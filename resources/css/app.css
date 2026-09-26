@@ -7,28 +7,42 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* Colores de marca CrediGo (mismos que el ERP) */
-    --color-primary-50: #f5f3ff;
-    --color-primary-100: #ede9fe;
-    --color-primary-200: #ddd6fe;
-    --color-primary-300: #c4b5fd;
-    --color-primary-400: #a78bfa;
-    --color-primary-500: #6d4ec4;
-    --color-primary-600: #2e217a; /* Azul principal */
-    --color-primary-700: #251a61;
-    --color-primary-800: #1d1448;
-    --color-primary-900: #150f30;
-    --color-primary-950: #0d0a1f;
+    /* Colores de marca de la web CrediGo */
+    --color-primary: #0f1037; /* Azul profundo */
+    --color-accent: #f8ec34; /* Amarillo */
 
-    --color-accent-50: #fefef8;
-    --color-accent-100: #fdfdf0;
-    --color-accent-200: #fcfcd9;
-    --color-accent-300: #fafac2;
-    --color-accent-400: #f7f989;
-    --color-accent-500: #f4f750; /* Amarillo principal */
-    --color-accent-600: #d4d63d;
-    --color-accent-700: #a8aa2e;
-    --color-accent-800: #7c7f22;
-    --color-accent-900: #505316;
-    --color-accent-950: #28290b;
+    --color-primary-50: #f1f2fa;
+    --color-primary-100: #e4e4f5;
+    --color-primary-200: #c8c9eb;
+    --color-primary-300: #9d9fdc;
+    --color-primary-400: #6c6fca;
+    --color-primary-500: #3b3fb8;
+    --color-primary-600: #2e3191;
+    --color-primary-700: #232571;
+    --color-primary-800: #191a53;
+    --color-primary-900: #0f1037;
+    --color-primary-950: #090a21;
+
+    --color-accent-50: #fefdef;
+    --color-accent-100: #fefbd6;
+    --color-accent-200: #fcf7ae;
+    --color-accent-300: #faf271;
+    --color-accent-400: #f8ec34;
+    --color-accent-500: #e9de31;
+    --color-accent-600: #c6bd2a;
+    --color-accent-700: #9a9220;
+    --color-accent-800: #777119;
+    --color-accent-900: #595513;
+    --color-accent-950: #37340b;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    ::selection {
+        background-color: var(--color-accent);
+        color: var(--color-primary);
+    }
 }

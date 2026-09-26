@@ -37,7 +37,7 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            //
+            'erpUrl' => config('services.erp.url'),
         ];
     }
 }

@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class ContactoRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'nombre' => ['required', 'string', 'max:120'],
+            'telefono' => ['required', 'string', 'regex:/^\+?[0-9\s]{6,20}$/'],
+            'email' => ['nullable', 'email', 'max:150'],
+            'asunto' => ['nullable', 'string', 'max:150'],
+            'mensaje' => ['required', 'string', 'max:2000'],
+            // Campo trampa para bots: los humanos no lo ven, debe llegar vacío
+            'website' => ['nullable', 'string'],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'telefono' => 'celular',
+        ];
+    }
+}

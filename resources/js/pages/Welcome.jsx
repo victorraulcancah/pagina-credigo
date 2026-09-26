@@ -1,19 +1,23 @@
-import { Head } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
+import { LogIn, MessageCircle } from 'lucide-react';
+import PageHero from '@/components/layout/PageHero';
+import PublicLayout from '@/components/layout/PublicLayout';
+import Button from '@/components/ui/Button';
+import { empresa } from '@/data/site';
 
 export default function Welcome() {
+    const { props } = usePage();
+
     return (
-        <>
-            <Head title="Inicio" />
-            <main className="min-h-screen bg-primary-600 flex items-center justify-center p-6">
-                <div className="text-center">
-                    <h1 className="text-5xl font-bold text-white">
-                        Credi<span className="text-accent-500">Go</span>
-                    </h1>
-                    <p className="mt-4 text-primary-100">
-                        Laravel + Inertia + React + Tailwind CSS
-                    </p>
-                </div>
-            </main>
-        </>
+        <PublicLayout title="Inicio" description={empresa.descripcion}>
+            <PageHero align="center" eyebrow={empresa.eslogan} title="CrediGo" description={empresa.descripcion}>
+                <Button href="/contacto" size="lg" icon={MessageCircle}>
+                    Contáctanos
+                </Button>
+                <Button href={props.erpUrl} variant="outline-light" size="lg" icon={LogIn}>
+                    Acceso al sistema
+                </Button>
+            </PageHero>
+        </PublicLayout>
     );
 }

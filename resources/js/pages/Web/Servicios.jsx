@@ -9,7 +9,7 @@ export default function Servicios({ secciones, servicios }) {
 
     return (
         <PublicLayout title="Servicios" description={hero?.contenido}>
-            <PageHero eyebrow={hero?.subtitulo} title={hero?.titulo || 'Servicios'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Servicios'} description={hero?.contenido} />
 
             <Section background="muted">
                 {servicios.length > 0 ? (

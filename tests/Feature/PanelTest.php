@@ -129,6 +129,24 @@ describe('con sesión iniciada', function () {
         expect($seccion->fresh()->items)->toBe([]);
     });
 
+    it('pone imagen de fondo al encabezado de contacto y la muestra en la página', function () {
+        Storage::fake('public');
+        $this->seed(ContenidoSeeder::class);
+        $seccion = Seccion::where('pagina', 'contacto')->where('clave', 'hero')->sole();
+
+        $this->post("/admin/secciones/{$seccion->id}", [
+            '_method' => 'put',
+            'titulo' => 'Hablemos',
+            'imagen' => UploadedFile::fake()->image('fondo.jpg', 1920, 700),
+            'activo' => true,
+        ])->assertSessionHasNoErrors();
+
+        Storage::disk('public')->assertExists($seccion->fresh()->imagen);
+
+        $this->get('/contacto')->assertInertia(fn (Assert $page) => $page
+            ->where('secciones', fn ($secciones) => str_contains($secciones['contacto.hero']['imagen_url'] ?? '', '/storage/secciones/')));
+    });
+
     it('marca un mensaje como leído y como no leído', function () {
         $mensaje = MensajeContacto::create(['nombre' => 'Ana', 'telefono' => '987654321', 'mensaje' => 'Hola']);
 

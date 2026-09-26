@@ -44,7 +44,7 @@ export default function Contacto({ secciones, servicios, preguntas }) {
 
     return (
         <PublicLayout title="Contacto" description={hero?.contenido}>
-            <PageHero eyebrow={hero?.subtitulo} title={hero?.titulo || 'Contacto'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Contacto'} description={hero?.contenido} />
 
             <Section background="muted">
                 <div className="grid gap-8 lg:grid-cols-5 lg:gap-10">

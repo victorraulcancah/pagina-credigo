@@ -15,6 +15,7 @@ import { PAGINAS } from '@/data/paginas';
 export default function SeccionEdit({ seccion }) {
     const usa = (campo) => seccion.campos.includes(campo);
     const esCifras = seccion.clave === 'cifras';
+    const esEncabezado = seccion.clave === 'hero';
 
     const form = useForm({
         subtitulo: seccion.subtitulo ?? '',
@@ -113,7 +114,7 @@ export default function SeccionEdit({ seccion }) {
                     </Panel>
 
                     {usa('imagen') && (
-                        <Panel title="Imagen">
+                        <Panel title={esEncabezado ? 'Imagen de fondo' : 'Imagen'}>
                             <ImageUpload
                                 actualUrl={seccion.imagen_url}
                                 archivo={data.imagen}
@@ -121,8 +122,12 @@ export default function SeccionEdit({ seccion }) {
                                 quitada={data.quitar_imagen}
                                 onQuitar={(valor) => setData('quitar_imagen', valor)}
                                 error={errors.imagen}
-                                hint="Recomendado 1200×900 px. Sin imagen se muestra el logo."
-                                aspect="aspect-[4/3]"
+                                hint={
+                                    esEncabezado
+                                        ? 'Foto horizontal detrás del título (se oscurece para leer el texto). Recomendado 1920×700 px. Sin imagen se ve el color de marca.'
+                                        : 'Recomendado 1200×900 px. Sin imagen se muestra el logo.'
+                                }
+                                aspect={esEncabezado ? 'aspect-[16/6]' : 'aspect-[4/3]'}
                             />
                         </Panel>
                     )}

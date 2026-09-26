@@ -53,7 +53,7 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Nosotros ────────────────────────────────────────────
-            ['nosotros', 'hero', 'Nosotros · Encabezado', ['subtitulo', 'titulo', 'contenido'], [
+            ['nosotros', 'hero', 'Nosotros · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
                 'subtitulo' => 'Sobre nosotros',
                 'titulo' => 'Somos CrediGo',
                 'contenido' => 'Financiamiento para conductores de aplicativo, con atención cercana y condiciones claras.',
@@ -83,14 +83,14 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Servicios ───────────────────────────────────────────
-            ['servicios', 'hero', 'Servicios · Encabezado', ['subtitulo', 'titulo', 'contenido'], [
+            ['servicios', 'hero', 'Servicios · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
                 'subtitulo' => 'Nuestros servicios',
                 'titulo' => 'Todo lo que necesitas para trabajar',
                 'contenido' => 'Financiamiento vehicular, celulares y productos en cuotas para conductores de aplicativo.',
             ]],
 
             // ── Contacto ────────────────────────────────────────────
-            ['contacto', 'hero', 'Contacto · Encabezado', ['subtitulo', 'titulo', 'contenido'], [
+            ['contacto', 'hero', 'Contacto · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
                 'subtitulo' => 'Contáctanos',
                 'titulo' => 'Hablemos',
                 'contenido' => 'Escríbenos y un asesor te responderá a la brevedad.',

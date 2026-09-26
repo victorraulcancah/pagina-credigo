@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\ConfiguracionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MensajeContactoController;
+use App\Http\Controllers\Admin\OpcionPlanController;
 use App\Http\Controllers\Admin\PerfilController;
 use App\Http\Controllers\Admin\PreguntaFrecuenteController;
 use App\Http\Controllers\Admin\SeccionController;
@@ -26,6 +27,7 @@ Route::controller(PaginaController::class)->group(function () {
     Route::get('/nosotros', 'nosotros')->name('nosotros');
     Route::get('/servicios', 'servicios')->name('servicios');
     Route::get('/contacto', 'contacto')->name('contacto');
+    Route::get('/cotizador', 'cotizador')->name('cotizador');
     Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');
     Route::get('/politica-de-privacidad', 'privacidad')->name('privacidad');
 });
@@ -75,6 +77,12 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('servicios', ServicioController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['servicios' => 'servicio']);
+
+    Route::get('/cotizador', [OpcionPlanController::class, 'index'])->name('cotizador.index');
+    Route::resource('cotizador/opciones', OpcionPlanController::class)
+        ->only(['store', 'update', 'destroy'])
+        ->parameters(['opciones' => 'opcion'])
+        ->names('cotizador.opciones');
 
     Route::resource('preguntas', PreguntaFrecuenteController::class)
         ->only(['index', 'store', 'update', 'destroy'])

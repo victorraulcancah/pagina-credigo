@@ -1,4 +1,5 @@
-import { CircleCheck } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import { ArrowRight, Calculator, CircleCheck } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Icono from '@/components/ui/Icono';
 
@@ -35,6 +36,19 @@ export default function ServicioCard({ servicio }) {
                             </li>
                         ))}
                     </ul>
+                )}
+
+                {/* Solo si el plan tiene opciones cargadas en el cotizador */}
+                {servicio.opciones_count > 0 && (
+                    <div className="mt-auto pt-6">
+                        <Link
+                            href={`/cotizador?plan=${servicio.id}`}
+                            className="inline-flex items-center gap-1.5 font-semibold text-primary underline-offset-4 hover:underline"
+                        >
+                            <Calculator className="size-4" aria-hidden="true" /> Cotizar este plan
+                            <ArrowRight className="size-4" aria-hidden="true" />
+                        </Link>
+                    </div>
                 )}
             </div>
         </Card>

@@ -3,5 +3,6 @@ export const navLinks = [
     { label: 'Inicio', href: '/' },
     { label: 'Nosotros', href: '/nosotros' },
     { label: 'Servicios', href: '/servicios' },
+    { label: 'Cotizador', href: '/cotizador' },
     { label: 'Contacto', href: '/contacto' },
 ];

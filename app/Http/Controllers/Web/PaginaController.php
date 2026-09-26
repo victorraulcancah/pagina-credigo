@@ -20,8 +20,23 @@ class PaginaController extends Controller
         return Inertia::render('Web/Inicio', [
             'banners' => Banner::activo()->ordenado()->get(),
             'secciones' => $this->contenido->secciones(['inicio', 'general']),
-            'servicios' => Servicio::activo()->destacado()->ordenado()->get(),
+            'servicios' => Servicio::activo()->destacado()->conOpcionesActivas()->ordenado()->get(),
             'preguntas' => PreguntaFrecuente::activo()->ordenado()->get(),
+        ]);
+    }
+
+    /** Cotizador: planes visibles que tienen al menos una opción visible. */
+    public function cotizador(): Response
+    {
+        $opcionesActivas = fn ($q) => $q->activo();
+
+        return Inertia::render('Web/Cotizador', [
+            'secciones' => $this->contenido->secciones(['cotizador']),
+            'planes' => Servicio::activo()
+                ->whereHas('opciones', $opcionesActivas)
+                ->with(['opciones' => fn ($q) => $q->activo()->ordenado()])
+                ->ordenado()
+                ->get(['id', 'titulo', 'etiqueta', 'icono', 'descripcion']),
         ]);
     }
 
@@ -36,7 +51,7 @@ class PaginaController extends Controller
     {
         return Inertia::render('Web/Servicios', [
             'secciones' => $this->contenido->secciones(['servicios', 'general']),
-            'servicios' => Servicio::activo()->ordenado()->get(),
+            'servicios' => Servicio::activo()->conOpcionesActivas()->ordenado()->get(),
         ]);
     }
 

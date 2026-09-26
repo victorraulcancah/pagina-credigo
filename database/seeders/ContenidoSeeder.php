@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Banner;
+use App\Models\OpcionPlan;
 use App\Models\PreguntaFrecuente;
 use App\Models\Seccion;
 use App\Models\Servicio;
@@ -18,6 +19,7 @@ class ContenidoSeeder extends Seeder
     {
         $this->secciones();
         $this->servicios();
+        $this->opcionesCotizador();
         $this->preguntas();
         $this->banners();
     }
@@ -97,6 +99,13 @@ class ContenidoSeeder extends Seeder
                 'contenido' => 'Financiamiento vehicular, celulares y productos en cuotas para conductores de aplicativo.',
             ]],
 
+            // ── Cotizador ───────────────────────────────────────────
+            ['cotizador', 'hero', 'Cotizador · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
+                'subtitulo' => 'Cotizador',
+                'titulo' => 'Cotiza tu plan en segundos',
+                'contenido' => 'Elige el plan y la opción que te interesa, revisa las cuotas referenciales y un asesor te contacta.',
+            ]],
+
             // ── Contacto ────────────────────────────────────────────
             ['contacto', 'hero', 'Contacto · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
                 'subtitulo' => 'Contáctanos',
@@ -167,6 +176,46 @@ class ContenidoSeeder extends Seeder
 
         foreach (self::planes() as $orden => $plan) {
             Servicio::create([...$plan, 'destacado' => true, 'orden' => $orden]);
+        }
+    }
+
+    /**
+     * Opciones iniciales del cotizador, solo con cifras ya publicadas en los planes.
+     * Las cuotas de los grupos de ahorro quedan vacías ("consulta con un asesor")
+     * hasta que se carguen desde el panel.
+     */
+    private function opcionesCotizador(): void
+    {
+        if (OpcionPlan::exists()) {
+            return;
+        }
+
+        $planes = Servicio::pluck('id', 'titulo');
+
+        if ($ahorro = $planes['Moto o auto por adjudicación'] ?? null) {
+            foreach (['13k', '15k', '17k'] as $orden => $certificado) {
+                OpcionPlan::create([
+                    'servicio_id' => $ahorro,
+                    'nombre' => "Auto · certificado {$certificado} USD",
+                    'nota' => 'Adjudicación por sorteo, directa con inicial o al llegar a 52 cuotas.',
+                    'moneda' => 'PEN',
+                    'frecuencia' => 'semanal',
+                    'orden' => $orden,
+                ]);
+            }
+        }
+
+        if ($yango = $planes['CrediYango'] ?? null) {
+            OpcionPlan::create([
+                'servicio_id' => $yango,
+                'nombre' => 'Inicial de S/2,000 + 200 cuotas',
+                'nota' => 'Si ya eres ahorrista, tu ahorro se descuenta de la inicial.',
+                'moneda' => 'PEN',
+                'inicial' => 2000,
+                'cuota' => 100,
+                'numero_cuotas' => 200,
+                'frecuencia' => 'semanal',
+            ]);
         }
     }
 

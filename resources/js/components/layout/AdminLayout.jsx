@@ -2,6 +2,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import {
     BookOpenText,
     Briefcase,
+    Calculator,
     Building,
     CircleQuestionMark,
     ExternalLink,
@@ -27,6 +28,7 @@ const menu = [
             { label: 'Banners', href: '/admin/banners', icon: Images },
             { label: 'Secciones', href: '/admin/secciones', icon: LayoutTemplate },
             { label: 'Servicios', href: '/admin/servicios', icon: Briefcase },
+            { label: 'Cotizador', href: '/admin/cotizador', icon: Calculator },
             { label: 'Preguntas frecuentes', href: '/admin/preguntas', icon: CircleQuestionMark },
         ],
     },

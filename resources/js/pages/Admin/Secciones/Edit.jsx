@@ -124,7 +124,7 @@ export default function SeccionEdit({ seccion }) {
                                 error={errors.imagen}
                                 hint={
                                     esEncabezado
-                                        ? 'Foto horizontal detrás del título (se oscurece para leer el texto). Recomendado 1920×700 px. Sin imagen se ve el color de marca.'
+                                        ? 'Se muestra tal cual detrás del título. Deja libre el lado izquierdo para el texto. Recomendado 1920×700 px. Sin imagen se ve el color de marca.'
                                         : 'Recomendado 1200×900 px. Sin imagen se muestra el logo.'
                                 }
                                 aspect={esEncabezado ? 'aspect-[16/6]' : 'aspect-[4/3]'}

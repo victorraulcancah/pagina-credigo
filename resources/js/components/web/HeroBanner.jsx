@@ -5,7 +5,7 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Container from '@/components/ui/Container';
 import { useSitio } from '@/hooks/useSitio';
-import { cn } from '@/lib/utils';
+import { cn, SOMBRA_TEXTO } from '@/lib/utils';
 
 const INTERVALO_MS = 6000;
 
@@ -50,7 +50,7 @@ export default function HeroBanner({ banners = [] }) {
             <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 -left-32 size-96 resplandor-claro" />
 
             {/*
-              Imagen de fondo de cada banner + capa oscura (para leer el texto).
+              Imagen de fondo de cada banner, tal cual se subió (sin capa oscura).
               Se cruzan con fundido; la activa hace un zoom lento. El zoom se
               reinicia recién cuando la imagen ya se ocultó (delay).
             */}
@@ -70,9 +70,6 @@ export default function HeroBanner({ banners = [] }) {
                                 i === indice ? 'scale-100 duration-[7000ms]' : 'scale-110 delay-1000 duration-0',
                             )}
                         />
-                        <div className="absolute inset-0 bg-primary/75 lg:hidden" />
-                        <div className="absolute inset-0 hidden bg-linear-to-r from-primary via-primary/80 to-primary/10 lg:block" />
-                        <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-primary/80 to-transparent" />
                     </div>
                 ) : null,
             )}
@@ -97,11 +94,21 @@ export default function HeroBanner({ banners = [] }) {
                                 )}
                             >
                                 {sitio.empresa_eslogan && <Badge className="mb-5">{sitio.empresa_eslogan}</Badge>}
-                                <Titulo className="text-4xl leading-tight font-extrabold tracking-tight text-balance drop-shadow-sm sm:text-5xl lg:text-6xl">
+                                <Titulo
+                                    className={cn(
+                                        'text-4xl leading-tight font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl',
+                                        slide.imagen_url && SOMBRA_TEXTO,
+                                    )}
+                                >
                                     {slide.titulo}
                                 </Titulo>
                                 {slide.subtitulo && (
-                                    <p className="mt-5 max-w-2xl text-base text-pretty text-white/85 sm:text-lg lg:text-xl">
+                                    <p
+                                        className={cn(
+                                            'mt-5 max-w-2xl text-base text-pretty text-white/85 sm:text-lg lg:text-xl',
+                                            slide.imagen_url && SOMBRA_TEXTO,
+                                        )}
+                                    >
                                         {slide.subtitulo}
                                     </p>
                                 )}

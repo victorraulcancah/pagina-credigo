@@ -95,7 +95,7 @@ export default function BannersIndex({ banners }) {
                             quitada={data.quitar_imagen}
                             onQuitar={(valor) => setData('quitar_imagen', valor)}
                             error={errors.imagen}
-                            hint="Foto horizontal a pantalla completa (el texto va a la izquierda, sobre una capa oscura). Recomendado 1920×1080 px. JPG o WEBP, máx. 4 MB."
+                            hint="Se muestra tal cual, a pantalla completa. Deja libre el lado izquierdo para el texto. Recomendado 1920×1080 px. JPG o WEBP, máx. 4 MB."
                         />
                     </div>
                     <FormField label="Texto del botón" htmlFor="boton_texto" error={errors.boton_texto}>

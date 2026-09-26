@@ -6,6 +6,9 @@ export function cn(...inputs) {
     return twMerge(clsx(inputs));
 }
 
+/** Sombra suave para que títulos y textos se lean sobre una foto de fondo. */
+export const SOMBRA_TEXTO = 'text-shadow-lg text-shadow-black/35';
+
 const COLUMNAS_LG = {
     1: 'lg:grid-cols-1',
     2: 'lg:grid-cols-2',

@@ -12,10 +12,35 @@ import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
 import { PAGINAS } from '@/data/paginas';
 
+const URLS_LEGALES = { terminos: '/terminos-y-condiciones', privacidad: '/politica-de-privacidad' };
+
+// Cómo se edita la lista (items) de cada tipo de sección
+const LISTA_GENERAL = { titulo: 'Elementos de la lista', descripcion: 'Se muestran como tarjetas en el orden indicado.', conIcono: true };
+const LISTAS = {
+    cifras: {
+        titulo: 'Cifras',
+        descripcion: 'Ej. valor "650+" y etiqueta "conductores financiados". Se muestran al pie del banner del inicio y en Nosotros.',
+        conIcono: false,
+        etiquetas: { titulo: 'Valor', descripcion: 'Etiqueta' },
+    },
+    pasos_rapidos: {
+        titulo: 'Pasos',
+        descripcion: 'Franja amarilla debajo del banner del inicio. Se numeran solos.',
+        conIcono: false,
+        etiquetas: { titulo: 'Paso', descripcion: 'Detalle' },
+    },
+    beneficios: {
+        titulo: 'Niveles',
+        descripcion: 'En orden: el 1.º se pinta bronce, el 2.º plata y el 3.º oro (este último resaltado).',
+        conIcono: true,
+    },
+};
+
 export default function SeccionEdit({ seccion }) {
     const usa = (campo) => seccion.campos.includes(campo);
-    const esCifras = seccion.clave === 'cifras';
     const esEncabezado = seccion.clave === 'hero';
+    const lista = LISTAS[seccion.clave] ?? LISTA_GENERAL;
+    const tieneTextos = ['subtitulo', 'titulo', 'contenido'].some(usa);
 
     const form = useForm({
         subtitulo: seccion.subtitulo ?? '',
@@ -42,6 +67,8 @@ export default function SeccionEdit({ seccion }) {
 
     const pagina = PAGINAS[seccion.pagina];
     const [paginaLabel, nombre] = seccion.nombre.includes('·') ? seccion.nombre.split(/\s*·\s*/) : [pagina?.label, seccion.nombre];
+    const esLegal = seccion.pagina === 'legal';
+    const urlPagina = esLegal ? URLS_LEGALES[seccion.clave] : pagina?.url;
 
     return (
         <AdminLayout title={`Sección: ${nombre}`}>
@@ -53,8 +80,8 @@ export default function SeccionEdit({ seccion }) {
                 description={`Página: ${paginaLabel}`}
                 actions={
                     <>
-                        {pagina?.url && (
-                            <Button href={pagina.url} newTab variant="ghost" icon={ExternalLink} className="border border-gray-200">
+                        {urlPagina && (
+                            <Button href={urlPagina} newTab variant="ghost" icon={ExternalLink} className="border border-gray-200">
                                 Ver página
                             </Button>
                         )}
@@ -67,6 +94,7 @@ export default function SeccionEdit({ seccion }) {
 
             <form id="form-seccion" onSubmit={guardar} className="grid gap-6 lg:grid-cols-3">
                 <div className="flex flex-col gap-6 lg:col-span-2">
+                    {tieneTextos && (
                     <Panel title="Contenido">
                         <div className="flex flex-col gap-5">
                             {usa('subtitulo') && (
@@ -80,24 +108,38 @@ export default function SeccionEdit({ seccion }) {
                                 </FormField>
                             )}
                             {usa('contenido') && (
-                                <FormField label="Texto" htmlFor="contenido" error={errors.contenido} hint="Deja una línea en blanco para separar párrafos.">
-                                    <Textarea id="contenido" rows={6} value={data.contenido} onChange={(e) => setData('contenido', e.target.value)} error={errors.contenido} />
+                                <FormField
+                                    label="Texto"
+                                    htmlFor="contenido"
+                                    error={errors.contenido}
+                                    hint={
+                                        esLegal
+                                            ? 'Formato: "## " al inicio de una línea = subtítulo · "- " = viñeta · línea en blanco = nuevo párrafo.'
+                                            : 'Deja una línea en blanco para separar párrafos.'
+                                    }
+                                >
+                                    <Textarea
+                                        id="contenido"
+                                        rows={esLegal ? 22 : 6}
+                                        value={data.contenido}
+                                        onChange={(e) => setData('contenido', e.target.value)}
+                                        error={errors.contenido}
+                                        className={esLegal ? 'font-mono text-sm' : undefined}
+                                    />
                                 </FormField>
                             )}
                         </div>
                     </Panel>
+                    )}
 
                     {usa('items') && (
-                        <Panel
-                            title={esCifras ? 'Cifras' : 'Elementos de la lista'}
-                            description={esCifras ? 'Ej. valor "+650" y etiqueta "Conductores".' : 'Se muestran como tarjetas en el orden indicado.'}
-                        >
+                        <Panel title={lista.titulo} description={lista.descripcion}>
                             <ItemsRepeater
                                 items={data.items}
                                 onChange={(items) => setData('items', items)}
                                 errors={errors}
-                                conIcono={!esCifras}
-                                etiquetas={esCifras ? { titulo: 'Valor', descripcion: 'Etiqueta' } : undefined}
+                                conIcono={lista.conIcono}
+                                etiquetas={lista.etiquetas}
                             />
                         </Panel>
                     )}

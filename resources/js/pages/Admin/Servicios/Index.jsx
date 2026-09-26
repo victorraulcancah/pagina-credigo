@@ -4,6 +4,7 @@ import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import IconPicker from '@/components/admin/IconPicker';
 import ImageUpload from '@/components/admin/ImageUpload';
+import ListaTextos from '@/components/admin/ListaTextos';
 import PageHeader from '@/components/admin/PageHeader';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
@@ -15,13 +16,31 @@ import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
 import { useCrudModal } from '@/hooks/useCrudModal';
 
-const VACIO = { titulo: '', descripcion: '', icono: 'Sparkles', imagen: null, quitar_imagen: false, destacado: false, orden: 0, activo: true };
+const VACIO = {
+    titulo: '',
+    etiqueta: '',
+    descripcion: '',
+    caracteristicas: [],
+    icono: 'Sparkles',
+    imagen: null,
+    quitar_imagen: false,
+    destacado: false,
+    orden: 0,
+    activo: true,
+};
 
 export default function ServiciosIndex({ servicios }) {
     const crud = useCrudModal({
         url: '/admin/servicios',
         vacio: VACIO,
-        aFormulario: (s) => ({ ...VACIO, ...s, icono: s.icono ?? 'Sparkles', imagen: null }),
+        aFormulario: (s) => ({
+            ...VACIO,
+            ...s,
+            etiqueta: s.etiqueta ?? '',
+            caracteristicas: s.caracteristicas ?? [],
+            icono: s.icono ?? 'Sparkles',
+            imagen: null,
+        }),
     });
     const { form } = crud;
     const { data, setData, errors, processing } = form;
@@ -59,8 +78,14 @@ export default function ServiciosIndex({ servicios }) {
                                     )}
                                     <span className="text-xs text-gray-400">Orden {servicio.orden}</span>
                                 </div>
-                                <h3 className="mt-1 font-bold text-gray-900">{servicio.titulo}</h3>
+                                {servicio.etiqueta && (
+                                    <p className="mt-1.5 text-xs font-bold tracking-wide text-gray-400 uppercase">{servicio.etiqueta}</p>
+                                )}
+                                <h3 className="font-bold text-gray-900">{servicio.titulo}</h3>
                                 <p className="line-clamp-2 text-sm text-gray-500">{servicio.descripcion}</p>
+                                {servicio.caracteristicas?.length > 0 && (
+                                    <p className="mt-1 text-xs text-gray-400">{servicio.caracteristicas.length} características</p>
+                                )}
                             </div>
                             <AccionesFila onEditar={() => crud.abrirEditar(servicio)} onEliminar={() => crud.eliminar(servicio, `"${servicio.titulo}"`)} />
                         </li>
@@ -82,14 +107,27 @@ export default function ServiciosIndex({ servicios }) {
                 }
             >
                 <form id="form-servicio" onSubmit={crud.guardar} className="grid gap-5 sm:grid-cols-2">
-                    <FormField label="Nombre del servicio" htmlFor="titulo" error={errors.titulo} required>
+                    <FormField label="Nombre del servicio o plan" htmlFor="titulo" error={errors.titulo} required>
                         <Input id="titulo" value={data.titulo} onChange={(e) => setData('titulo', e.target.value)} error={errors.titulo} />
                     </FormField>
-                    <FormField label="Ícono" htmlFor="icono" error={errors.icono}>
+                    <FormField label="Etiqueta" htmlFor="etiqueta" error={errors.etiqueta} hint='Texto pequeño junto al ícono. Ej. "Grupos de ahorro"'>
+                        <Input id="etiqueta" value={data.etiqueta} onChange={(e) => setData('etiqueta', e.target.value)} error={errors.etiqueta} />
+                    </FormField>
+                    <FormField label="Ícono" htmlFor="icono" error={errors.icono} className="sm:col-span-2">
                         <IconPicker id="icono" value={data.icono} onChange={(icono) => setData('icono', icono)} />
                     </FormField>
                     <FormField label="Descripción" htmlFor="descripcion" error={errors.descripcion} required className="sm:col-span-2">
-                        <Textarea id="descripcion" rows={4} value={data.descripcion} onChange={(e) => setData('descripcion', e.target.value)} error={errors.descripcion} />
+                        <Textarea id="descripcion" rows={3} value={data.descripcion} onChange={(e) => setData('descripcion', e.target.value)} error={errors.descripcion} />
+                    </FormField>
+                    <FormField label="Características" error={errors.caracteristicas} hint="Cada una se muestra con un check en la tarjeta." className="sm:col-span-2">
+                        <ListaTextos
+                            campo="caracteristicas"
+                            items={data.caracteristicas}
+                            onChange={(items) => setData('caracteristicas', items)}
+                            errors={errors}
+                            placeholder="Ej. Inicial de S/2,000"
+                            textoAgregar="Agregar característica"
+                        />
                     </FormField>
                     <div className="sm:col-span-2">
                         <ImageUpload

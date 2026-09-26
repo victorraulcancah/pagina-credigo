@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, Briefcase, Building, CircleQuestionMark, Images, Inbox, LayoutTemplate, Palette } from 'lucide-react';
+import { ArrowRight, BookOpenText, Briefcase, Building, CircleQuestionMark, Images, Inbox, LayoutTemplate, Palette } from 'lucide-react';
 import PageHeader from '@/components/admin/PageHeader';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
@@ -9,6 +9,13 @@ import { cn } from '@/lib/utils';
 export default function Dashboard({ resumen, ultimosMensajes }) {
     const tarjetas = [
         { label: 'Mensajes sin leer', valor: resumen.mensajes_no_leidos, icon: Inbox, href: '/admin/mensajes?estado=no_leidos', alerta: resumen.mensajes_no_leidos > 0 },
+        {
+            label: 'Reclamaciones pendientes',
+            valor: resumen.reclamaciones_pendientes,
+            icon: BookOpenText,
+            href: '/admin/reclamaciones?estado=pendiente',
+            alerta: resumen.reclamaciones_pendientes > 0,
+        },
         { label: 'Servicios visibles', valor: resumen.servicios_activos, icon: Briefcase, href: '/admin/servicios' },
         { label: 'Banners visibles', valor: resumen.banners_activos, icon: Images, href: '/admin/banners' },
         { label: 'Preguntas frecuentes', valor: resumen.preguntas_activas, icon: CircleQuestionMark, href: '/admin/preguntas' },
@@ -24,7 +31,7 @@ export default function Dashboard({ resumen, ultimosMensajes }) {
         <AdminLayout title="Dashboard">
             <PageHeader title="Dashboard" description="Resumen del sitio web." />
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
                 {tarjetas.map((t) => (
                     <Link
                         key={t.label}

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\MensajeContacto;
 use App\Models\PreguntaFrecuente;
+use App\Models\Reclamacion;
 use App\Models\Servicio;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,6 +18,7 @@ class DashboardController extends Controller
         return Inertia::render('Admin/Dashboard', [
             'resumen' => [
                 'mensajes_no_leidos' => MensajeContacto::noLeido()->count(),
+                'reclamaciones_pendientes' => Reclamacion::pendiente()->count(),
                 'mensajes_total' => MensajeContacto::count(),
                 'servicios_activos' => Servicio::activo()->count(),
                 'banners_activos' => Banner::activo()->count(),

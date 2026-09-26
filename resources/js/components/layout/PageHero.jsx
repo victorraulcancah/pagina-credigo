@@ -11,7 +11,7 @@ export default function PageHero({ eyebrow, title, description, imagen, align = 
     const centered = align === 'center';
 
     return (
-        <section className="relative overflow-hidden bg-primary text-white">
+        <section className="relative overflow-clip bg-primary text-white">
             {imagen ? (
                 // Imagen tal cual se subió (sin capa oscura)
                 <img src={imagen} alt="" aria-hidden="true" fetchPriority="high" className="absolute inset-0 size-full object-cover" />

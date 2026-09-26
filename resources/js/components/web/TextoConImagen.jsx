@@ -35,7 +35,7 @@ export default function TextoConImagen({ seccion, background = 'white', invertid
                         className="aspect-[4/3] w-full rounded-3xl object-cover shadow-xl"
                     />
                 ) : (
-                    <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-3xl bg-primary p-10">
+                    <div className="relative flex aspect-[4/3] items-center justify-center overflow-clip rounded-3xl bg-primary p-10">
                         <div aria-hidden="true" className="absolute -top-16 -right-16 size-64 resplandor-acento" />
                         <img src={sitio.logo} alt="" className="relative w-1/2 max-w-xs object-contain drop-shadow-2xl" />
                     </div>

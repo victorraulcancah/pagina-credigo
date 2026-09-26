@@ -1,0 +1,243 @@
+import { router, useForm } from '@inertiajs/react';
+import { BookOpenText, ChevronLeft, ChevronRight, Search, Send } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import EmptyState from '@/components/admin/EmptyState';
+import PageHeader from '@/components/admin/PageHeader';
+import AdminLayout from '@/components/layout/AdminLayout';
+import Button from '@/components/ui/Button';
+import FormField from '@/components/ui/FormField';
+import Input from '@/components/ui/Input';
+import Modal from '@/components/ui/Modal';
+import Textarea from '@/components/ui/Textarea';
+import { formatoFecha } from '@/lib/fechas';
+import { cn } from '@/lib/utils';
+
+const opcionesVisita = { preserveState: true, preserveScroll: true, replace: true };
+
+// fecha_limite viene como "2026-10-17": se lee a mediodía para evitar desfases de zona horaria
+const fechaLocal = (fecha) => new Date(`${fecha}T12:00:00`);
+const diasRestantes = (fecha) => Math.ceil((fechaLocal(fecha) - new Date().setHours(12, 0, 0, 0)) / 86_400_000);
+
+function Plazo({ reclamacion }) {
+    if (reclamacion.estado === 'atendido') {
+        return <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">Atendido</span>;
+    }
+
+    const dias = diasRestantes(reclamacion.fecha_limite);
+
+    return (
+        <span
+            className={cn(
+                'rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                reclamacion.vencido ? 'bg-red-100 text-red-700' : dias <= 3 ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-600',
+            )}
+        >
+            {reclamacion.vencido ? 'Plazo vencido' : `Vence ${formatoFecha(fechaLocal(reclamacion.fecha_limite), false)}`}
+        </span>
+    );
+}
+
+function Dato({ etiqueta, children, className }) {
+    if (!children) return null;
+
+    return (
+        <div className={className}>
+            <dt className="text-xs font-semibold text-gray-500 uppercase">{etiqueta}</dt>
+            <dd className="mt-0.5 whitespace-pre-line text-gray-900">{children}</dd>
+        </div>
+    );
+}
+
+export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespuesta }) {
+    const [buscar, setBuscar] = useState(filtros.buscar);
+    const [seleccionadaId, setSeleccionadaId] = useState(null);
+    const primeraCarga = useRef(true);
+    const respuesta = useForm({ respuesta: '' });
+
+    const seleccionada = reclamaciones.data.find((r) => r.id === seleccionadaId);
+
+    const filtrar = (cambios) => router.get('/admin/reclamaciones', { ...filtros, ...cambios }, opcionesVisita);
+
+    useEffect(() => {
+        if (primeraCarga.current) {
+            primeraCarga.current = false;
+            return;
+        }
+        const id = setTimeout(() => filtrar({ buscar }), 400);
+        return () => clearTimeout(id);
+    }, [buscar]);
+
+    const abrir = (reclamacion) => {
+        respuesta.reset();
+        respuesta.clearErrors();
+        setSeleccionadaId(reclamacion.id);
+    };
+
+    const responder = (e) => {
+        e.preventDefault();
+        respuesta.put(`/admin/reclamaciones/${seleccionada.id}/respuesta`, { preserveScroll: true, preserveState: true });
+    };
+
+    return (
+        <AdminLayout title="Libro de Reclamaciones">
+            <PageHeader
+                title="Libro de Reclamaciones"
+                description={`Hojas registradas en la web. Plazo legal de respuesta: ${diasRespuesta} días hábiles. No se pueden eliminar.`}
+                actions={
+                    <Button href="/libro-de-reclamaciones" newTab variant="ghost" icon={BookOpenText} className="border border-gray-200">
+                        Ver formulario público
+                    </Button>
+                }
+            />
+
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="inline-flex w-fit rounded-full bg-white p-1 ring-1 ring-gray-200">
+                    {[
+                        ['todos', 'Todas'],
+                        ['pendiente', 'Pendientes'],
+                        ['atendido', 'Atendidas'],
+                    ].map(([valor, label]) => (
+                        <button
+                            key={valor}
+                            type="button"
+                            onClick={() => filtrar({ estado: valor })}
+                            className={cn(
+                                'rounded-full px-4 py-1.5 text-sm font-semibold transition',
+                                filtros.estado === valor ? 'bg-primary text-white' : 'text-gray-600 hover:text-gray-900',
+                            )}
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
+                <div className="relative sm:w-72">
+                    <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+                    <Input
+                        type="search"
+                        aria-label="Buscar reclamaciones"
+                        placeholder="N° de hoja, nombre o documento"
+                        value={buscar}
+                        onChange={(e) => setBuscar(e.target.value)}
+                        className="pl-10"
+                    />
+                </div>
+            </div>
+
+            {reclamaciones.data.length === 0 ? (
+                <EmptyState
+                    icon={BookOpenText}
+                    title={filtros.buscar || filtros.estado !== 'todos' ? 'Sin resultados' : 'No hay reclamaciones'}
+                    description="Las hojas del Libro de Reclamaciones de la web aparecerán aquí."
+                />
+            ) : (
+                <ul className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    {reclamaciones.data.map((r) => (
+                        <li key={r.id}>
+                            <button type="button" onClick={() => abrir(r)} className="flex w-full flex-col gap-2 px-4 py-4 text-left transition hover:bg-gray-50 sm:flex-row sm:items-center sm:gap-4 sm:px-5">
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="font-mono text-sm font-bold text-gray-900">N° {r.codigo}</span>
+                                        <span
+                                            className={cn(
+                                                'rounded-full px-2 py-0.5 text-xs font-bold uppercase',
+                                                r.tipo === 'reclamo' ? 'bg-primary-50 text-primary' : 'bg-accent-100 text-accent-900',
+                                            )}
+                                        >
+                                            {r.tipo}
+                                        </span>
+                                    </div>
+                                    <p className="mt-0.5 truncate text-sm text-gray-700">
+                                        {r.nombre} · {r.tipo_documento} {r.numero_documento}
+                                    </p>
+                                    <p className="line-clamp-1 text-sm text-gray-500">{r.detalle}</p>
+                                </div>
+                                <div className="flex shrink-0 items-center gap-3 sm:flex-col sm:items-end sm:gap-1">
+                                    <Plazo reclamacion={r} />
+                                    <span className="text-xs text-gray-400">{formatoFecha(r.created_at)}</span>
+                                </div>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {reclamaciones.last_page > 1 && (
+                <nav aria-label="Paginación" className="mt-4 flex items-center justify-between gap-3 text-sm">
+                    <span className="text-gray-500">
+                        {reclamaciones.from}–{reclamaciones.to} de {reclamaciones.total}
+                    </span>
+                    <div className="flex gap-2">
+                        <Button href={reclamaciones.prev_page_url ?? undefined} variant="ghost" size="sm" icon={ChevronLeft} disabled={!reclamaciones.prev_page_url} className="border border-gray-200" preserveState>
+                            Anterior
+                        </Button>
+                        <Button href={reclamaciones.next_page_url ?? undefined} variant="ghost" size="sm" icon={ChevronRight} iconPosition="right" disabled={!reclamaciones.next_page_url} className="border border-gray-200" preserveState>
+                            Siguiente
+                        </Button>
+                    </div>
+                </nav>
+            )}
+
+            <Modal
+                open={Boolean(seleccionada)}
+                onClose={() => setSeleccionadaId(null)}
+                maxWidth="max-w-3xl"
+                title={seleccionada && `Hoja N° ${seleccionada.codigo} · ${seleccionada.tipo === 'reclamo' ? 'Reclamo' : 'Queja'}`}
+                description={seleccionada && `Registrada el ${formatoFecha(seleccionada.created_at)}`}
+                footer={
+                    seleccionada?.estado === 'pendiente' && (
+                        <Button type="submit" form="form-respuesta" variant="secondary" icon={Send} disabled={respuesta.processing}>
+                            {respuesta.processing ? 'Enviando...' : 'Registrar respuesta y enviar por correo'}
+                        </Button>
+                    )
+                }
+            >
+                {seleccionada && (
+                    <div className="flex flex-col gap-6">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Plazo reclamacion={seleccionada} />
+                        </div>
+                        <dl className="grid gap-4 text-sm sm:grid-cols-2">
+                            <Dato etiqueta="Consumidor">{`${seleccionada.nombre}\n${seleccionada.tipo_documento} ${seleccionada.numero_documento}`}</Dato>
+                            <Dato etiqueta="Contacto">{`${seleccionada.telefono}\n${seleccionada.email}`}</Dato>
+                            <Dato etiqueta="Domicilio">{seleccionada.domicilio}</Dato>
+                            {seleccionada.menor_de_edad && <Dato etiqueta="Padre, madre o tutor">{seleccionada.apoderado}</Dato>}
+                            <Dato etiqueta={seleccionada.tipo_bien === 'producto' ? 'Producto' : 'Servicio'} className="sm:col-span-2">
+                                {seleccionada.descripcion_bien}
+                                {seleccionada.monto_reclamado && ` — Monto reclamado: S/ ${Number(seleccionada.monto_reclamado).toFixed(2)}`}
+                            </Dato>
+                            <Dato etiqueta="Detalle" className="sm:col-span-2">{seleccionada.detalle}</Dato>
+                            <Dato etiqueta="Pedido" className="sm:col-span-2">{seleccionada.pedido}</Dato>
+                        </dl>
+
+                        {seleccionada.estado === 'atendido' ? (
+                            <div className="rounded-xl bg-green-50 p-4 text-sm">
+                                <p className="font-semibold text-green-800">
+                                    Respondido el {formatoFecha(seleccionada.respondido_at)}
+                                    {seleccionada.respondido_por?.name && ` por ${seleccionada.respondido_por.name}`}
+                                </p>
+                                <p className="mt-2 whitespace-pre-line text-gray-800">{seleccionada.respuesta}</p>
+                            </div>
+                        ) : (
+                            <form id="form-respuesta" onSubmit={responder}>
+                                <FormField
+                                    label="Respuesta al consumidor"
+                                    htmlFor="respuesta"
+                                    error={respuesta.errors.respuesta}
+                                    hint={`Se enviará a ${seleccionada.email} y quedará registrada en la hoja.`}
+                                >
+                                    <Textarea
+                                        id="respuesta"
+                                        rows={6}
+                                        value={respuesta.data.respuesta}
+                                        onChange={(e) => respuesta.setData('respuesta', e.target.value)}
+                                        error={respuesta.errors.respuesta}
+                                    />
+                                </FormField>
+                            </form>
+                        )}
+                    </div>
+                )}
+            </Modal>
+        </AdminLayout>
+    );
+}

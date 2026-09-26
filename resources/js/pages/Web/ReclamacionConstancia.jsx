@@ -1,0 +1,74 @@
+import { CircleCheckBig, Printer } from 'lucide-react';
+import PublicLayout from '@/components/layout/PublicLayout';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import Section from '@/components/ui/Section';
+import { formatoFecha } from '@/lib/fechas';
+
+function Fila({ etiqueta, children }) {
+    if (!children) return null;
+
+    return (
+        <div className="grid gap-1 border-b border-primary-100 py-3 sm:grid-cols-3 sm:gap-4">
+            <dt className="text-sm font-semibold text-primary-500">{etiqueta}</dt>
+            <dd className="whitespace-pre-line text-primary sm:col-span-2">{children}</dd>
+        </div>
+    );
+}
+
+/** Constancia de la hoja de reclamación registrada (imprimible). */
+export default function ReclamacionConstancia({ reclamacion, diasRespuesta }) {
+    const r = reclamacion;
+
+    return (
+        <PublicLayout title={`Hoja de reclamación N° ${r.codigo}`}>
+            <Section background="muted">
+                <div className="mx-auto max-w-3xl">
+                    <div className="mb-6 flex flex-col items-center gap-3 text-center print:hidden">
+                        <CircleCheckBig className="size-14 text-green-600" aria-hidden="true" />
+                        <h1 className="text-3xl font-extrabold text-primary sm:text-4xl">Registramos tu {r.tipo}</h1>
+                        <p className="max-w-xl text-primary-700/80">
+                            Enviamos una copia a <strong>{r.email}</strong>. Te responderemos en un plazo no mayor a {diasRespuesta} días hábiles
+                            (hasta el {formatoFecha(r.fecha_limite + 'T12:00:00', false)}).
+                        </p>
+                        <Button variant="outline" icon={Printer} onClick={() => window.print()}>
+                            Imprimir o guardar como PDF
+                        </Button>
+                    </div>
+
+                    <Card>
+                        <div className="mb-4 flex flex-col gap-1 border-b-2 border-primary pb-4 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <p className="text-xs font-bold tracking-wider text-primary-500 uppercase">Libro de Reclamaciones</p>
+                                <p className="text-2xl font-extrabold text-primary">Hoja N° {r.codigo}</p>
+                            </div>
+                            <p className="text-sm text-primary-700/80">{formatoFecha(r.created_at)}</p>
+                        </div>
+
+                        <dl>
+                            <Fila etiqueta="Proveedor">
+                                {r.proveedor.razon_social}
+                                {r.proveedor.ruc && ` — RUC ${r.proveedor.ruc}`}
+                                {r.proveedor.direccion && `\n${r.proveedor.direccion}`}
+                            </Fila>
+                            <Fila etiqueta="Consumidor">{`${r.nombre}\n${r.tipo_documento} ${r.numero_documento}`}</Fila>
+                            {r.menor_de_edad && <Fila etiqueta="Padre, madre o tutor">{r.apoderado}</Fila>}
+                            <Fila etiqueta="Domicilio">{r.domicilio}</Fila>
+                            <Fila etiqueta="Contacto">{`${r.telefono} · ${r.email}`}</Fila>
+                            <Fila etiqueta={r.tipo_bien === 'producto' ? 'Producto' : 'Servicio'}>{r.descripcion_bien}</Fila>
+                            <Fila etiqueta="Monto reclamado">{r.monto_reclamado && `S/ ${Number(r.monto_reclamado).toFixed(2)}`}</Fila>
+                            <Fila etiqueta="Tipo">{r.tipo === 'reclamo' ? 'Reclamo' : 'Queja'}</Fila>
+                            <Fila etiqueta="Detalle">{r.detalle}</Fila>
+                            <Fila etiqueta="Pedido">{r.pedido}</Fila>
+                        </dl>
+
+                        <p className="mt-6 text-xs text-primary-700/70">
+                            La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer
+                            una denuncia ante el INDECOPI.
+                        </p>
+                    </Card>
+                </div>
+            </Section>
+        </PublicLayout>
+    );
+}

@@ -37,6 +37,7 @@ it('guarda el mensaje del formulario de contacto', function () {
         'nombre' => 'Juan Pérez',
         'telefono' => '987 654 321',
         'mensaje' => 'Quiero información',
+        'acepta_politica' => true,
     ])->assertRedirect()->assertSessionHasNoErrors();
 
     expect(MensajeContacto::sole())
@@ -44,9 +45,9 @@ it('guarda el mensaje del formulario de contacto', function () {
         ->leido_at->toBeNull();
 });
 
-it('valida el formulario de contacto', function () {
+it('valida el formulario de contacto (incluida la aceptación de la política)', function () {
     $this->post('/contacto', ['nombre' => '', 'telefono' => 'abc', 'mensaje' => ''])
-        ->assertSessionHasErrors(['nombre', 'telefono', 'mensaje']);
+        ->assertSessionHasErrors(['nombre', 'telefono', 'mensaje', 'acepta_politica']);
 
     expect(MensajeContacto::count())->toBe(0);
 });
@@ -57,7 +58,12 @@ it('descarta los envíos de bots (campo trampa lleno)', function () {
         'telefono' => '999999999',
         'mensaje' => 'spam',
         'website' => 'http://spam.test',
+        'acepta_politica' => true,
     ])->assertRedirect();
 
     expect(MensajeContacto::count())->toBe(0);
 });
+
+it('muestra las páginas legales', function (string $url) {
+    $this->get($url)->assertOk()->assertInertia(fn (Assert $page) => $page->component('Web/Legal'));
+})->with(['/terminos-y-condiciones', '/politica-de-privacidad']);

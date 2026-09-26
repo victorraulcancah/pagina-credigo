@@ -16,11 +16,12 @@ const sizes = {
     lg: 'h-12 px-7 text-base sm:h-14 sm:px-8 sm:text-lg',
 };
 
-const isExternalHref = (href) => /^(https?:|mailto:|tel:)/.test(href);
+// Externos y anclas (#seccion, /#seccion) van con <a> normal para que el navegador haga el scroll
+export const usaEnlaceNativo = (href) => /^(https?:|mailto:|tel:)/.test(href) || href.includes('#');
 
 /**
  * Botón de la web. Con `href` se renderiza como enlace:
- * rutas internas usan <Link> de Inertia; http/mailto/tel usan <a>.
+ * rutas internas usan <Link> de Inertia; http/mailto/tel/anclas usan <a>.
  *
  * <Button href="/contacto" icon={ArrowRight} iconPosition="right">Contáctanos</Button>
  * <Button variant="secondary" type="submit" fullWidth>Enviar</Button>
@@ -56,7 +57,7 @@ export default function Button({
         </>
     );
 
-    if (href && isExternalHref(href)) {
+    if (href && usaEnlaceNativo(href)) {
         return (
             <a
                 href={href}

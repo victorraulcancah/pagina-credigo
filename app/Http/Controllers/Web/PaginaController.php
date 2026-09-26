@@ -48,4 +48,22 @@ class PaginaController extends Controller
             'preguntas' => PreguntaFrecuente::activo()->ordenado()->get(),
         ]);
     }
+
+    public function terminos(): Response
+    {
+        return $this->paginaLegal('terminos');
+    }
+
+    public function privacidad(): Response
+    {
+        return $this->paginaLegal('privacidad');
+    }
+
+    /** Páginas legales: su texto se edita en el panel (Secciones → Páginas legales). */
+    private function paginaLegal(string $clave): Response
+    {
+        $seccion = $this->contenido->secciones(['legal'])["legal.{$clave}"] ?? abort(404);
+
+        return Inertia::render('Web/Legal', ['seccion' => $seccion]);
+    }
 }

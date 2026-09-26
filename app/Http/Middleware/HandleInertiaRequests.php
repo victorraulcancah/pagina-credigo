@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\MensajeContacto;
+use App\Models\Reclamacion;
 use App\Services\ConfiguracionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -45,6 +46,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => fn () => $request->user()?->only(['id', 'name', 'email']),
             ],
             'mensajesNoLeidos' => fn () => $request->user() ? MensajeContacto::noLeido()->count() : 0,
+            'reclamacionesPendientes' => fn () => $request->user() ? Reclamacion::pendiente()->count() : 0,
         ];
     }
 }

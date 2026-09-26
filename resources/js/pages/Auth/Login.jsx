@@ -18,7 +18,7 @@ export default function Login() {
     };
 
     return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-primary px-4 py-12">
+        <div className="relative flex min-h-screen items-center justify-center overflow-clip bg-primary px-4 py-12">
             <Head title={`Acceso al sistema - ${sitio.empresa_nombre}`} />
             <div aria-hidden="true" className="pointer-events-none absolute -top-32 -right-32 size-96 resplandor-acento" />
             <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 -left-32 size-96 resplandor-claro" />

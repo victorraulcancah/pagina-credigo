@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
+    BookOpenText,
     Briefcase,
     Building,
     CircleQuestionMark,
@@ -29,7 +30,13 @@ const menu = [
             { label: 'Preguntas frecuentes', href: '/admin/preguntas', icon: CircleQuestionMark },
         ],
     },
-    { grupo: 'Contacto', items: [{ label: 'Mensajes', href: '/admin/mensajes', icon: Inbox, contador: 'mensajesNoLeidos' }] },
+    {
+        grupo: 'Contacto',
+        items: [
+            { label: 'Mensajes', href: '/admin/mensajes', icon: Inbox, contador: 'mensajesNoLeidos' },
+            { label: 'Libro de Reclamaciones', href: '/admin/reclamaciones', icon: BookOpenText, contador: 'reclamacionesPendientes' },
+        ],
+    },
     {
         grupo: 'Configuración',
         items: [

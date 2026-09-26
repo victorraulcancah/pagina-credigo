@@ -5,4 +5,5 @@ export const PAGINAS = {
     servicios: { label: 'Servicios', url: '/servicios' },
     contacto: { label: 'Contacto', url: '/contacto' },
     general: { label: 'Bloques compartidos', descripcion: 'Aparecen en varias páginas' },
+    legal: { label: 'Páginas legales', descripcion: 'Términos y condiciones · Política de privacidad' },
 };

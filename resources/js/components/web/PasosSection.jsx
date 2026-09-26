@@ -4,12 +4,12 @@ import SectionHeading from '@/components/ui/SectionHeading';
 import { cn, columnasLg } from '@/lib/utils';
 
 /** Lista numerada de pasos (sección con items: titulo, descripcion, icono). */
-export default function PasosSection({ seccion, background = 'muted' }) {
+export default function PasosSection({ id, seccion, background = 'muted' }) {
     if (!seccion) return null;
     const pasos = seccion.items ?? [];
 
     return (
-        <Section background={background}>
+        <Section id={id} background={background}>
             <SectionHeading eyebrow={seccion.subtitulo} title={seccion.titulo} description={seccion.contenido} />
             {pasos.length > 0 && (
                 <ol className={cn('mt-14 grid gap-x-6 gap-y-10 sm:grid-cols-2', columnasLg(pasos.length))}>

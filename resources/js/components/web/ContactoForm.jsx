@@ -5,10 +5,11 @@ import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
+import AceptaPolitica from '@/components/web/AceptaPolitica';
 
 /** Formulario público de contacto → se guarda en la bandeja del panel (/admin/mensajes). */
 export default function ContactoForm({ servicios = [] }) {
-    const form = useForm({ nombre: '', telefono: '', email: '', asunto: '', mensaje: '', website: '' });
+    const form = useForm({ nombre: '', telefono: '', email: '', asunto: '', mensaje: '', website: '', acepta_politica: false });
     const { data, setData, errors, processing, recentlySuccessful } = form;
 
     const opcionesAsunto = [...servicios, 'Otro'].map((titulo) => ({ value: titulo, label: titulo }));
@@ -87,6 +88,13 @@ export default function ContactoForm({ servicios = [] }) {
                     onChange={(e) => setData('website', e.target.value)}
                 />
             </div>
+
+            <AceptaPolitica
+                checked={data.acepta_politica}
+                onChange={(valor) => setData('acepta_politica', valor)}
+                error={errors.acepta_politica}
+                className="sm:col-span-2"
+            />
 
             <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center">
                 <Button type="submit" variant="secondary" size="lg" icon={Send} disabled={processing}>

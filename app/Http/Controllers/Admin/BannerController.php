@@ -25,10 +25,7 @@ class BannerController extends Controller
 
     public function store(BannerRequest $request): RedirectResponse
     {
-        Banner::create([
-            ...$request->safe()->except(['imagen', 'quitar_imagen']),
-            ...$this->imagenes->desdeFormulario($request, null, self::CARPETA),
-        ]);
+        Banner::create($this->datos($request));
 
         Inertia::flash('success', 'Banner creado');
 
@@ -37,10 +34,7 @@ class BannerController extends Controller
 
     public function update(BannerRequest $request, Banner $banner): RedirectResponse
     {
-        $banner->update([
-            ...$request->safe()->except(['imagen', 'quitar_imagen']),
-            ...$this->imagenes->desdeFormulario($request, $banner->imagen, self::CARPETA),
-        ]);
+        $banner->update($this->datos($request, $banner));
 
         Inertia::flash('success', 'Banner actualizado');
 
@@ -50,10 +44,21 @@ class BannerController extends Controller
     public function destroy(Banner $banner): RedirectResponse
     {
         $this->imagenes->eliminar($banner->imagen);
+        $this->imagenes->eliminar($banner->imagen_movil);
         $banner->delete();
 
         Inertia::flash('success', 'Banner eliminado');
 
         return back();
+    }
+
+    /** Datos del formulario + las dos imágenes (escritorio y celular). */
+    private function datos(BannerRequest $request, ?Banner $banner = null): array
+    {
+        return [
+            ...$request->safe()->except(['imagen', 'quitar_imagen', 'imagen_movil', 'quitar_imagen_movil']),
+            ...$this->imagenes->desdeFormulario($request, $banner?->imagen, self::CARPETA),
+            ...$this->imagenes->desdeFormulario($request, $banner?->imagen_movil, self::CARPETA, 'imagen_movil'),
+        ];
     }
 }

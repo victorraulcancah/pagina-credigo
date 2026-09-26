@@ -26,7 +26,7 @@ class ServicioController extends Controller
     public function store(ServicioRequest $request): RedirectResponse
     {
         Servicio::create([
-            ...$request->safe()->except(['imagen', 'quitar_imagen']),
+            ...$request->datos(),
             ...$this->imagenes->desdeFormulario($request, null, self::CARPETA),
         ]);
 
@@ -38,7 +38,7 @@ class ServicioController extends Controller
     public function update(ServicioRequest $request, Servicio $servicio): RedirectResponse
     {
         $servicio->update([
-            ...$request->safe()->except(['imagen', 'quitar_imagen']),
+            ...$request->datos(),
             ...$this->imagenes->desdeFormulario($request, $servicio->imagen, self::CARPETA),
         ]);
 

@@ -26,10 +26,18 @@ class ContenidoSeeder extends Seeder
     {
         $secciones = [
             // ── Inicio ──────────────────────────────────────────────
-            ['inicio', 'servicios', 'Inicio · Encabezado de servicios', ['subtitulo', 'titulo', 'contenido', 'boton'], [
-                'subtitulo' => 'Lo que ofrecemos',
-                'titulo' => 'Soluciones pensadas para conductores',
-                'contenido' => 'Financiamiento y productos para que sigas generando ingresos con tu vehículo.',
+            ['inicio', 'pasos_rapidos', 'Inicio · Franja de pasos (debajo del banner)', ['items'], [
+                'items' => [
+                    ['titulo' => 'Te registras', 'descripcion' => 'DNI/RUC verificado', 'icono' => null],
+                    ['titulo' => 'Ahorras cada semana', 'descripcion' => 'como asociado del grupo', 'icono' => null],
+                    ['titulo' => 'Resultas adjudicado', 'descripcion' => 'sorteo, directa o automática', 'icono' => null],
+                    ['titulo' => 'Recibes tu vehículo', 'descripcion' => 'y sigues pagando como adjudicado', 'icono' => null],
+                ],
+            ]],
+            ['inicio', 'servicios', 'Inicio · Encabezado de planes', ['subtitulo', 'titulo', 'contenido', 'boton'], [
+                'subtitulo' => 'Planes',
+                'titulo' => 'Elige el camino que más te conviene',
+                'contenido' => 'Financiamiento vehicular, entrega inmediata con CrediYango, o financiamiento de lo que ya usas cada día.',
                 'boton_texto' => 'Ver todos los servicios',
                 'boton_url' => '/servicios',
             ]],
@@ -42,13 +50,13 @@ class ContenidoSeeder extends Seeder
             ]],
             ['inicio', 'como_funciona', 'Inicio · Cómo funciona', ['subtitulo', 'titulo', 'contenido', 'items'], [
                 'subtitulo' => 'Cómo funciona',
-                'titulo' => 'Tu financiamiento en 4 pasos',
-                'contenido' => 'Un proceso simple y acompañado por nuestros asesores.',
+                'titulo' => 'De asociado a propietario, un pago a la vez',
+                'contenido' => 'Nuestros grupos de ahorro (Credi Ahorros Autos, CrediGo Autos, Credi Motos y CrediGo InDriver) te acompañan desde la inscripción hasta la entrega de llaves.',
                 'items' => [
-                    ['titulo' => 'Contáctanos', 'descripcion' => 'Escríbenos por WhatsApp o llena el formulario y un asesor te atenderá.', 'icono' => 'MessageCircle'],
-                    ['titulo' => 'Inscríbete', 'descripcion' => 'Registramos tus datos y eliges el plan que mejor se adapta a ti.', 'icono' => 'ClipboardCheck'],
-                    ['titulo' => 'Paga tus cuotas', 'descripcion' => 'Realiza tus pagos semanales con tu código de pago.', 'icono' => 'Wallet'],
-                    ['titulo' => 'Recibe tu vehículo', 'descripcion' => 'Accede a tu vehículo o producto y sigue generando ingresos.', 'icono' => 'Car'],
+                    ['titulo' => 'Inscripción', 'descripcion' => 'Pagas tu cuota de inscripción y quedas registrado como ahorrista del grupo elegido.', 'icono' => 'ClipboardCheck'],
+                    ['titulo' => 'Cuotas semanales', 'descripcion' => 'Entre 150 y 215 cuotas, según el grupo, mientras avanzas hacia la adjudicación.', 'icono' => 'CalendarCheck'],
+                    ['titulo' => 'Adjudicación', 'descripcion' => 'Por sorteo mensual, de forma directa con inicial, o automática al llegar a 14 cuotas (moto) o 52 (auto).', 'icono' => 'Trophy'],
+                    ['titulo' => 'Entrega y uso', 'descripcion' => 'Recibes el vehículo y continúas pagando como adjudicado. Certificados de 13k, 15k o 17k USD.', 'icono' => 'KeyRound'],
                 ],
             ]],
 
@@ -101,14 +109,23 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Bloques que se repiten en varias páginas ────────────
-            ['general', 'cifras', 'General · Cifras', ['subtitulo', 'titulo', 'items'], [
+            ['general', 'cifras', 'General · Cifras (banner del inicio y Nosotros)', ['subtitulo', 'titulo', 'items'], [
                 'subtitulo' => 'CrediGo en cifras',
                 'titulo' => 'Crecemos junto a nuestros conductores',
                 'items' => [
-                    ['titulo' => '+650', 'descripcion' => 'Conductores', 'icono' => null],
-                    ['titulo' => '+600', 'descripcion' => 'Financiamientos', 'icono' => null],
-                    ['titulo' => '2', 'descripcion' => 'Ciudades', 'icono' => null],
-                    ['titulo' => '2', 'descripcion' => 'Plataformas aliadas', 'icono' => null],
+                    ['titulo' => '650+', 'descripcion' => 'conductores financiados', 'icono' => null],
+                    ['titulo' => '2', 'descripcion' => 'ciudades: Arequipa y Lima', 'icono' => null],
+                    ['titulo' => 'Yango · InDrive', 'descripcion' => 'socios de flota oficiales', 'icono' => null],
+                ],
+            ]],
+            ['general', 'beneficios', 'General · Beneficios (niveles)', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Beneficios',
+                'titulo' => 'Cumplir tus pagos también te da ventajas',
+                'contenido' => 'Un puntaje crediticio propio te ubica en un nivel de fidelización con beneficios reales.',
+                'items' => [
+                    ['titulo' => 'Bronce', 'descripcion' => 'Nivel de ingreso al programa de fidelización, con acceso a cupones y comercios afiliados.', 'icono' => 'Medal'],
+                    ['titulo' => 'Plata', 'descripcion' => 'Mejores condiciones y mayor acceso a beneficios conforme mantienes tus pagos al día.', 'icono' => 'Award'],
+                    ['titulo' => 'Oro', 'descripcion' => 'El nivel más alto: máximos beneficios en Comercios GO y en nuestra red de talleres.', 'icono' => 'Crown'],
                 ],
             ]],
             ['general', 'faq', 'General · Preguntas frecuentes (encabezado)', ['subtitulo', 'titulo', 'contenido'], [
@@ -121,6 +138,16 @@ class ContenidoSeeder extends Seeder
                 'contenido' => 'Un asesor te explica los planes y requisitos sin compromiso.',
                 'boton_texto' => 'Escríbenos',
                 'boton_url' => '/contacto',
+            ]],
+
+            // ── Páginas legales (texto base: revisar con asesoría legal) ──
+            ['legal', 'terminos', 'Legal · Términos y condiciones', ['titulo', 'contenido'], [
+                'titulo' => 'Términos y condiciones',
+                'contenido' => self::textoTerminos(),
+            ]],
+            ['legal', 'privacidad', 'Legal · Política de privacidad', ['titulo', 'contenido'], [
+                'titulo' => 'Política de privacidad',
+                'contenido' => self::textoPrivacidad(),
             ]],
         ];
 
@@ -138,18 +165,121 @@ class ContenidoSeeder extends Seeder
             return;
         }
 
-        $servicios = [
-            ['Financiamiento vehicular', 'Car', true, 'Accede a tu auto a través de nuestros grupos de financiamiento con cuotas semanales. El vehículo se adjudica por sorteo o con cuota inicial.'],
-            ['CrediYango', 'BadgeCheck', true, 'Plan de financiamiento vehicular para conductores de Yango, con cuota inicial y pagos semanales.'],
-            ['Motos y mototaxis', 'Bike', true, 'Financia tu moto lineal o mototaxi y empieza a generar ingresos.'],
-            ['Celulares', 'Smartphone', true, 'Financiamos tu celular para que trabajes con los aplicativos, en cuotas cómodas.'],
-            ['Productos para tu vehículo', 'Wrench', false, 'Llantas, baterías, aceite y mantenimiento en cuotas, sin descuidar tu economía.'],
-            ['Descuentos por productividad', 'BadgePercent', false, 'Cumple tu meta de viajes semanales en Yango o InDrive y obtén un descuento en tu cuota.'],
-        ];
-
-        foreach ($servicios as $orden => [$titulo, $icono, $destacado, $descripcion]) {
-            Servicio::create(compact('titulo', 'icono', 'destacado', 'descripcion', 'orden'));
+        foreach (self::planes() as $orden => $plan) {
+            Servicio::create([...$plan, 'destacado' => true, 'orden' => $orden]);
         }
+    }
+
+    /** Los 3 planes de CrediGo, cada uno con su etiqueta y características. */
+    public static function planes(): array
+    {
+        return [
+            [
+                'etiqueta' => 'Grupos de ahorro',
+                'titulo' => 'Moto o auto por adjudicación',
+                'icono' => 'Car',
+                'descripcion' => 'El plan clásico de CrediGo: ahorra semanalmente y accede a tu vehículo por sorteo o al completar tus cuotas.',
+                'caracteristicas' => [
+                    'Inscripción + cuotas semanales',
+                    'Certificados de 13k, 15k o 17k USD',
+                    'Retiro con penalidad y condonación de cuotas restantes',
+                ],
+            ],
+            [
+                'etiqueta' => 'Entrega más rápida',
+                'titulo' => 'CrediYango',
+                'icono' => 'Zap',
+                'descripcion' => 'Para quien no quiere esperar el sorteo: inicial y cuotas fijas, con entrega más directa.',
+                'caracteristicas' => [
+                    'Inicial de S/2,000',
+                    '200 cuotas semanales de S/100',
+                    'Si ya eres ahorrista, tu ahorro se descuenta de la inicial',
+                ],
+            ],
+            [
+                'etiqueta' => 'Microfinanciamiento',
+                'titulo' => 'Todo lo que tu unidad necesita',
+                'icono' => 'Wrench',
+                'descripcion' => 'Financia lo que mantiene tu vehículo y tu trabajo en marcha, en cuotas accesibles.',
+                'caracteristicas' => [
+                    'Celulares Redmi y línea corporativa Claro',
+                    'Llantas, baterías, aceite y mantenimiento (IncaMotors)',
+                    'SOAT, revisión técnica, GPS y canasta navideña',
+                ],
+            ],
+        ];
+    }
+
+    /** Formato: "## " subtítulo, "- " viñeta, línea en blanco separa párrafos. */
+    private static function textoTerminos(): string
+    {
+        return <<<'TEXTO'
+            Al usar este sitio web aceptas estos términos y condiciones. Si no estás de acuerdo con ellos, te pedimos no utilizar el sitio.
+
+            ## Información de los planes
+            La información sobre planes, cuotas, montos y condiciones publicada en este sitio es referencial. Las condiciones finales de cada financiamiento se establecen en el contrato correspondiente, luego de la evaluación del cliente.
+
+            ## Uso del sitio
+            - Te comprometes a brindar información veraz en los formularios.
+            - No debes usar el sitio para fines ilícitos ni para enviar contenido ofensivo o no solicitado.
+
+            ## Propiedad intelectual
+            Los textos, imágenes, logotipos y marcas de este sitio pertenecen a la empresa o a sus licenciantes y no pueden usarse sin autorización.
+
+            ## Enlaces a terceros
+            El sitio puede enlazar a servicios de terceros (como WhatsApp o redes sociales), que se rigen por sus propios términos y políticas.
+
+            ## Libro de Reclamaciones
+            Conforme al Código de Protección y Defensa del Consumidor, ponemos a tu disposición un Libro de Reclamaciones virtual en este sitio.
+
+            ## Modificaciones
+            Podemos actualizar estos términos en cualquier momento. La versión vigente es la publicada en esta página.
+
+            ## Legislación aplicable
+            Estos términos se rigen por las leyes de la República del Perú.
+            TEXTO;
+    }
+
+    private static function textoPrivacidad(): string
+    {
+        return <<<'TEXTO'
+            En cumplimiento de la Ley N° 29733, Ley de Protección de Datos Personales, te informamos cómo tratamos los datos personales que nos proporcionas a través de este sitio web.
+
+            ## Datos que recopilamos
+            - Nombres, documento de identidad, teléfono, correo electrónico y domicilio que ingresas en nuestros formularios.
+            - La información sobre el servicio que te interesa y el contenido de tus mensajes o reclamos.
+
+            ## Finalidades
+            - Atender tus consultas, solicitudes y reclamos.
+            - Contactarte para darte la información que solicitaste sobre nuestros planes de financiamiento.
+            - Cumplir obligaciones legales, como las del Libro de Reclamaciones.
+
+            ## Plazo de conservación
+            Conservamos tus datos mientras sean necesarios para las finalidades descritas o durante el plazo que exija la ley.
+
+            ## Tus derechos
+            Puedes ejercer tus derechos de acceso, rectificación, cancelación y oposición escribiendo a nuestro correo de contacto. Si consideras que no fueron atendidos, puedes acudir a la Autoridad Nacional de Protección de Datos Personales.
+
+            ## Seguridad
+            Aplicamos medidas técnicas y organizativas para proteger tus datos contra pérdida, uso indebido o acceso no autorizado.
+
+            ## Cambios en esta política
+            Podemos actualizar esta política. La versión vigente es la publicada en esta página.
+            TEXTO;
+    }
+
+    /** Textos del banner principal del inicio. */
+    public static function bannerPrincipal(): array
+    {
+        return [
+            'etiqueta' => 'Anda con el tuyo — Arequipa y Lima',
+            'titulo' => 'Tu propio vehículo, ahorrando mientras trabajas.',
+            'subtitulo' => 'Financiamos motos y autos para conductores de Yango e InDrive. Ahorra semanalmente, resulta adjudicado y trabaja con tu propio vehículo, sin dejar de generar ingresos mientras esperas.',
+            'boton_texto' => 'Empieza tu ahorro',
+            'boton_url' => '/contacto',
+            'boton2_texto' => 'Ver cómo funciona',
+            'boton2_url' => '/#como-funciona',
+        ];
     }
 
     private function preguntas(): void
@@ -176,13 +306,7 @@ class ContenidoSeeder extends Seeder
             return;
         }
 
-        Banner::create([
-            'titulo' => 'Tu próximo vehículo empieza aquí',
-            'subtitulo' => 'Financiamiento vehicular, celulares y productos en cuotas para conductores de Yango e InDrive.',
-            'boton_texto' => 'Solicitar información',
-            'boton_url' => '/contacto',
-            'orden' => 0,
-        ]);
+        Banner::create([...self::bannerPrincipal(), 'orden' => 0]);
 
         Banner::create([
             'titulo' => 'Financia tu celular para trabajar',

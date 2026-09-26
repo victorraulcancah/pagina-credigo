@@ -15,7 +15,7 @@ class ContactoController extends Controller
         // Bot detectado (llenó el campo oculto): se responde igual pero no se guarda
         if (! $request->filled('website')) {
             MensajeContacto::create([
-                ...$request->safe()->except('website'),
+                ...$request->safe()->except(['website', 'acepta_politica']),
                 'ip' => $request->ip(),
             ]);
         }

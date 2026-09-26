@@ -21,6 +21,15 @@ class ContactoRequest extends FormRequest
             'mensaje' => ['required', 'string', 'max:2000'],
             // Campo trampa para bots: los humanos no lo ven, debe llegar vacío
             'website' => ['nullable', 'string'],
+            // Consentimiento para tratar sus datos (Ley N° 29733)
+            'acepta_politica' => ['accepted'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'acepta_politica.accepted' => 'Debes aceptar la política de privacidad para enviar tu mensaje.',
         ];
     }
 

@@ -9,7 +9,9 @@ use App\Http\Controllers\Admin\PreguntaFrecuenteController;
 use App\Http\Controllers\Admin\SeccionController;
 use App\Http\Controllers\Admin\ServicioController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Admin\ReclamacionController;
 use App\Http\Controllers\Web\ContactoController;
+use App\Http\Controllers\Web\LibroReclamacionesController;
 use App\Http\Controllers\Web\PaginaController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,11 +26,20 @@ Route::controller(PaginaController::class)->group(function () {
     Route::get('/nosotros', 'nosotros')->name('nosotros');
     Route::get('/servicios', 'servicios')->name('servicios');
     Route::get('/contacto', 'contacto')->name('contacto');
+    Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');
+    Route::get('/politica-de-privacidad', 'privacidad')->name('privacidad');
 });
 
 Route::post('/contacto', [ContactoController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('contacto.store');
+
+// Libro de Reclamaciones virtual (Indecopi)
+Route::controller(LibroReclamacionesController::class)->prefix('libro-de-reclamaciones')->name('reclamaciones.')->group(function () {
+    Route::get('/', 'create')->name('create');
+    Route::post('/', 'store')->middleware('throttle:5,1')->name('store');
+    Route::get('/constancia/{reclamacion}', 'constancia')->middleware('signed')->name('constancia');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +83,9 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/mensajes', [MensajeContactoController::class, 'index'])->name('mensajes.index');
     Route::patch('/mensajes/{mensaje}/leido', [MensajeContactoController::class, 'leido'])->name('mensajes.leido');
     Route::delete('/mensajes/{mensaje}', [MensajeContactoController::class, 'destroy'])->name('mensajes.destroy');
+
+    Route::get('/reclamaciones', [ReclamacionController::class, 'index'])->name('reclamaciones.index');
+    Route::put('/reclamaciones/{reclamacion}/respuesta', [ReclamacionController::class, 'responder'])->name('reclamaciones.responder');
 
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');

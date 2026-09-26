@@ -50,7 +50,7 @@ export default function Navbar() {
     }, [open]);
 
     return (
-        <header className={cn('sticky top-0 z-50 bg-primary text-white transition-shadow duration-300', scrolled && 'shadow-lg shadow-black/30')}>
+        <header className={cn('sticky top-0 z-50 bg-primary text-white transition-shadow duration-300 print:hidden', scrolled && 'shadow-lg shadow-black/30')}>
             <Container className="flex h-14 items-center justify-between gap-4 sm:h-16">
                 <Logo className="h-8 sm:h-10" />
 

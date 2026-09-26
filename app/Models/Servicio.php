@@ -13,11 +13,12 @@ class Servicio extends Model
 
     protected $table = 'servicios';
 
-    protected $fillable = ['titulo', 'descripcion', 'icono', 'imagen', 'destacado', 'orden', 'activo'];
+    protected $fillable = ['titulo', 'etiqueta', 'descripcion', 'caracteristicas', 'icono', 'imagen', 'destacado', 'orden', 'activo'];
 
     protected function casts(): array
     {
         return [
+            'caracteristicas' => 'array',
             'destacado' => 'boolean',
             'orden' => 'integer',
             'activo' => 'boolean',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Banner;
 use App\Models\Configuracion;
 use App\Models\MensajeContacto;
 use App\Models\Seccion;
@@ -100,6 +101,60 @@ describe('con sesión iniciada', function () {
 
         $this->delete("/admin/servicios/{$servicio->id}");
         expect(Servicio::count())->toBe(0);
+    });
+
+    it('guarda la etiqueta y las características de un plan, y las vacía si se quitan todas', function () {
+        $datos = ['titulo' => 'CrediYango', 'etiqueta' => 'Entrega más rápida', 'descripcion' => 'Plan', 'orden' => 0, 'activo' => true, 'destacado' => true];
+
+        $this->post('/admin/servicios', [...$datos, 'caracteristicas' => ['Inicial de S/2,000', '200 cuotas semanales de S/100']])
+            ->assertSessionHasNoErrors();
+        $servicio = Servicio::sole();
+        expect($servicio->etiqueta)->toBe('Entrega más rápida')
+            ->and($servicio->caracteristicas)->toBe(['Inicial de S/2,000', '200 cuotas semanales de S/100']);
+
+        $this->put("/admin/servicios/{$servicio->id}", $datos)->assertSessionHasNoErrors();
+        expect($servicio->fresh()->caracteristicas)->toBe([]);
+    });
+
+    it('rechaza características vacías', function () {
+        $this->post('/admin/servicios', ['titulo' => 'X', 'descripcion' => 'Y', 'orden' => 0, 'caracteristicas' => ['Válida', '']])
+            ->assertSessionHasErrors('caracteristicas.1');
+    });
+
+    it('guarda el segundo botón del banner (ancla a una sección)', function () {
+        $this->post('/admin/banners', [
+            'titulo' => 'Tu propio vehículo',
+            'etiqueta' => 'Anda con el tuyo',
+            'boton2_texto' => 'Ver cómo funciona',
+            'boton2_url' => '/#como-funciona',
+            'orden' => 0,
+            'activo' => true,
+        ])->assertSessionHasNoErrors();
+
+        expect(Banner::sole())
+            ->etiqueta->toBe('Anda con el tuyo')
+            ->boton2_url->toBe('/#como-funciona');
+    });
+
+    it('guarda un banner "solo imagen" con imagen para celular y enlace sin texto de botón', function () {
+        Storage::fake('public');
+
+        $this->post('/admin/banners', [
+            'titulo' => 'Campaña de verano',
+            'solo_imagen' => true,
+            'imagen' => UploadedFile::fake()->image('diseno.jpg', 1920, 1080),
+            'imagen_movil' => UploadedFile::fake()->image('diseno-movil.jpg', 1080, 1620),
+            'boton_url' => '/contacto',
+            'orden' => 0,
+            'activo' => true,
+        ])->assertSessionHasNoErrors();
+
+        $banner = Banner::sole();
+        expect($banner->solo_imagen)->toBeTrue()
+            ->and($banner->imagen_movil_url)->toContain('/storage/banners/');
+
+        $this->delete("/admin/banners/{$banner->id}");
+        Storage::disk('public')->assertMissing($banner->imagen_movil);
     });
 
     it('edita una sección solo en los campos que tiene habilitados', function () {

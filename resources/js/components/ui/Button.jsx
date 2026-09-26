@@ -6,6 +6,7 @@ const variants = {
     secondary: 'bg-primary text-white hover:bg-primary-700 focus-visible:ring-primary',
     outline: 'border-2 border-primary text-primary hover:bg-primary hover:text-white focus-visible:ring-primary',
     'outline-light': 'border-2 border-white/70 text-white hover:bg-white hover:text-primary focus-visible:ring-white',
+    'outline-accent': 'border-2 border-accent text-white hover:bg-accent hover:text-primary focus-visible:ring-accent',
     ghost: 'text-primary hover:bg-primary-50 focus-visible:ring-primary',
 };
 

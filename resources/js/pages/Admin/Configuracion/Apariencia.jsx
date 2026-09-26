@@ -108,9 +108,9 @@ export default function Apariencia({ ajustes, coloresPorDefecto }) {
                         style={coloresValidos ? { '--color-primary': data.color_primario, '--color-accent': data.color_acento } : undefined}
                         className="overflow-hidden rounded-2xl ring-1 ring-gray-200"
                     >
-                        <div className="flex items-center justify-between gap-3 bg-accent px-4 py-3">
+                        <div className="flex items-center justify-between gap-3 bg-primary px-4 py-2.5">
                             <img src={logoVista} alt="" className="h-8 w-auto object-contain" />
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-white">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-accent px-3 py-1 text-xs font-semibold text-white">
                                 <LogIn className="size-3.5" /> Acceso al sistema
                             </span>
                         </div>

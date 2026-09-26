@@ -39,7 +39,7 @@ export default function HeroBanner({ banners = [] }) {
         <section
             aria-roledescription="carrusel"
             aria-label="Destacados"
-            className="relative flex min-h-[560px] items-center overflow-hidden bg-primary text-white sm:min-h-[620px] lg:min-h-[calc(100vh-5rem)]"
+            className="relative flex min-h-[560px] items-center overflow-hidden bg-primary text-white sm:min-h-[620px] lg:min-h-[calc(100vh-4rem)]"
             onMouseEnter={() => setPausado(true)}
             onMouseLeave={() => setPausado(false)}
             onFocusCapture={() => setPausado(true)}

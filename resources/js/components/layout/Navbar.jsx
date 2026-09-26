@@ -12,11 +12,11 @@ function AccesoButton({ className, fullWidth = false, size }) {
     const { auth } = usePage().props;
 
     return auth.user ? (
-        <Button href="/admin" variant="secondary" size={size} icon={LayoutDashboard} fullWidth={fullWidth} className={className}>
+        <Button href="/admin" variant="outline-accent" size={size} icon={LayoutDashboard} fullWidth={fullWidth} className={className}>
             Ir al panel
         </Button>
     ) : (
-        <Button href="/login" variant="secondary" size={size} icon={LogIn} fullWidth={fullWidth} className={className}>
+        <Button href="/login" variant="outline-accent" size={size} icon={LogIn} fullWidth={fullWidth} className={className}>
             Acceso al sistema
         </Button>
     );
@@ -50,9 +50,9 @@ export default function Navbar() {
     }, [open]);
 
     return (
-        <header className={cn('sticky top-0 z-50 bg-accent text-primary transition-shadow duration-300', scrolled && 'shadow-lg shadow-black/20')}>
-            <Container className="flex h-16 items-center justify-between gap-4 sm:h-20">
-                <Logo />
+        <header className={cn('sticky top-0 z-50 bg-primary text-white transition-shadow duration-300', scrolled && 'shadow-lg shadow-black/30')}>
+            <Container className="flex h-14 items-center justify-between gap-4 sm:h-16">
+                <Logo className="h-8 sm:h-10" />
 
                 <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
                     {navLinks.map((link) => (
@@ -61,10 +61,10 @@ export default function Navbar() {
                             href={link.href}
                             aria-current={isActive(link.href) ? 'page' : undefined}
                             className={cn(
-                                'rounded-full px-4 py-2 text-sm font-semibold transition-colors',
+                                'rounded-full px-4 py-1.5 text-sm font-semibold transition-colors',
                                 isActive(link.href)
-                                    ? 'bg-primary text-accent'
-                                    : 'text-primary/80 hover:bg-primary/10 hover:text-primary',
+                                    ? 'bg-accent text-primary'
+                                    : 'text-white hover:bg-white/10',
                             )}
                         >
                             {link.label}
@@ -80,7 +80,7 @@ export default function Navbar() {
                         aria-expanded={open}
                         aria-controls="menu-movil"
                         aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
-                        className="inline-flex size-10 items-center justify-center rounded-full text-primary transition hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none lg:hidden"
+                        className="inline-flex size-10 items-center justify-center rounded-full text-white transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none lg:hidden"
                     >
                         {open ? <X className="size-6" /> : <Menu className="size-6" />}
                     </button>
@@ -92,7 +92,7 @@ export default function Navbar() {
                 id="menu-movil"
                 inert={!open}
                 className={cn(
-                    'grid border-t border-primary/10 transition-[grid-template-rows] duration-300 lg:hidden',
+                    'grid border-t border-white/10 transition-[grid-template-rows] duration-300 lg:hidden',
                     open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr] border-transparent',
                 )}
             >
@@ -106,8 +106,8 @@ export default function Navbar() {
                                 className={cn(
                                     'rounded-xl px-4 py-3 text-base font-semibold transition-colors',
                                     isActive(link.href)
-                                        ? 'bg-primary text-accent'
-                                        : 'text-primary/80 hover:bg-primary/10 hover:text-primary',
+                                        ? 'bg-accent text-primary'
+                                        : 'text-white hover:bg-white/10',
                                 )}
                             >
                                 {link.label}

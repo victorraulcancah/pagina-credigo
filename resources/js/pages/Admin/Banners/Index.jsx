@@ -32,7 +32,7 @@ export default function BannersIndex({ banners }) {
 
     return (
         <AdminLayout title="Banners">
-            <PageHeader title="Banners" description="Diapositivas del inicio. Se muestran en el orden indicado y cambian cada 6 segundos." actions={nuevo} />
+            <PageHeader title="Banners" description="Carrusel del inicio: cada banner con su imagen de fondo. Se muestran en el orden indicado y cambian cada 6 segundos." actions={nuevo} />
 
             {banners.length === 0 ? (
                 <EmptyState icon={Images} title="No hay banners" description="Sin banners, el inicio muestra el nombre y la descripción de la empresa." action={nuevo} />
@@ -88,15 +88,14 @@ export default function BannersIndex({ banners }) {
                     </FormField>
                     <div className="sm:col-span-2">
                         <ImageUpload
-                            label="Imagen (opcional)"
+                            label="Imagen de fondo"
                             actualUrl={crud.editando?.imagen_url}
                             archivo={data.imagen}
                             onArchivo={(archivo) => setData('imagen', archivo)}
                             quitada={data.quitar_imagen}
                             onQuitar={(valor) => setData('quitar_imagen', valor)}
                             error={errors.imagen}
-                            hint="Se muestra a la derecha del texto. Recomendado 1200×900 px. JPG, PNG o WEBP, máx. 4 MB."
-                            aspect="aspect-[4/3]"
+                            hint="Foto horizontal a pantalla completa (el texto va a la izquierda, sobre una capa oscura). Recomendado 1920×1080 px. JPG o WEBP, máx. 4 MB."
                         />
                     </div>
                     <FormField label="Texto del botón" htmlFor="boton_texto" error={errors.boton_texto}>

@@ -9,7 +9,11 @@ import { cn } from '@/lib/utils';
 
 const INTERVALO_MS = 6000;
 
-/** Slider principal de inicio (banners del panel). Sin banners muestra los datos de la empresa. */
+/**
+ * Carrusel principal de inicio (banners del panel): cada banner usa su imagen
+ * como fondo a pantalla completa con el texto encima. Sin imagen se ve el
+ * color de marca; sin banners muestra los datos de la empresa.
+ */
 export default function HeroBanner({ banners = [] }) {
     const sitio = useSitio();
     const whatsapp = sitio.whatsappUrl();
@@ -35,17 +39,46 @@ export default function HeroBanner({ banners = [] }) {
         <section
             aria-roledescription="carrusel"
             aria-label="Destacados"
-            className="relative overflow-hidden bg-primary text-white"
+            className="relative flex min-h-[560px] items-center overflow-hidden bg-primary text-white sm:min-h-[620px] lg:min-h-[calc(100vh-5rem)]"
             onMouseEnter={() => setPausado(true)}
             onMouseLeave={() => setPausado(false)}
             onFocusCapture={() => setPausado(true)}
             onBlurCapture={() => setPausado(false)}
         >
+            {/* Fondo de marca (se ve en los banners sin imagen) */}
             <div aria-hidden="true" className="pointer-events-none absolute -top-32 -right-32 size-96 resplandor-acento" />
             <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 -left-32 size-96 resplandor-claro" />
 
-            <Container className="relative py-16 sm:py-20 lg:py-28">
-                {/* Todas las diapositivas en la misma celda: el alto lo define la más alta */}
+            {/*
+              Imagen de fondo de cada banner + capa oscura (para leer el texto).
+              Se cruzan con fundido; la activa hace un zoom lento. El zoom se
+              reinicia recién cuando la imagen ya se ocultó (delay).
+            */}
+            {slides.map((slide, i) =>
+                slide.imagen_url ? (
+                    <div
+                        key={slide.id}
+                        aria-hidden="true"
+                        className={cn('absolute inset-0 transition-opacity duration-1000', i === indice ? 'opacity-100' : 'opacity-0')}
+                    >
+                        <img
+                            src={slide.imagen_url}
+                            alt=""
+                            fetchPriority={i === 0 ? 'high' : 'auto'}
+                            className={cn(
+                                'size-full object-cover transition-[scale] ease-out',
+                                i === indice ? 'scale-100 duration-[7000ms]' : 'scale-110 delay-1000 duration-0',
+                            )}
+                        />
+                        <div className="absolute inset-0 bg-primary/75 lg:hidden" />
+                        <div className="absolute inset-0 hidden bg-linear-to-r from-primary via-primary/80 to-primary/10 lg:block" />
+                        <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-primary/80 to-transparent" />
+                    </div>
+                ) : null,
+            )}
+
+            <Container className="relative py-16 sm:py-20 lg:py-24">
+                {/* Todos los textos en la misma celda: el alto lo define el más largo */}
                 <div className="grid">
                     {slides.map((slide, i) => {
                         const activa = i === indice;
@@ -59,40 +92,29 @@ export default function HeroBanner({ banners = [] }) {
                                 aria-roledescription="diapositiva"
                                 aria-label={`${i + 1} de ${total}`}
                                 className={cn(
-                                    'transition-opacity duration-700 [grid-area:1/1]',
-                                    activa ? 'opacity-100' : 'pointer-events-none opacity-0',
+                                    'max-w-3xl transition-all duration-700 [grid-area:1/1]',
+                                    activa ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0',
                                 )}
                             >
-                                <div className={cn('grid items-center gap-10 lg:gap-16', slide.imagen_url && 'lg:grid-cols-2')}>
-                                    <div className="max-w-3xl">
-                                        {sitio.empresa_eslogan && <Badge className="mb-5">{sitio.empresa_eslogan}</Badge>}
-                                        <Titulo className="text-4xl leading-tight font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-                                            {slide.titulo}
-                                        </Titulo>
-                                        {slide.subtitulo && (
-                                            <p className="mt-5 max-w-2xl text-base text-pretty text-primary-100 sm:text-lg lg:text-xl">
-                                                {slide.subtitulo}
-                                            </p>
-                                        )}
-                                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                                            {slide.boton_texto && slide.boton_url && (
-                                                <Button href={slide.boton_url} size="lg" icon={ArrowRight} iconPosition="right">
-                                                    {slide.boton_texto}
-                                                </Button>
-                                            )}
-                                            {whatsapp && (
-                                                <Button href={whatsapp} newTab variant="outline-light" size="lg" icon={FaWhatsapp}>
-                                                    WhatsApp
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {slide.imagen_url && (
-                                        <img
-                                            src={slide.imagen_url}
-                                            alt=""
-                                            className="aspect-[4/3] w-full rounded-3xl object-cover shadow-2xl ring-4 ring-white/10"
-                                        />
+                                {sitio.empresa_eslogan && <Badge className="mb-5">{sitio.empresa_eslogan}</Badge>}
+                                <Titulo className="text-4xl leading-tight font-extrabold tracking-tight text-balance drop-shadow-sm sm:text-5xl lg:text-6xl">
+                                    {slide.titulo}
+                                </Titulo>
+                                {slide.subtitulo && (
+                                    <p className="mt-5 max-w-2xl text-base text-pretty text-white/85 sm:text-lg lg:text-xl">
+                                        {slide.subtitulo}
+                                    </p>
+                                )}
+                                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                                    {slide.boton_texto && slide.boton_url && (
+                                        <Button href={slide.boton_url} size="lg" icon={ArrowRight} iconPosition="right">
+                                            {slide.boton_texto}
+                                        </Button>
+                                    )}
+                                    {whatsapp && (
+                                        <Button href={whatsapp} newTab variant="outline-light" size="lg" icon={FaWhatsapp}>
+                                            WhatsApp
+                                        </Button>
                                     )}
                                 </div>
                             </div>
@@ -106,7 +128,7 @@ export default function HeroBanner({ banners = [] }) {
                             type="button"
                             onClick={() => ir(-1)}
                             aria-label="Anterior"
-                            className="flex size-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+                            className="flex size-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition hover:bg-white/20"
                         >
                             <ChevronLeft className="size-5" />
                         </button>
@@ -129,7 +151,7 @@ export default function HeroBanner({ banners = [] }) {
                             type="button"
                             onClick={() => ir(1)}
                             aria-label="Siguiente"
-                            className="flex size-10 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+                            className="flex size-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm transition hover:bg-white/20"
                         >
                             <ChevronRight className="size-5" />
                         </button>

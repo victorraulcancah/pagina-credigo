@@ -13,11 +13,11 @@ export default function PageHero({ eyebrow, title, description, align = 'left', 
         <section className="relative overflow-hidden bg-primary text-white">
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -top-24 -right-24 size-72 rounded-full bg-accent/15 blur-3xl sm:size-96"
+                className="pointer-events-none absolute -top-24 -right-24 size-72 resplandor-acento sm:size-96"
             />
             <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -bottom-32 -left-24 size-72 rounded-full bg-primary-500/30 blur-3xl"
+                className="pointer-events-none absolute -bottom-32 -left-24 size-72 resplandor-claro"
             />
             <Container className={cn('relative py-16 sm:py-20 lg:py-28', centered && 'text-center')}>
                 <div className={cn('max-w-3xl', centered && 'mx-auto')}>

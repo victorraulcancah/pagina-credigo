@@ -1,16 +1,10 @@
-import { Link, usePage } from '@inertiajs/react';
-import { LogIn, Mail, MapPin, Phone } from 'lucide-react';
-import { FaFacebookF, FaInstagram, FaTiktok, FaWhatsapp } from 'react-icons/fa6';
+import { Link } from '@inertiajs/react';
+import { Clock, Mail, MapPin, Phone } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa6';
 import Logo from '@/components/layout/Logo';
-import Button from '@/components/ui/Button';
 import Container from '@/components/ui/Container';
-import { empresa, navLinks, whatsappUrl } from '@/data/site';
-
-const socialIcons = {
-    facebook: { icon: FaFacebookF, label: 'Facebook' },
-    instagram: { icon: FaInstagram, label: 'Instagram' },
-    tiktok: { icon: FaTiktok, label: 'TikTok' },
-};
+import { navLinks } from '@/data/navegacion';
+import { useSitio } from '@/hooks/useSitio';
 
 function SocialLink({ href, label, icon: Icon }) {
     return (
@@ -26,9 +20,30 @@ function SocialLink({ href, label, icon: Icon }) {
     );
 }
 
+function DatoContacto({ icon: Icon, href, children }) {
+    const contenido = (
+        <>
+            <Icon className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden="true" />
+            <span className="min-w-0 break-words">{children}</span>
+        </>
+    );
+
+    return (
+        <li>
+            {href ? (
+                <a href={href} className="flex items-start gap-3 transition hover:text-accent">
+                    {contenido}
+                </a>
+            ) : (
+                <div className="flex items-start gap-3">{contenido}</div>
+            )}
+        </li>
+    );
+}
+
 export default function Footer() {
-    const { props } = usePage();
-    const redes = Object.entries(empresa.redes).filter(([, href]) => href);
+    const sitio = useSitio();
+    const whatsapp = sitio.whatsappUrl();
 
     return (
         <footer className="bg-primary-950 text-primary-200">
@@ -36,13 +51,17 @@ export default function Footer() {
             <Container className="grid gap-10 py-14 sm:grid-cols-2 sm:py-16 lg:grid-cols-12 lg:gap-8">
                 <div className="sm:col-span-2 lg:col-span-5">
                     <Logo />
-                    <p className="mt-5 max-w-sm text-sm leading-relaxed">{empresa.descripcion}</p>
-                    <div className="mt-6 flex gap-3">
-                        <SocialLink href={whatsappUrl()} label="WhatsApp" icon={FaWhatsapp} />
-                        {redes.map(([red, href]) => (
-                            <SocialLink key={red} href={href} {...socialIcons[red]} />
-                        ))}
-                    </div>
+                    {sitio.empresa_descripcion && (
+                        <p className="mt-5 max-w-sm text-sm leading-relaxed">{sitio.empresa_descripcion}</p>
+                    )}
+                    {(whatsapp || sitio.redes.length > 0) && (
+                        <div className="mt-6 flex flex-wrap gap-3">
+                            {whatsapp && <SocialLink href={whatsapp} label="WhatsApp" icon={FaWhatsapp} />}
+                            {sitio.redes.map((red) => (
+                                <SocialLink key={red.clave} {...red} />
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className="lg:col-span-3">
@@ -61,30 +80,25 @@ export default function Footer() {
                 <div className="lg:col-span-4">
                     <h3 className="text-sm font-bold tracking-wider text-white uppercase">Contacto</h3>
                     <ul className="mt-4 space-y-3 text-sm">
-                        <li>
-                            <a href={`tel:+${empresa.whatsapp}`} className="flex items-start gap-3 transition hover:text-accent">
-                                <Phone className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden="true" />
-                                {empresa.telefono}
-                            </a>
-                        </li>
-                        <li>
-                            <a href={`mailto:${empresa.email}`} className="flex items-start gap-3 break-all transition hover:text-accent">
-                                <Mail className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden="true" />
-                                {empresa.email}
-                            </a>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <MapPin className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden="true" />
-                            <span>
-                                {empresa.direccion}
-                                <br />
-                                {empresa.ciudad}
-                            </span>
-                        </li>
+                        {sitio.contacto_telefono && (
+                            <DatoContacto icon={Phone} href={`tel:${sitio.contacto_telefono.replace(/\s/g, '')}`}>
+                                {sitio.contacto_telefono}
+                            </DatoContacto>
+                        )}
+                        {sitio.contacto_email && (
+                            <DatoContacto icon={Mail} href={`mailto:${sitio.contacto_email}`}>
+                                {sitio.contacto_email}
+                            </DatoContacto>
+                        )}
+                        {(sitio.contacto_direccion || sitio.contacto_ciudad) && (
+                            <DatoContacto icon={MapPin}>
+                                {sitio.contacto_direccion}
+                                {sitio.contacto_direccion && sitio.contacto_ciudad && <br />}
+                                {sitio.contacto_ciudad}
+                            </DatoContacto>
+                        )}
+                        {sitio.contacto_horario && <DatoContacto icon={Clock}>{sitio.contacto_horario}</DatoContacto>}
                     </ul>
-                    <Button href={props.erpUrl} size="sm" icon={LogIn} className="mt-6">
-                        Acceso al sistema
-                    </Button>
                 </div>
             </Container>
 
@@ -92,7 +106,8 @@ export default function Footer() {
                 {/* pb/pr extra para que el botón flotante de WhatsApp no tape el texto */}
                 <Container className="flex flex-col gap-1 pt-6 pb-24 text-center text-xs sm:flex-row sm:justify-between sm:pr-24 sm:pb-6 sm:text-left sm:text-sm lg:pr-28">
                     <p>
-                        © {new Date().getFullYear()} {empresa.razonSocial} · RUC {empresa.ruc}
+                        © {new Date().getFullYear()} {sitio.empresa_razon_social || sitio.empresa_nombre}
+                        {sitio.empresa_ruc && ` · RUC ${sitio.empresa_ruc}`}
                     </p>
                     <p>Todos los derechos reservados.</p>
                 </Container>

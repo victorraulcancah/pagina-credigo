@@ -3,37 +3,56 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+ * Colores de marca. Los valores reales vienen de la BD (panel → Apariencia):
+ * app.blade.php los sobrescribe en :root y useTemaColores() los actualiza al navegar.
+ */
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    /* Colores de marca de la web CrediGo */
     --color-primary: #0f1037; /* Azul profundo */
     --color-accent: #f8ec34; /* Amarillo */
+}
 
-    --color-primary-50: #f1f2fa;
-    --color-primary-100: #e4e4f5;
-    --color-primary-200: #c8c9eb;
-    --color-primary-300: #9d9fdc;
-    --color-primary-400: #6c6fca;
-    --color-primary-500: #3b3fb8;
-    --color-primary-600: #2e3191;
-    --color-primary-700: #232571;
-    --color-primary-800: #191a53;
-    --color-primary-900: #0f1037;
-    --color-primary-950: #090a21;
+/*
+ * Escalas calculadas a partir del color base (inline: se resuelven en cada
+ * elemento, así cualquier cambio de --color-primary / --color-accent se refleja).
+ */
+@theme inline {
+    --color-primary-50: color-mix(in oklab, var(--color-primary) 5%, white);
+    --color-primary-100: color-mix(in oklab, var(--color-primary) 10%, white);
+    --color-primary-200: color-mix(in oklab, var(--color-primary) 22%, white);
+    --color-primary-300: color-mix(in oklab, var(--color-primary) 38%, white);
+    --color-primary-400: color-mix(in oklab, var(--color-primary) 55%, white);
+    --color-primary-500: color-mix(in oklab, var(--color-primary) 70%, white);
+    --color-primary-600: color-mix(in oklab, var(--color-primary) 82%, white);
+    --color-primary-700: color-mix(in oklab, var(--color-primary) 90%, white);
+    --color-primary-800: color-mix(in oklab, var(--color-primary) 95%, white);
+    --color-primary-900: var(--color-primary);
+    --color-primary-950: color-mix(in oklab, var(--color-primary) 65%, black);
 
-    --color-accent-50: #fefdef;
-    --color-accent-100: #fefbd6;
-    --color-accent-200: #fcf7ae;
-    --color-accent-300: #faf271;
-    --color-accent-400: #f8ec34;
-    --color-accent-500: #e9de31;
-    --color-accent-600: #c6bd2a;
-    --color-accent-700: #9a9220;
-    --color-accent-800: #777119;
-    --color-accent-900: #595513;
-    --color-accent-950: #37340b;
+    --color-accent-50: color-mix(in oklab, var(--color-accent) 8%, white);
+    --color-accent-100: color-mix(in oklab, var(--color-accent) 20%, white);
+    --color-accent-200: color-mix(in oklab, var(--color-accent) 40%, white);
+    --color-accent-300: color-mix(in oklab, var(--color-accent) 70%, white);
+    --color-accent-400: var(--color-accent);
+    --color-accent-500: color-mix(in oklab, var(--color-accent) 94%, black);
+    --color-accent-600: color-mix(in oklab, var(--color-accent) 80%, black);
+    --color-accent-700: color-mix(in oklab, var(--color-accent) 62%, black);
+    --color-accent-800: color-mix(in oklab, var(--color-accent) 48%, black);
+    --color-accent-900: color-mix(in oklab, var(--color-accent) 36%, black);
+    --color-accent-950: color-mix(in oklab, var(--color-accent) 22%, black);
+}
+
+/* Resplandores decorativos: degradado radial (mucho más liviano que filter: blur en celulares) */
+@utility resplandor-acento {
+    background-image: radial-gradient(closest-side, color-mix(in oklab, var(--color-accent) 22%, transparent), transparent);
+}
+
+@utility resplandor-claro {
+    background-image: radial-gradient(closest-side, color-mix(in oklab, var(--color-primary) 50%, #6c6fca 50%), transparent);
+    opacity: 0.45;
 }
 
 @layer base {
@@ -44,5 +63,10 @@
     ::selection {
         background-color: var(--color-accent);
         color: var(--color-primary);
+    }
+
+    button:not(:disabled),
+    [role='button']:not(:disabled) {
+        cursor: pointer;
     }
 }

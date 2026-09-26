@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,6 +23,26 @@ class ImagenService
         $this->eliminar($anterior);
 
         return $ruta;
+    }
+
+    /**
+     * Resuelve el campo de imagen de un formulario del panel:
+     * archivo nuevo → se guarda (y se borra el anterior); `quitar_{campo}` → se borra;
+     * sin cambios → arreglo vacío. El resultado se mezcla con los datos a guardar.
+     */
+    public function desdeFormulario(Request $request, ?string $actual, string $carpeta, string $campo = 'imagen'): array
+    {
+        if ($request->hasFile($campo)) {
+            return [$campo => $this->reemplazar($actual, $request->file($campo), $carpeta)];
+        }
+
+        if ($request->boolean("quitar_{$campo}")) {
+            $this->eliminar($actual);
+
+            return [$campo => null];
+        }
+
+        return [];
     }
 
     public function eliminar(?string $ruta): void

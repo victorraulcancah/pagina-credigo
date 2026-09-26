@@ -1,11 +1,15 @@
 import { FaWhatsapp } from 'react-icons/fa6';
-import { whatsappUrl } from '@/data/site';
+import { useSitio } from '@/hooks/useSitio';
 
-/** Botón flotante de WhatsApp (esquina inferior derecha). */
-export default function WhatsAppButton({ mensaje }) {
+/** Botón flotante de WhatsApp (se oculta si no hay número configurado). */
+export default function WhatsAppButton() {
+    const href = useSitio().whatsappUrl();
+
+    if (!href) return null;
+
     return (
         <a
-            href={whatsappUrl(mensaje)}
+            href={href}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Escríbenos por WhatsApp"

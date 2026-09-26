@@ -14,6 +14,8 @@ export default function SectionHeading({
     as: Tag = 'h2',
     className,
 }) {
+    if (!eyebrow && !title && !description) return null;
+
     return (
         <div
             className={cn(
@@ -23,18 +25,20 @@ export default function SectionHeading({
             )}
         >
             {eyebrow && <Badge className="mb-4">{eyebrow}</Badge>}
-            <Tag
-                className={cn(
-                    'text-3xl leading-tight font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl',
-                    light ? 'text-white' : 'text-primary',
-                )}
-            >
-                {title}
-            </Tag>
+            {title && (
+                <Tag
+                    className={cn(
+                        'text-3xl leading-tight font-bold tracking-tight text-balance sm:text-4xl lg:text-5xl',
+                        light ? 'text-white' : 'text-primary',
+                    )}
+                >
+                    {title}
+                </Tag>
+            )}
             {description && (
                 <p
                     className={cn(
-                        'mt-4 text-base text-pretty sm:text-lg',
+                        'mt-4 text-base text-pretty whitespace-pre-line sm:text-lg',
                         light ? 'text-primary-100' : 'text-primary-700/80',
                     )}
                 >

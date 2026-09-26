@@ -1,14 +1,29 @@
 import { Link, usePage } from '@inertiajs/react';
-import { LogIn, Menu, X } from 'lucide-react';
+import { LayoutDashboard, LogIn, Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Logo from '@/components/layout/Logo';
 import Button from '@/components/ui/Button';
 import Container from '@/components/ui/Container';
-import { navLinks } from '@/data/site';
+import { navLinks } from '@/data/navegacion';
 import { cn } from '@/lib/utils';
 
+/** Botón al panel: "Acceso al sistema" o "Ir al panel" si ya inició sesión. */
+function AccesoButton({ className, fullWidth = false, size }) {
+    const { auth } = usePage().props;
+
+    return auth.user ? (
+        <Button href="/admin" size={size} icon={LayoutDashboard} fullWidth={fullWidth} className={className}>
+            Ir al panel
+        </Button>
+    ) : (
+        <Button href="/login" size={size} icon={LogIn} fullWidth={fullWidth} className={className}>
+            Acceso al sistema
+        </Button>
+    );
+}
+
 export default function Navbar() {
-    const { url, props } = usePage();
+    const { url } = usePage();
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
@@ -58,9 +73,7 @@ export default function Navbar() {
                 </nav>
 
                 <div className="flex items-center gap-2">
-                    <Button href={props.erpUrl} size="sm" icon={LogIn} className="hidden sm:inline-flex">
-                        Acceso al sistema
-                    </Button>
+                    <AccesoButton size="sm" className="hidden sm:inline-flex" />
                     <button
                         type="button"
                         onClick={() => setOpen((v) => !v)}
@@ -100,9 +113,7 @@ export default function Navbar() {
                                 {link.label}
                             </Link>
                         ))}
-                        <Button href={props.erpUrl} icon={LogIn} fullWidth className="mt-3 sm:hidden">
-                            Acceso al sistema
-                        </Button>
+                        <AccesoButton fullWidth className="mt-3 sm:hidden" />
                     </Container>
                 </div>
             </div>

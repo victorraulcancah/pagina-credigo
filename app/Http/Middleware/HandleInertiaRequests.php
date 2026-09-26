@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\MensajeContacto;
+use App\Services\ConfiguracionService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -37,7 +39,12 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
-            'erpUrl' => config('services.erp.url'),
+            // Ajustes del sitio (empresa, contacto, redes, colores, logo) editables en /admin
+            'sitio' => fn () => app(ConfiguracionService::class)->publicas(),
+            'auth' => [
+                'user' => fn () => $request->user()?->only(['id', 'name', 'email']),
+            ],
+            'mensajesNoLeidos' => fn () => $request->user() ? MensajeContacto::noLeido()->count() : 0,
         ];
     }
 }

@@ -6,6 +6,7 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import AceptaPolitica from '@/components/web/AceptaPolitica';
+import { registrarLead } from '@/lib/analitica';
 
 /** Formulario público de contacto → se guarda en la bandeja del panel (/admin/mensajes). */
 export default function ContactoForm({ servicios = [] }) {
@@ -18,7 +19,10 @@ export default function ContactoForm({ servicios = [] }) {
         e.preventDefault();
         form.post('/contacto', {
             preserveScroll: true,
-            onSuccess: () => form.reset(),
+            onSuccess: () => {
+                registrarLead('contacto');
+                form.reset();
+            },
         });
     };
 

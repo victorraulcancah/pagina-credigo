@@ -13,11 +13,19 @@ class ConfiguracionController extends Controller
 {
     public function __construct(private ConfiguracionService $configuracion) {}
 
-    /** Empresa, contacto y redes sociales. */
+    /** Empresa, contacto, redes sociales y correos de avisos. */
     public function empresa(): Response
     {
         return Inertia::render('Admin/Configuracion/Empresa', [
-            'ajustes' => $this->configuracion->publicas(),
+            'ajustes' => $this->configuracion->paraPanel(),
+        ]);
+    }
+
+    /** Vista previa al compartir, Google Analytics y píxel de Meta. */
+    public function seo(): Response
+    {
+        return Inertia::render('Admin/Configuracion/Seo', [
+            'ajustes' => $this->configuracion->paraPanel(),
         ]);
     }
 
@@ -25,7 +33,7 @@ class ConfiguracionController extends Controller
     public function apariencia(): Response
     {
         return Inertia::render('Admin/Configuracion/Apariencia', [
-            'ajustes' => $this->configuracion->publicas(),
+            'ajustes' => $this->configuracion->paraPanel(),
             'coloresPorDefecto' => [
                 'color_primario' => config('sitio.defaults.color_primario'),
                 'color_acento' => config('sitio.defaults.color_acento'),

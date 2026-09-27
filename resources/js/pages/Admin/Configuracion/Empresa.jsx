@@ -13,6 +13,7 @@ const CAMPOS = [
     'contacto_telefono', 'contacto_whatsapp', 'contacto_whatsapp_mensaje', 'contacto_email',
     'contacto_direccion', 'contacto_ciudad', 'contacto_horario', 'contacto_mapa_url',
     'redes_facebook', 'redes_instagram', 'redes_tiktok', 'redes_youtube',
+    'notificaciones_email',
 ];
 
 export default function Empresa({ ajustes }) {
@@ -117,6 +118,20 @@ export default function Empresa({ ajustes }) {
                             <Textarea {...campo('contacto_mapa_url', { rows: 2 })} />
                         </FormField>
                     </div>
+                </Panel>
+
+                <Panel
+                    title="Avisos por correo"
+                    description="Quién recibe un correo cuando llega una solicitud (contacto o cotizador) o una hoja del Libro de Reclamaciones. No se muestra en la web."
+                >
+                    <FormField
+                        label="Correos del equipo"
+                        htmlFor="notificaciones_email"
+                        error={errors.notificaciones_email}
+                        hint="Separa varios correos con comas. Si lo dejas vacío, los avisos van al correo de contacto."
+                    >
+                        <Input {...campo('notificaciones_email', { placeholder: 'ventas@credigo.com, gerencia@credigo.com' })} />
+                    </FormField>
                 </Panel>
 
                 <Panel title="Redes sociales" description="Pega el enlace completo. Las que dejes vacías no se muestran.">

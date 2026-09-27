@@ -11,6 +11,7 @@ import {
     LayoutDashboard,
     LayoutTemplate,
     LogOut,
+    Megaphone,
     Menu,
     Palette,
     UserCog,
@@ -35,7 +36,7 @@ const menu = [
     {
         grupo: 'Contacto',
         items: [
-            { label: 'Mensajes', href: '/admin/mensajes', icon: Inbox, contador: 'mensajesNoLeidos' },
+            { label: 'Solicitudes', href: '/admin/mensajes', icon: Inbox, contador: 'mensajesNoLeidos' },
             { label: 'Libro de Reclamaciones', href: '/admin/reclamaciones', icon: BookOpenText, contador: 'reclamacionesPendientes' },
         ],
     },
@@ -44,6 +45,7 @@ const menu = [
         items: [
             { label: 'Empresa y contacto', href: '/admin/configuracion/empresa', icon: Building },
             { label: 'Apariencia', href: '/admin/configuracion/apariencia', icon: Palette },
+            { label: 'SEO y marketing', href: '/admin/configuracion/seo', icon: Megaphone },
             { label: 'Mi perfil', href: '/admin/perfil', icon: UserCog },
         ],
     },

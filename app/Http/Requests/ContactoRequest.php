@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\MensajeContacto;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ContactoRequest extends FormRequest
 {
@@ -19,6 +21,7 @@ class ContactoRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:150'],
             'asunto' => ['nullable', 'string', 'max:150'],
             'mensaje' => ['required', 'string', 'max:2000'],
+            'origen' => ['nullable', Rule::in(array_keys(MensajeContacto::ORIGENES))],
             // Campo trampa para bots: los humanos no lo ven, debe llegar vacío
             'website' => ['nullable', 'string'],
             // Consentimiento para tratar sus datos (Ley N° 29733)

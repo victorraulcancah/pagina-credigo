@@ -5,6 +5,7 @@ import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import AceptaPolitica from '@/components/web/AceptaPolitica';
+import { registrarLead } from '@/lib/analitica';
 
 /**
  * Pedido de información de una cotización. Se guarda como mensaje de contacto
@@ -19,9 +20,16 @@ export default function CotizacionForm({ asunto, detalle }) {
         form.transform(({ comentario, ...resto }) => ({
             ...resto,
             asunto,
+            origen: 'cotizador',
             mensaje: comentario ? `${detalle}\n\nComentario: ${comentario}` : detalle,
         }));
-        form.post('/contacto', { preserveScroll: true, onSuccess: () => form.reset() });
+        form.post('/contacto', {
+            preserveScroll: true,
+            onSuccess: () => {
+                registrarLead('cotizador');
+                form.reset();
+            },
+        });
     };
 
     return (

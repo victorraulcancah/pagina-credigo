@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 
 export default function Dashboard({ resumen, ultimosMensajes }) {
     const tarjetas = [
-        { label: 'Mensajes sin leer', valor: resumen.mensajes_no_leidos, icon: Inbox, href: '/admin/mensajes?estado=no_leidos', alerta: resumen.mensajes_no_leidos > 0 },
+        { label: 'Solicitudes nuevas', valor: resumen.solicitudes_nuevas, icon: Inbox, href: '/admin/mensajes?estado=nuevo', alerta: resumen.solicitudes_nuevas > 0 },
         {
             label: 'Reclamaciones pendientes',
             valor: resumen.reclamaciones_pendientes,
@@ -51,9 +51,9 @@ export default function Dashboard({ resumen, ultimosMensajes }) {
             </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                <Panel title="Últimos mensajes" className="lg:col-span-2">
+                <Panel title="Últimas solicitudes" className="lg:col-span-2">
                     {ultimosMensajes.length === 0 ? (
-                        <p className="py-6 text-center text-sm text-gray-500">Aún no llegan mensajes del formulario de contacto.</p>
+                        <p className="py-6 text-center text-sm text-gray-500">Aún no llegan solicitudes del formulario de contacto ni del cotizador.</p>
                     ) : (
                         <ul className="-my-2 divide-y divide-gray-100">
                             {ultimosMensajes.map((m) => (
@@ -71,7 +71,7 @@ export default function Dashboard({ resumen, ultimosMensajes }) {
                         </ul>
                     )}
                     <Link href="/admin/mensajes" className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
-                        Ver todos los mensajes <ArrowRight className="size-4" />
+                        Ver todas las solicitudes <ArrowRight className="size-4" />
                     </Link>
                 </Panel>
 

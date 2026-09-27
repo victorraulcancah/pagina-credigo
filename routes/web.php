@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ReclamacionController;
 use App\Http\Controllers\Web\ContactoController;
 use App\Http\Controllers\Web\LibroReclamacionesController;
 use App\Http\Controllers\Web\PaginaController;
+use App\Http\Controllers\Web\SeoController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -31,6 +32,9 @@ Route::controller(PaginaController::class)->group(function () {
     Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');
     Route::get('/politica-de-privacidad', 'privacidad')->name('privacidad');
 });
+
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 Route::post('/contacto', [ContactoController::class, 'store'])
     ->middleware('throttle:5,1')
@@ -65,6 +69,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/configuracion/empresa', [ConfiguracionController::class, 'empresa'])->name('configuracion.empresa');
     Route::get('/configuracion/apariencia', [ConfiguracionController::class, 'apariencia'])->name('configuracion.apariencia');
+    Route::get('/configuracion/seo', [ConfiguracionController::class, 'seo'])->name('configuracion.seo');
     Route::put('/configuracion', [ConfiguracionController::class, 'update'])->name('configuracion.update');
 
     Route::resource('banners', BannerController::class)
@@ -89,6 +94,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         ->parameters(['preguntas' => 'pregunta']);
 
     Route::get('/mensajes', [MensajeContactoController::class, 'index'])->name('mensajes.index');
+    Route::get('/mensajes/exportar', [MensajeContactoController::class, 'exportar'])->name('mensajes.exportar');
+    Route::put('/mensajes/{mensaje}/seguimiento', [MensajeContactoController::class, 'seguimiento'])->name('mensajes.seguimiento');
     Route::patch('/mensajes/{mensaje}/leido', [MensajeContactoController::class, 'leido'])->name('mensajes.leido');
     Route::delete('/mensajes/{mensaje}', [MensajeContactoController::class, 'destroy'])->name('mensajes.destroy');
 

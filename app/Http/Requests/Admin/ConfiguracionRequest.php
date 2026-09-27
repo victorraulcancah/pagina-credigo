@@ -20,6 +20,10 @@ class ConfiguracionRequest extends FormRequest
     /** Si pegan el <iframe> completo de Google Maps, se extrae solo el src. */
     protected function prepareForValidation(): void
     {
+        if ($this->filled('analytics_ga4')) {
+            $this->merge(['analytics_ga4' => strtoupper(trim((string) $this->input('analytics_ga4')))]);
+        }
+
         $mapa = $this->input('contacto_mapa_url');
 
         if ($mapa && str_contains($mapa, '<iframe') && preg_match('/src="([^"]+)"/', $mapa, $coincidencia)) {
@@ -56,12 +60,28 @@ class ConfiguracionRequest extends FormRequest
             'favicon' => ['sometimes', 'nullable', 'file', 'mimes:png,ico,webp', 'max:512'],
             'quitar_logo' => ['sometimes', 'boolean'],
             'quitar_favicon' => ['sometimes', 'boolean'],
+
+            // Correos separados por coma: cada uno debe ser válido
+            'notificaciones_email' => ['sometimes', 'nullable', 'string', 'max:500', function ($atributo, $valor, $fallar) {
+                $correos = preg_split('/[\s,;]+/', (string) $valor, -1, PREG_SPLIT_NO_EMPTY);
+                $invalidos = array_filter($correos, fn ($correo) => ! filter_var($correo, FILTER_VALIDATE_EMAIL));
+                if ($invalidos) {
+                    $fallar('Correo no válido: '.implode(', ', $invalidos));
+                }
+            }],
+
+            'imagen_compartir' => ['sometimes', 'nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'quitar_imagen_compartir' => ['sometimes', 'boolean'],
+            'analytics_ga4' => ['sometimes', 'nullable', 'regex:/^G-[A-Z0-9]{4,20}$/'],
+            'analytics_meta_pixel' => ['sometimes', 'nullable', 'regex:/^\d{10,20}$/'],
         ];
     }
 
     public function messages(): array
     {
         return [
+            'analytics_ga4.regex' => 'El ID de Google Analytics tiene el formato G-XXXXXXXXXX.',
+            'analytics_meta_pixel.regex' => 'El ID del píxel de Meta son solo números (ej. 123456789012345).',
             'contacto_whatsapp.regex' => 'El WhatsApp debe tener solo números con código de país (ej. 51987654321).',
             'contacto_mapa_url.starts_with' => 'Pega el enlace "Insertar un mapa" de Google Maps.',
             'color_primario.regex' => 'El color debe tener formato hexadecimal (ej. #0f1037).',
@@ -91,6 +111,8 @@ class ConfiguracionRequest extends FormRequest
             'redes_youtube' => 'YouTube',
             'color_primario' => 'color principal',
             'color_acento' => 'color de acento',
+            'notificaciones_email' => 'correos de avisos',
+            'imagen_compartir' => 'imagen para compartir',
         ];
     }
 }

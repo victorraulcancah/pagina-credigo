@@ -17,7 +17,7 @@ class DashboardController extends Controller
     {
         return Inertia::render('Admin/Dashboard', [
             'resumen' => [
-                'mensajes_no_leidos' => MensajeContacto::noLeido()->count(),
+                'solicitudes_nuevas' => MensajeContacto::where('estado', 'nuevo')->count(),
                 'reclamaciones_pendientes' => Reclamacion::pendiente()->count(),
                 'mensajes_total' => MensajeContacto::count(),
                 'servicios_activos' => Servicio::activo()->count(),

@@ -22,6 +22,10 @@ class LibroReclamacionesController extends Controller
             'tiposComprobante' => Reclamacion::TIPOS_COMPROBANTE,
             'soluciones' => Reclamacion::SOLUCIONES,
             'diasRespuesta' => Reclamacion::DIAS_HABILES_RESPUESTA,
+            'seo' => [
+                'titulo' => 'Libro de Reclamaciones',
+                'descripcion' => 'Registra tu reclamo o queja en nuestro Libro de Reclamaciones virtual.',
+            ],
         ]);
     }
 

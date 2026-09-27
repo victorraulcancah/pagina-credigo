@@ -1,5 +1,6 @@
 import { createInertiaApp, router } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
+import { registrarVisita } from '@/lib/analitica';
 import { toast } from '@/utils/sweetalert';
 import '../css/app.css';
 
@@ -8,6 +9,16 @@ router.on('flash', (event) => {
     const { success, error } = event.detail.flash ?? {};
     if (success) toast(success, 'success');
     if (error) toast(error, 'error');
+});
+
+// Analítica en navegación sin recarga (la primera vista ya la registra el script de la página)
+let primeraVisita = true;
+router.on('navigate', (event) => {
+    if (primeraVisita) {
+        primeraVisita = false;
+        return;
+    }
+    registrarVisita(event.detail.page.url);
 });
 
 createInertiaApp({

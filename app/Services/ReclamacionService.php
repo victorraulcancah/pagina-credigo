@@ -95,10 +95,11 @@ class ReclamacionService
     private function enviarCorreo($correo, Reclamacion $reclamacion): void
     {
         try {
-            $empresa = $this->configuracion->get('contacto_email');
+            // Copia oculta al equipo (Panel → Empresa y contacto → Notificaciones)
+            $equipo = $this->configuracion->correosInternos();
 
             Mail::to($reclamacion->email)
-                ->when($empresa, fn ($mail) => $mail->bcc($empresa))
+                ->when($equipo, fn ($mail) => $mail->bcc($equipo))
                 ->send($correo);
         } catch (Throwable $e) {
             Log::error("No se pudo enviar el correo de la reclamación {$reclamacion->codigo}: {$e->getMessage()}");

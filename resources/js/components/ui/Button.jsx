@@ -23,12 +23,15 @@ export const usaEnlaceNativo = (href) => /^(https?:|mailto:|tel:)/.test(href) ||
  * Botón de la web. Con `href` se renderiza como enlace:
  * rutas internas usan <Link> de Inertia; http/mailto/tel/anclas usan <a>.
  *
+ * `nativo`: fuerza un <a> normal (ej. descargas de archivos, que no son páginas de Inertia).
+ *
  * <Button href="/contacto" icon={ArrowRight} iconPosition="right">Contáctanos</Button>
  * <Button variant="secondary" type="submit" fullWidth>Enviar</Button>
  */
 export default function Button({
     href,
     newTab = false,
+    nativo = false,
     variant = 'primary',
     size = 'md',
     icon: Icon,
@@ -57,7 +60,7 @@ export default function Button({
         </>
     );
 
-    if (href && usaEnlaceNativo(href)) {
+    if (href && (nativo || usaEnlaceNativo(href))) {
         return (
             <a
                 href={href}

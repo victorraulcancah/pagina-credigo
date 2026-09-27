@@ -1,5 +1,5 @@
 import { router, useForm } from '@inertiajs/react';
-import { BookOpenText, ChevronLeft, ChevronRight, Search, Send } from 'lucide-react';
+import { BookOpenText, ChevronLeft, ChevronRight, FileText, Paperclip, Search, Send, Video } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import EmptyState from '@/components/admin/EmptyState';
 import PageHeader from '@/components/admin/PageHeader';
@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Textarea from '@/components/ui/Textarea';
 import { formatoFecha } from '@/lib/fechas';
+import { ETIQUETA_ADJUNTO, filasHoja, tamanoArchivo } from '@/lib/reclamacion';
 import { cn } from '@/lib/utils';
 
 const opcionesVisita = { preserveState: true, preserveScroll: true, replace: true };
@@ -145,6 +146,11 @@ export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespues
                                         >
                                             {r.tipo}
                                         </span>
+                                        {r.adjuntos?.length > 0 && (
+                                            <span className="inline-flex items-center gap-1 text-xs text-gray-500" title="Archivos adjuntos">
+                                                <Paperclip className="size-3.5" aria-hidden="true" /> {r.adjuntos.length}
+                                            </span>
+                                        )}
                                     </div>
                                     <p className="mt-0.5 truncate text-sm text-gray-700">
                                         {r.nombre} · {r.tipo_documento} {r.numero_documento}
@@ -197,17 +203,47 @@ export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespues
                             <Plazo reclamacion={seleccionada} />
                         </div>
                         <dl className="grid gap-4 text-sm sm:grid-cols-2">
-                            <Dato etiqueta="Consumidor">{`${seleccionada.nombre}\n${seleccionada.tipo_documento} ${seleccionada.numero_documento}`}</Dato>
-                            <Dato etiqueta="Contacto">{`${seleccionada.telefono}\n${seleccionada.email}`}</Dato>
-                            <Dato etiqueta="Domicilio">{seleccionada.domicilio}</Dato>
-                            {seleccionada.menor_de_edad && <Dato etiqueta="Padre, madre o tutor">{seleccionada.apoderado}</Dato>}
-                            <Dato etiqueta={seleccionada.tipo_bien === 'producto' ? 'Producto' : 'Servicio'} className="sm:col-span-2">
-                                {seleccionada.descripcion_bien}
-                                {seleccionada.monto_reclamado && ` — Monto reclamado: S/ ${Number(seleccionada.monto_reclamado).toFixed(2)}`}
-                            </Dato>
-                            <Dato etiqueta="Detalle" className="sm:col-span-2">{seleccionada.detalle}</Dato>
-                            <Dato etiqueta="Pedido" className="sm:col-span-2">{seleccionada.pedido}</Dato>
+                            {filasHoja(seleccionada).map(([etiqueta, valor]) => (
+                                <Dato key={etiqueta} etiqueta={etiqueta} className={valor.length > 60 ? 'sm:col-span-2' : undefined}>
+                                    {valor}
+                                </Dato>
+                            ))}
                         </dl>
+
+                        {seleccionada.adjuntos?.length > 0 && (
+                            <div>
+                                <p className="mb-2 text-xs font-semibold text-gray-500 uppercase">Archivos adjuntos</p>
+                                <ul className="grid gap-2 sm:grid-cols-2">
+                                    {seleccionada.adjuntos.map((adjunto) => {
+                                        const url = `/admin/reclamaciones/adjuntos/${adjunto.id}`;
+                                        return (
+                                            <li key={adjunto.id}>
+                                                <a
+                                                    href={url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-3 rounded-xl border border-gray-200 p-2 transition hover:border-primary"
+                                                >
+                                                    {adjunto.mime.startsWith('image/') ? (
+                                                        <img src={url} alt="" className="size-12 shrink-0 rounded-lg object-cover" />
+                                                    ) : (
+                                                        <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
+                                                            {adjunto.tipo === 'video' ? <Video className="size-5" /> : <FileText className="size-5" />}
+                                                        </span>
+                                                    )}
+                                                    <span className="min-w-0">
+                                                        <span className="block truncate text-sm font-medium text-gray-900">{adjunto.nombre_original}</span>
+                                                        <span className="block text-xs text-gray-500">
+                                                            {ETIQUETA_ADJUNTO[adjunto.tipo]} · {tamanoArchivo(adjunto.tamano)}
+                                                        </span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        )}
 
                         {seleccionada.estado === 'atendido' ? (
                             <div className="rounded-xl bg-green-50 p-4 text-sm">

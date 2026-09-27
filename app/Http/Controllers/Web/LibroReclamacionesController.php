@@ -19,16 +19,15 @@ class LibroReclamacionesController extends Controller
     {
         return Inertia::render('Web/LibroReclamaciones', [
             'tiposDocumento' => Reclamacion::TIPOS_DOCUMENTO,
+            'tiposComprobante' => Reclamacion::TIPOS_COMPROBANTE,
+            'soluciones' => Reclamacion::SOLUCIONES,
             'diasRespuesta' => Reclamacion::DIAS_HABILES_RESPUESTA,
         ]);
     }
 
     public function store(ReclamacionRequest $request): RedirectResponse
     {
-        $reclamacion = $this->reclamaciones->registrar(
-            $request->safe()->except('acepta_politica'),
-            $request->ip(),
-        );
+        $reclamacion = $this->reclamaciones->registrar($request->datos(), $request->archivos(), $request->ip());
 
         // Enlace firmado: la constancia solo la ve quien la registró (no se puede adivinar el número)
         return redirect(URL::signedRoute('reclamaciones.constancia', $reclamacion));
@@ -37,7 +36,8 @@ class LibroReclamacionesController extends Controller
     public function constancia(Reclamacion $reclamacion): Response
     {
         return Inertia::render('Web/ReclamacionConstancia', [
-            'reclamacion' => $reclamacion->makeHidden(['respuesta', 'respondido_por']),
+            'reclamacion' => $reclamacion->load('adjuntos:id,reclamacion_id,tipo,nombre_original,tamano')
+                ->makeHidden(['respuesta', 'respondido_por']),
             'diasRespuesta' => Reclamacion::DIAS_HABILES_RESPUESTA,
         ]);
     }

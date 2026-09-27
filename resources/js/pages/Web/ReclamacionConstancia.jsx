@@ -4,6 +4,7 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Section from '@/components/ui/Section';
 import { formatoFecha } from '@/lib/fechas';
+import { ETIQUETA_ADJUNTO, filasHoja, tamanoArchivo } from '@/lib/reclamacion';
 
 function Fila({ etiqueta, children }) {
     if (!children) return null;
@@ -51,15 +52,16 @@ export default function ReclamacionConstancia({ reclamacion, diasRespuesta }) {
                                 {r.proveedor.ruc && ` — RUC ${r.proveedor.ruc}`}
                                 {r.proveedor.direccion && `\n${r.proveedor.direccion}`}
                             </Fila>
-                            <Fila etiqueta="Consumidor">{`${r.nombre}\n${r.tipo_documento} ${r.numero_documento}`}</Fila>
-                            {r.menor_de_edad && <Fila etiqueta="Padre, madre o tutor">{r.apoderado}</Fila>}
-                            <Fila etiqueta="Domicilio">{r.domicilio}</Fila>
-                            <Fila etiqueta="Contacto">{`${r.telefono} · ${r.email}`}</Fila>
-                            <Fila etiqueta={r.tipo_bien === 'producto' ? 'Producto' : 'Servicio'}>{r.descripcion_bien}</Fila>
-                            <Fila etiqueta="Monto reclamado">{r.monto_reclamado && `S/ ${Number(r.monto_reclamado).toFixed(2)}`}</Fila>
-                            <Fila etiqueta="Tipo">{r.tipo === 'reclamo' ? 'Reclamo' : 'Queja'}</Fila>
-                            <Fila etiqueta="Detalle">{r.detalle}</Fila>
-                            <Fila etiqueta="Pedido">{r.pedido}</Fila>
+                            {filasHoja(r).map(([etiqueta, valor]) => (
+                                <Fila key={etiqueta} etiqueta={etiqueta}>
+                                    {valor}
+                                </Fila>
+                            ))}
+                            {r.adjuntos?.length > 0 && (
+                                <Fila etiqueta="Archivos adjuntos">
+                                    {r.adjuntos.map((a) => `${ETIQUETA_ADJUNTO[a.tipo]}: ${a.nombre_original} (${tamanoArchivo(a.tamano)})`).join('\n')}
+                                </Fila>
+                            )}
                         </dl>
 
                         <p className="mt-6 text-xs text-primary-700/70">

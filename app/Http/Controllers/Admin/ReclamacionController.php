@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\RespuestaReclamacionRequest;
 use App\Models\Reclamacion;
+use App\Models\ReclamacionAdjunto;
 use App\Services\ReclamacionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** Bandeja del Libro de Reclamaciones. Las hojas no se eliminan (registro legal). */
 class ReclamacionController extends Controller
@@ -25,7 +28,7 @@ class ReclamacionController extends Controller
         $estado = $filtros['estado'] ?? 'todos';
 
         $reclamaciones = Reclamacion::query()
-            ->with('respondidoPor:id,name')
+            ->with(['respondidoPor:id,name', 'adjuntos:id,reclamacion_id,tipo,nombre_original,mime,tamano'])
             ->buscar($filtros['buscar'] ?? null)
             ->when($estado !== 'todos', fn ($q) => $q->where('estado', $estado))
             ->latest()
@@ -46,5 +49,11 @@ class ReclamacionController extends Controller
         Inertia::flash('success', "Respuesta registrada y enviada a {$reclamacion->email}");
 
         return back();
+    }
+
+    /** Muestra un adjunto (foto, comprobante o video) desde el disco privado; solo con sesión. */
+    public function adjunto(ReclamacionAdjunto $adjunto): StreamedResponse
+    {
+        return Storage::disk(ReclamacionAdjunto::DISCO)->response($adjunto->ruta, $adjunto->nombre_original);
     }
 }

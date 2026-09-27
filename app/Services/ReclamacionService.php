@@ -5,10 +5,13 @@ namespace App\Services;
 use App\Mail\ReclamacionRegistrada;
 use App\Mail\ReclamacionRespondida;
 use App\Models\Reclamacion;
+use App\Models\ReclamacionAdjunto;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class ReclamacionService
@@ -16,25 +19,51 @@ class ReclamacionService
     public function __construct(private ConfiguracionService $configuracion) {}
 
     /**
-     * Registra la hoja de reclamación con su número correlativo y envía la
-     * copia al correo del consumidor (con copia a la empresa).
+     * Registra la hoja de reclamación con su número correlativo, guarda los
+     * adjuntos en el disco privado y envía la copia al consumidor (con copia a la empresa).
+     *
+     * @param  array<string, UploadedFile[]>  $archivos  por tipo: foto | comprobante | video
      */
-    public function registrar(array $datos, ?string $ip): Reclamacion
+    public function registrar(array $datos, array $archivos, ?string $ip): Reclamacion
     {
-        $reclamacion = DB::transaction(function () use ($datos, $ip) {
-            $reclamacion = Reclamacion::create([
-                ...$datos,
-                'proveedor' => $this->datosProveedor(),
-                'ip' => $ip,
-            ]);
+        $rutasGuardadas = [];
 
-            // El id es único y correlativo: el código no se repite ni salta números
-            $reclamacion->update(['codigo' => sprintf('%s-%06d', now()->year, $reclamacion->id)]);
+        try {
+            $reclamacion = DB::transaction(function () use ($datos, $archivos, $ip, &$rutasGuardadas) {
+                $reclamacion = Reclamacion::create([
+                    ...$datos,
+                    'proveedor' => $this->datosProveedor(),
+                    'ip' => $ip,
+                ]);
 
-            return $reclamacion;
-        });
+                // El id es único y correlativo: el código no se repite ni salta números
+                $reclamacion->update(['codigo' => sprintf('%s-%06d', now()->year, $reclamacion->id)]);
 
-        $this->enviarCorreo(new ReclamacionRegistrada($reclamacion), $reclamacion);
+                foreach ($archivos as $tipo => $lista) {
+                    foreach ($lista as $archivo) {
+                        $ruta = $archivo->store("reclamaciones/{$reclamacion->id}", ReclamacionAdjunto::DISCO);
+                        $rutasGuardadas[] = $ruta;
+
+                        $reclamacion->adjuntos()->create([
+                            'tipo' => $tipo,
+                            'ruta' => $ruta,
+                            'nombre_original' => $archivo->getClientOriginalName(),
+                            'mime' => $archivo->getMimeType(),
+                            'tamano' => $archivo->getSize(),
+                        ]);
+                    }
+                }
+
+                return $reclamacion;
+            });
+        } catch (Throwable $e) {
+            // Si algo falla, no quedan archivos sueltos sin hoja
+            Storage::disk(ReclamacionAdjunto::DISCO)->delete($rutasGuardadas);
+
+            throw $e;
+        }
+
+        $this->enviarCorreo(new ReclamacionRegistrada($reclamacion->load('adjuntos')), $reclamacion);
 
         return $reclamacion;
     }

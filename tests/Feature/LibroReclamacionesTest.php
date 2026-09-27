@@ -5,7 +5,9 @@ use App\Mail\ReclamacionRespondida;
 use App\Models\Reclamacion;
 use App\Models\User;
 use Database\Seeders\ConfiguracionSeeder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -23,8 +25,11 @@ function datosReclamacion(array $cambios = []): array
         'monto_reclamado' => '150.50',
         'descripcion_bien' => 'Plan CrediYango',
         'detalle' => 'No me enviaron mi código de pago.',
+        'solucion_esperada' => 'cumplimiento',
         'pedido' => 'Que me envíen el código.',
+        'declara_veracidad' => true,
         'acepta_politica' => true,
+        'conforme' => true,
         ...$cambios,
     ];
 }
@@ -53,13 +58,76 @@ it('registra la hoja con número correlativo, datos del proveedor y copia por co
     Mail::assertSent(ReclamacionRegistrada::class, fn ($mail) => $mail->hasTo('ana@example.com'));
 });
 
-it('valida el documento, el apoderado de menores y la aceptación de la política', function () {
+it('valida documento, celular, mínimos de texto, apoderado, "otra solución" y confirmaciones', function () {
     $this->post('/libro-de-reclamaciones', datosReclamacion([
         'numero_documento' => '123',
+        'telefono' => '812345678',
+        'detalle' => 'Muy corto',
+        'pedido' => 'Corto',
+        'monto_reclamado' => '',
         'menor_de_edad' => true,
         'apoderado' => '',
+        'solucion_esperada' => 'otra',
+        'solucion_otra' => '',
+        'declara_veracidad' => false,
         'acepta_politica' => false,
-    ]))->assertSessionHasErrors(['numero_documento', 'apoderado', 'acepta_politica']);
+        'conforme' => false,
+    ]))->assertSessionHasErrors([
+        'numero_documento', 'telefono', 'detalle', 'pedido', 'monto_reclamado',
+        'apoderado', 'apoderado_numero_documento', 'solucion_otra',
+        'declara_veracidad', 'acepta_politica', 'conforme',
+    ]);
+
+    expect(Reclamacion::count())->toBe(0);
+});
+
+it('acepta el celular con espacios y guarda los datos de la compra y la solución', function () {
+    $this->post('/libro-de-reclamaciones', datosReclamacion([
+        'telefono' => '987 654 321',
+        'comprobante_tipo' => 'boleta',
+        'comprobante_numero' => 'B001-00012345',
+        'fecha_compra' => now()->subDays(3)->toDateString(),
+        'producto_nombre' => 'Celular Redmi 14',
+        'producto_marca' => 'Xiaomi',
+        'solucion_esperada' => 'otra',
+        'solucion_otra' => 'Que me llamen',
+    ]))->assertSessionHasNoErrors();
+
+    $reclamacion = Reclamacion::sole();
+    expect($reclamacion->telefono)->toBe('987654321')
+        ->and($reclamacion->comprobante_texto)->toBe('Boleta de venta')
+        ->and($reclamacion->solucion_texto)->toBe('Que me llamen')
+        ->and($reclamacion->declara_veracidad)->toBeTrue()
+        ->and($reclamacion->acepta_datos)->toBeTrue()
+        ->and($reclamacion->conforme)->toBeTrue();
+});
+
+it('guarda los adjuntos en el disco privado y el panel los puede ver', function () {
+    Storage::fake('local');
+
+    $this->post('/libro-de-reclamaciones', datosReclamacion([
+        'fotos' => [UploadedFile::fake()->image('foto1.jpg'), UploadedFile::fake()->image('foto2.png')],
+        'comprobante_archivo' => UploadedFile::fake()->create('boleta.pdf', 200, 'application/pdf'),
+        'video' => UploadedFile::fake()->create('video.mp4', 1024, 'video/mp4'),
+    ]))->assertSessionHasNoErrors();
+
+    $reclamacion = Reclamacion::sole();
+    expect($reclamacion->adjuntos)->toHaveCount(4)
+        ->and($reclamacion->adjuntos->pluck('tipo')->sort()->values()->all())->toBe(['comprobante', 'foto', 'foto', 'video']);
+
+    $adjunto = $reclamacion->adjuntos->first();
+    Storage::disk('local')->assertExists($adjunto->ruta);
+
+    // Sin sesión no se puede ver; con sesión sí
+    $this->get("/admin/reclamaciones/adjuntos/{$adjunto->id}")->assertRedirect('/login');
+    $this->actingAs(User::factory()->create())->get("/admin/reclamaciones/adjuntos/{$adjunto->id}")->assertOk();
+});
+
+it('rechaza adjuntos demasiado pesados o de otro formato', function () {
+    $this->post('/libro-de-reclamaciones', datosReclamacion([
+        'fotos' => [UploadedFile::fake()->image('grande.jpg')->size(6000)],
+        'video' => UploadedFile::fake()->create('video.avi', 100, 'video/x-msvideo'),
+    ]))->assertSessionHasErrors(['fotos.0', 'video']);
 
     expect(Reclamacion::count())->toBe(0);
 });

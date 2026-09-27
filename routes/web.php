@@ -94,6 +94,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/reclamaciones', [ReclamacionController::class, 'index'])->name('reclamaciones.index');
     Route::put('/reclamaciones/{reclamacion}/respuesta', [ReclamacionController::class, 'responder'])->name('reclamaciones.responder');
+    Route::get('/reclamaciones/adjuntos/{adjunto}', [ReclamacionController::class, 'adjunto'])->name('reclamaciones.adjunto');
 
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');

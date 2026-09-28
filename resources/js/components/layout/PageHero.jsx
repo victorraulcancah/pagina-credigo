@@ -1,5 +1,6 @@
 import Badge from '@/components/ui/Badge';
 import Container from '@/components/ui/Container';
+import Revelar from '@/components/ui/Revelar';
 import { cn, SOMBRA_TEXTO } from '@/lib/utils';
 
 /**
@@ -23,24 +24,34 @@ export default function PageHero({ eyebrow, title, description, imagen, align = 
             )}
             <Container className={cn('relative py-16 sm:py-20 lg:py-28', imagen && 'lg:py-32', centered && 'text-center')}>
                 <div className={cn('max-w-3xl', centered && 'mx-auto')}>
-                    {eyebrow && <Badge className="mb-5">{eyebrow}</Badge>}
-                    <h1
+                    {eyebrow && (
+                        <Revelar className="mb-5">
+                            <Badge>{eyebrow}</Badge>
+                        </Revelar>
+                    )}
+                    <Revelar
+                        as="h1"
+                        retraso={100}
                         className={cn(
                             'text-4xl leading-tight font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl',
                             imagen && SOMBRA_TEXTO,
                         )}
                     >
                         {title}
-                    </h1>
+                    </Revelar>
                     {description && (
-                        <p className={cn('mt-5 text-base text-pretty text-white/85 sm:text-lg lg:text-xl', imagen && SOMBRA_TEXTO)}>
+                        <Revelar
+                            as="p"
+                            retraso={200}
+                            className={cn('mt-5 text-base text-pretty text-white/85 sm:text-lg lg:text-xl', imagen && SOMBRA_TEXTO)}
+                        >
                             {description}
-                        </p>
+                        </Revelar>
                     )}
                     {children && (
-                        <div className={cn('mt-8 flex flex-col gap-3 sm:flex-row', centered && 'sm:justify-center')}>
+                        <Revelar retraso={300} className={cn('mt-8 flex flex-col gap-3 sm:flex-row', centered && 'sm:justify-center')}>
                             {children}
-                        </div>
+                        </Revelar>
                     )}
                 </div>
             </Container>

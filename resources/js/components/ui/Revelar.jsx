@@ -9,6 +9,9 @@ const DESDE = {
     zoom: 'scale-90',
 };
 
+/** Retraso para animar una lista uno tras otro (con tope, para que las últimas no esperen demasiado). */
+export const escalonar = (indice, paso = 120, maximo = 5) => Math.min(indice, maximo) * paso;
+
 /**
  * Anima su contenido la primera vez que entra en pantalla al hacer scroll.
  * <Revelar desde="derecha" retraso={150}>...</Revelar>

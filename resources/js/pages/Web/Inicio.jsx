@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Button from '@/components/ui/Button';
+import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
 import CtaSection from '@/components/web/CtaSection';
@@ -23,14 +24,18 @@ export default function Inicio({ banners, secciones, servicios, preguntas }) {
 
             {servicios.length > 0 && (
                 <Section id="planes">
-                    <SectionHeading
-                        eyebrow={encabezadoPlanes?.subtitulo}
-                        title={encabezadoPlanes?.titulo}
-                        description={encabezadoPlanes?.contenido}
-                    />
+                    <Revelar>
+                        <SectionHeading
+                            eyebrow={encabezadoPlanes?.subtitulo}
+                            title={encabezadoPlanes?.titulo}
+                            description={encabezadoPlanes?.contenido}
+                        />
+                    </Revelar>
                     <div className={cn('mt-12 grid gap-6 sm:grid-cols-2', columnasLg(servicios.length))}>
-                        {servicios.map((servicio) => (
-                            <ServicioCard key={servicio.id} servicio={servicio} />
+                        {servicios.map((servicio, i) => (
+                            <Revelar key={servicio.id} retraso={escalonar(i)} className="h-full">
+                                <ServicioCard servicio={servicio} />
+                            </Revelar>
                         ))}
                     </div>
                     {encabezadoPlanes?.boton_texto && encabezadoPlanes?.boton_url && (

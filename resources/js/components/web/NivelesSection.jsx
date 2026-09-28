@@ -1,4 +1,5 @@
 import Icono from '@/components/ui/Icono';
+import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
 import { cn, columnasLg } from '@/lib/utils';
@@ -17,15 +18,20 @@ export default function NivelesSection({ seccion, background = 'white' }) {
 
     return (
         <Section id="beneficios" background={background}>
-            <SectionHeading eyebrow={seccion.subtitulo} title={seccion.titulo} description={seccion.contenido} />
+            <Revelar>
+                <SectionHeading eyebrow={seccion.subtitulo} title={seccion.titulo} description={seccion.contenido} />
+            </Revelar>
             <div className={cn('mt-12 grid gap-6 sm:grid-cols-2', columnasLg(niveles.length))}>
                 {niveles.map((nivel, i) => {
                     const medalla = MEDALLAS[i] ?? { fondo: 'bg-accent', texto: 'text-primary' };
                     const esUltimo = i === niveles.length - 1;
 
                     return (
-                        <article
+                        <Revelar
+                            as="article"
                             key={i}
+                            desde="zoom"
+                            retraso={escalonar(i, 150)}
                             className={cn(
                                 'relative flex h-full flex-col overflow-hidden rounded-2xl p-6 shadow-sm ring-1 sm:p-8',
                                 esUltimo ? 'bg-primary text-white ring-primary' : 'bg-white text-primary ring-primary-100',
@@ -43,7 +49,7 @@ export default function NivelesSection({ seccion, background = 'white' }) {
                                     {nivel.descripcion}
                                 </p>
                             )}
-                        </article>
+                        </Revelar>
                     );
                 })}
             </div>

@@ -3,6 +3,7 @@ import { FaWhatsapp } from 'react-icons/fa6';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Card from '@/components/ui/Card';
+import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import ContactoForm from '@/components/web/ContactoForm';
 import FaqSection from '@/components/web/FaqSection';
@@ -42,6 +43,35 @@ export default function Contacto({ secciones, servicios, preguntas }) {
     const formulario = secciones['contacto.formulario'];
     const whatsapp = sitio.whatsappUrl();
 
+    // Solo los datos configurados en el panel
+    const datos = [
+        whatsapp && (
+            <DatoContacto key="whatsapp" icon={FaWhatsapp} titulo="WhatsApp" href={whatsapp} externo>
+                Escríbenos ahora
+            </DatoContacto>
+        ),
+        sitio.contacto_telefono && (
+            <DatoContacto key="telefono" icon={Phone} titulo="Teléfono" href={`tel:${sitio.contacto_telefono.replace(/\s/g, '')}`}>
+                {sitio.contacto_telefono}
+            </DatoContacto>
+        ),
+        sitio.contacto_email && (
+            <DatoContacto key="correo" icon={Mail} titulo="Correo" href={`mailto:${sitio.contacto_email}`}>
+                {sitio.contacto_email}
+            </DatoContacto>
+        ),
+        (sitio.contacto_direccion || sitio.contacto_ciudad) && (
+            <DatoContacto key="direccion" icon={MapPin} titulo="Dirección">
+                {[sitio.contacto_direccion, sitio.contacto_ciudad].filter(Boolean).join(', ')}
+            </DatoContacto>
+        ),
+        sitio.contacto_horario && (
+            <DatoContacto key="horario" icon={Clock} titulo="Horario">
+                {sitio.contacto_horario}
+            </DatoContacto>
+        ),
+    ].filter(Boolean);
+
     return (
         <PublicLayout title="Contacto" description={hero?.contenido}>
             <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Contacto'} description={hero?.contenido} />
@@ -49,40 +79,20 @@ export default function Contacto({ secciones, servicios, preguntas }) {
             <Section background="muted">
                 <div className="grid gap-8 lg:grid-cols-5 lg:gap-10">
                     <div className="flex flex-col gap-4 lg:col-span-2">
-                        {whatsapp && (
-                            <DatoContacto icon={FaWhatsapp} titulo="WhatsApp" href={whatsapp} externo>
-                                Escríbenos ahora
-                            </DatoContacto>
-                        )}
-                        {sitio.contacto_telefono && (
-                            <DatoContacto icon={Phone} titulo="Teléfono" href={`tel:${sitio.contacto_telefono.replace(/\s/g, '')}`}>
-                                {sitio.contacto_telefono}
-                            </DatoContacto>
-                        )}
-                        {sitio.contacto_email && (
-                            <DatoContacto icon={Mail} titulo="Correo" href={`mailto:${sitio.contacto_email}`}>
-                                {sitio.contacto_email}
-                            </DatoContacto>
-                        )}
-                        {(sitio.contacto_direccion || sitio.contacto_ciudad) && (
-                            <DatoContacto icon={MapPin} titulo="Dirección">
-                                {[sitio.contacto_direccion, sitio.contacto_ciudad].filter(Boolean).join(', ')}
-                            </DatoContacto>
-                        )}
-                        {sitio.contacto_horario && (
-                            <DatoContacto icon={Clock} titulo="Horario">
-                                {sitio.contacto_horario}
-                            </DatoContacto>
-                        )}
+                        {datos.map((dato, i) => (
+                            <Revelar key={dato.key} desde="izquierda" retraso={escalonar(i, 100)}>
+                                {dato}
+                            </Revelar>
+                        ))}
                     </div>
 
-                    <Card className="lg:col-span-3">
+                    <Revelar as={Card} desde="derecha" retraso={150} className="lg:col-span-3">
                         {formulario?.titulo && <h2 className="text-2xl font-bold text-primary sm:text-3xl">{formulario.titulo}</h2>}
                         {formulario?.contenido && <p className="mt-2 text-primary-700/80">{formulario.contenido}</p>}
                         <div className="mt-6">
                             <ContactoForm servicios={servicios} />
                         </div>
-                    </Card>
+                    </Revelar>
                 </div>
 
                 {sitio.contacto_mapa_url && (

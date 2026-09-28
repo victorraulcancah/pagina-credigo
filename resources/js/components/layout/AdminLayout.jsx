@@ -2,22 +2,24 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import {
     BookOpenText,
     Briefcase,
-    Calculator,
     Building,
+    Calculator,
     CircleQuestionMark,
     ExternalLink,
     Images,
     Inbox,
     LayoutDashboard,
     LayoutTemplate,
-    LogOut,
     Megaphone,
     Menu,
     Palette,
+    PanelLeftClose,
+    PanelLeftOpen,
     UserCog,
     X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import MenuUsuario from '@/components/admin/MenuUsuario';
 import { useSitio, useTemaColores } from '@/hooks/useSitio';
 import { cn } from '@/lib/utils';
 
@@ -51,12 +53,27 @@ const menu = [
     },
 ];
 
+// El menú contraído se recuerda en este navegador (preferencia personal)
+const CLAVE_COLAPSADO = 'panel.menu-colapsado';
+
+const leerColapsado = () => {
+    try {
+        return localStorage.getItem(CLAVE_COLAPSADO) === '1';
+    } catch {
+        return false;
+    }
+};
+
+/**
+ * Layout del panel. En computadora el menú lateral se contrae a solo íconos
+ * (todas las clases de "colapsado" llevan lg:); en celular es un menú deslizable.
+ */
 export default function AdminLayout({ title, children }) {
     const page = usePage();
-    const { auth } = page.props;
     const sitio = useSitio();
     useTemaColores();
     const [abierto, setAbierto] = useState(false);
+    const [colapsado, setColapsado] = useState(leerColapsado);
 
     const path = page.url.split('?')[0];
     const activo = (item) => (item.exacto ? path === item.href : path.startsWith(item.href));
@@ -66,6 +83,17 @@ export default function AdminLayout({ title, children }) {
         setAbierto(false);
     }, [page.url]);
 
+    const alternarColapsado = () => {
+        setColapsado((valor) => {
+            try {
+                localStorage.setItem(CLAVE_COLAPSADO, valor ? '0' : '1');
+            } catch {
+                // sin almacenamiento: solo dura esta visita
+            }
+            return !valor;
+        });
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900">
             <Head title={`${title} - Panel ${sitio.empresa_nombre}`} />
@@ -74,22 +102,22 @@ export default function AdminLayout({ title, children }) {
             <div
                 aria-hidden="true"
                 onClick={() => setAbierto(false)}
-                className={cn(
-                    'fixed inset-0 z-40 bg-black/50 transition-opacity lg:hidden',
-                    abierto ? 'opacity-100' : 'pointer-events-none opacity-0',
-                )}
+                className={cn('fixed inset-0 z-40 bg-black/50 transition-opacity lg:hidden', abierto ? 'opacity-100' : 'pointer-events-none opacity-0')}
             />
 
             <aside
                 className={cn(
-                    'fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-primary text-white transition-transform duration-300 lg:translate-x-0',
+                    'fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-x-hidden bg-primary text-white transition-[width,translate] duration-300 ease-in-out lg:translate-x-0',
                     abierto ? 'translate-x-0' : '-translate-x-full',
+                    colapsado && 'lg:w-20',
                 )}
             >
-                <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-5">
-                    <Link href="/admin" className="flex items-center gap-3">
-                        <img src={sitio.logo} alt={sitio.empresa_nombre} className="h-9 w-auto object-contain" />
-                        <span className="text-xs font-semibold tracking-wider text-white/60 uppercase">Panel</span>
+                <div className={cn('flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-5', colapsado && 'lg:justify-center lg:px-2')}>
+                    <Link href="/admin" className="flex items-center gap-3" title={colapsado ? 'Dashboard' : undefined}>
+                        <img src={sitio.logo} alt={sitio.empresa_nombre} className={cn('h-9 w-auto object-contain', colapsado && 'lg:max-w-14')} />
+                        <span className={cn('text-xs font-semibold tracking-wider whitespace-nowrap text-white/60 uppercase transition-opacity', colapsado && 'lg:hidden')}>
+                            Panel
+                        </span>
                     </Link>
                     <button
                         type="button"
@@ -101,34 +129,48 @@ export default function AdminLayout({ title, children }) {
                     </button>
                 </div>
 
-                <nav aria-label="Panel" className="flex-1 overflow-y-auto px-3 py-4">
+                <nav aria-label="Panel" className="flex-1 overflow-x-hidden overflow-y-auto px-3 py-4">
                     {menu.map((bloque, i) => (
                         <div key={i} className="mb-5">
                             {bloque.grupo && (
-                                <p className="mb-2 px-3 text-[11px] font-bold tracking-wider text-white/40 uppercase">{bloque.grupo}</p>
+                                <>
+                                    <p className={cn('mb-2 px-3 text-[11px] font-bold tracking-wider whitespace-nowrap text-white/40 uppercase', colapsado && 'lg:hidden')}>
+                                        {bloque.grupo}
+                                    </p>
+                                    {/* Contraído: una línea separa los grupos */}
+                                    <div className={cn('mx-2 mb-3 hidden border-t border-white/10', colapsado && 'lg:block')} />
+                                </>
                             )}
                             <ul className="flex flex-col gap-1">
                                 {bloque.items.map((item) => {
                                     const contador = item.contador ? page.props[item.contador] : 0;
+                                    const esActivo = activo(item);
                                     return (
                                         <li key={item.href}>
                                             <Link
                                                 href={item.href}
-                                                aria-current={activo(item) ? 'page' : undefined}
+                                                aria-current={esActivo ? 'page' : undefined}
+                                                title={colapsado ? item.label : undefined}
                                                 className={cn(
                                                     'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
-                                                    activo(item)
-                                                        ? 'bg-accent text-primary'
-                                                        : 'text-white/75 hover:bg-white/10 hover:text-white',
+                                                    esActivo ? 'bg-accent text-primary' : 'text-white/75 hover:bg-white/10 hover:text-white',
+                                                    colapsado && 'lg:justify-center lg:px-0',
                                                 )}
                                             >
-                                                <item.icon className="size-5 shrink-0" aria-hidden="true" />
-                                                <span className="flex-1">{item.label}</span>
+                                                <span className="relative shrink-0">
+                                                    <item.icon className="size-5" aria-hidden="true" />
+                                                    {/* Contraído: el contador pasa a ser un punto sobre el ícono */}
+                                                    {contador > 0 && (
+                                                        <span className={cn('absolute -top-1 -right-1 hidden size-2.5 rounded-full bg-accent ring-2 ring-primary', colapsado && 'lg:block')} />
+                                                    )}
+                                                </span>
+                                                <span className={cn('flex-1 truncate whitespace-nowrap', colapsado && 'lg:hidden')}>{item.label}</span>
                                                 {contador > 0 && (
                                                     <span
                                                         className={cn(
                                                             'rounded-full px-2 py-0.5 text-xs font-bold',
-                                                            activo(item) ? 'bg-primary text-accent' : 'bg-accent text-primary',
+                                                            esActivo ? 'bg-primary text-accent' : 'bg-accent text-primary',
+                                                            colapsado && 'lg:hidden',
                                                         )}
                                                     >
                                                         {contador}
@@ -142,24 +184,9 @@ export default function AdminLayout({ title, children }) {
                         </div>
                     ))}
                 </nav>
-
-                <div className="border-t border-white/10 p-3">
-                    <div className="mb-2 px-3 py-2">
-                        <p className="truncate text-sm font-semibold">{auth.user?.name}</p>
-                        <p className="truncate text-xs text-white/60">{auth.user?.email}</p>
-                    </div>
-                    <Link
-                        href="/logout"
-                        method="post"
-                        as="button"
-                        className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white"
-                    >
-                        <LogOut className="size-5" aria-hidden="true" /> Cerrar sesión
-                    </Link>
-                </div>
             </aside>
 
-            <div className="lg:pl-72">
+            <div className={cn('transition-[padding] duration-300 ease-in-out lg:pl-72', colapsado && 'lg:pl-20')}>
                 <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-gray-200 bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8">
                     <button
                         type="button"
@@ -170,16 +197,30 @@ export default function AdminLayout({ title, children }) {
                     >
                         <Menu className="size-6" />
                     </button>
-                    <p className="truncate text-sm font-semibold text-gray-500">{title}</p>
-                    <a
-                        href="/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="ml-auto flex shrink-0 items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-primary hover:text-primary"
+                    <button
+                        type="button"
+                        onClick={alternarColapsado}
+                        aria-label={colapsado ? 'Expandir menú' : 'Contraer menú'}
+                        title={colapsado ? 'Expandir menú' : 'Contraer menú'}
+                        className="hidden size-10 items-center justify-center rounded-lg text-gray-600 transition hover:bg-gray-100 hover:text-primary lg:flex"
                     >
-                        <ExternalLink className="size-4" aria-hidden="true" />
-                        <span className="hidden sm:inline">Ver sitio</span>
-                    </a>
+                        {colapsado ? <PanelLeftOpen className="size-5" /> : <PanelLeftClose className="size-5" />}
+                    </button>
+                    <p className="truncate text-sm font-semibold text-gray-500">{title}</p>
+
+                    <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+                        <a
+                            href="/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Ver sitio"
+                            className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-primary hover:text-primary"
+                        >
+                            <ExternalLink className="size-4" aria-hidden="true" />
+                            <span className="hidden md:inline">Ver sitio</span>
+                        </a>
+                        <MenuUsuario />
+                    </div>
                 </header>
 
                 <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">

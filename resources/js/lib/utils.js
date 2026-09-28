@@ -6,6 +6,15 @@ export function cn(...inputs) {
     return twMerge(clsx(inputs));
 }
 
+/** "Victor Canchari" → "VC" */
+export const iniciales = (nombre = '') =>
+    nombre
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((parte) => parte[0]?.toUpperCase())
+        .join('');
+
 /** Sombra suave para que títulos y textos se lean sobre una foto de fondo. */
 export const SOMBRA_TEXTO = 'text-shadow-lg text-shadow-black/35';
 

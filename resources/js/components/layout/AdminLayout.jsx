@@ -39,7 +39,7 @@ const menu = [
         grupo: 'Contacto',
         items: [
             { label: 'Solicitudes', href: '/admin/mensajes', icon: Inbox, contador: 'mensajesNoLeidos' },
-            { label: 'Libro de Reclamaciones', href: '/admin/reclamaciones', icon: BookOpenText, contador: 'reclamacionesPendientes' },
+            { label: 'Reclamaciones', href: '/admin/reclamaciones', icon: BookOpenText, contador: 'reclamacionesPendientes' },
         ],
     },
     {
@@ -107,12 +107,12 @@ export default function AdminLayout({ title, children }) {
 
             <aside
                 className={cn(
-                    'fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-x-hidden bg-primary text-white transition-[width,translate] duration-300 ease-in-out lg:translate-x-0',
+                    'fixed inset-y-0 left-0 z-50 flex w-60 flex-col overflow-x-hidden bg-primary text-white transition-[width,translate] duration-300 ease-in-out lg:translate-x-0',
                     abierto ? 'translate-x-0' : '-translate-x-full',
-                    colapsado && 'lg:w-20',
+                    colapsado && 'lg:w-18',
                 )}
             >
-                <div className={cn('flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-5', colapsado && 'lg:justify-center lg:px-2')}>
+                <div className={cn('flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-4', colapsado && 'lg:justify-center lg:px-2')}>
                     <Link href="/admin" className="flex items-center gap-3" title={colapsado ? 'Dashboard' : undefined}>
                         <img src={sitio.logo} alt={sitio.empresa_nombre} className={cn('h-9 w-auto object-contain', colapsado && 'lg:max-w-14')} />
                         <span className={cn('text-xs font-semibold tracking-wider whitespace-nowrap text-white/60 uppercase transition-opacity', colapsado && 'lg:hidden')}>
@@ -129,12 +129,12 @@ export default function AdminLayout({ title, children }) {
                     </button>
                 </div>
 
-                <nav aria-label="Panel" className="flex-1 overflow-x-hidden overflow-y-auto px-3 py-4">
+                <nav aria-label="Panel" className="flex-1 overflow-x-hidden overflow-y-auto px-2 py-4">
                     {menu.map((bloque, i) => (
                         <div key={i} className="mb-5">
                             {bloque.grupo && (
                                 <>
-                                    <p className={cn('mb-2 px-3 text-[11px] font-bold tracking-wider whitespace-nowrap text-white/40 uppercase', colapsado && 'lg:hidden')}>
+                                    <p className={cn('mb-2 px-2.5 text-[11px] font-bold tracking-wider whitespace-nowrap text-white/40 uppercase', colapsado && 'lg:hidden')}>
                                         {bloque.grupo}
                                     </p>
                                     {/* Contraído: una línea separa los grupos */}
@@ -152,7 +152,7 @@ export default function AdminLayout({ title, children }) {
                                                 aria-current={esActivo ? 'page' : undefined}
                                                 title={colapsado ? item.label : undefined}
                                                 className={cn(
-                                                    'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                                                    'flex items-center gap-2.5 rounded-xl px-2.5 py-2.5 text-sm font-medium transition-colors',
                                                     esActivo ? 'bg-accent text-primary' : 'text-white/75 hover:bg-white/10 hover:text-white',
                                                     colapsado && 'lg:justify-center lg:px-0',
                                                 )}
@@ -186,7 +186,7 @@ export default function AdminLayout({ title, children }) {
                 </nav>
             </aside>
 
-            <div className={cn('transition-[padding] duration-300 ease-in-out lg:pl-72', colapsado && 'lg:pl-20')}>
+            <div className={cn('transition-[padding] duration-300 ease-in-out lg:pl-60', colapsado && 'lg:pl-18')}>
                 <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-gray-200 bg-white/90 px-4 backdrop-blur sm:px-6 lg:px-8">
                     <button
                         type="button"

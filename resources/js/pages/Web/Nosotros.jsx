@@ -3,6 +3,7 @@ import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
 import FeatureCard from '@/components/ui/FeatureCard';
 import Icono from '@/components/ui/Icono';
+import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
 import CifrasSection from '@/components/web/CifrasSection';
@@ -17,7 +18,8 @@ import { cn, columnasLg } from '@/lib/utils';
 function PilarFila({ seccion, icon: Icon, invertida }) {
     return (
         <article className="grid items-center gap-8 py-10 first:pt-0 last:pb-0 md:grid-cols-2 md:gap-12 lg:gap-16 sm:py-12">
-            <div className={cn('overflow-hidden rounded-2xl ring-1 ring-white/10', !invertida && 'md:order-last')}>
+            {/* La imagen entra desde su lado: derecha si está a la derecha, izquierda si está a la izquierda */}
+            <Revelar desde={invertida ? 'izquierda' : 'derecha'} className={cn('overflow-hidden rounded-2xl ring-1 ring-white/10', !invertida && 'md:order-last')}>
                 {seccion.imagen_url ? (
                     <img src={seccion.imagen_url} alt={seccion.titulo} loading="lazy" className="aspect-video size-full object-cover" />
                 ) : (
@@ -26,15 +28,15 @@ function PilarFila({ seccion, icon: Icon, invertida }) {
                         <Icon className="relative size-20 text-accent sm:size-24" strokeWidth={1.25} aria-hidden="true" />
                     </div>
                 )}
-            </div>
+            </Revelar>
 
-            <div>
+            <Revelar retraso={150}>
                 <span className="mb-4 flex size-11 items-center justify-center rounded-xl bg-accent text-primary">
                     <Icon className="size-5" aria-hidden="true" />
                 </span>
                 <h3 className="text-2xl font-extrabold tracking-wide text-white uppercase sm:text-3xl">{seccion.titulo}</h3>
                 <p className="mt-4 text-base leading-relaxed whitespace-pre-line text-white/75 sm:text-lg">{seccion.contenido}</p>
-            </div>
+            </Revelar>
         </article>
     );
 }
@@ -67,16 +69,19 @@ export default function Nosotros({ secciones }) {
 
             {valores && (
                 <Section>
-                    <SectionHeading eyebrow={valores.subtitulo} title={valores.titulo} description={valores.contenido} />
+                    <Revelar>
+                        <SectionHeading eyebrow={valores.subtitulo} title={valores.titulo} description={valores.contenido} />
+                    </Revelar>
                     {listaValores.length > 0 && (
                         <div className={cn('mt-12 grid gap-6 sm:grid-cols-2', columnasLg(listaValores.length))}>
                             {listaValores.map((valor, i) => (
-                                <FeatureCard
-                                    key={i}
-                                    icon={(props) => <Icono nombre={valor.icono} {...props} />}
-                                    title={valor.titulo}
-                                    description={valor.descripcion}
-                                />
+                                <Revelar key={i} retraso={i * 120} className="h-full">
+                                    <FeatureCard
+                                        icon={(props) => <Icono nombre={valor.icono} {...props} />}
+                                        title={valor.titulo}
+                                        description={valor.descripcion}
+                                    />
+                                </Revelar>
                             ))}
                         </div>
                     )}

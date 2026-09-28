@@ -1,3 +1,4 @@
+import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
 import Stat from '@/components/ui/Stat';
@@ -10,10 +11,14 @@ export default function CifrasSection({ seccion }) {
 
     return (
         <Section background="dark">
-            <SectionHeading light eyebrow={seccion.subtitulo} title={seccion.titulo} description={seccion.contenido} />
+            <Revelar>
+                <SectionHeading light eyebrow={seccion.subtitulo} title={seccion.titulo} description={seccion.contenido} />
+            </Revelar>
             <div className={cn('mt-12 grid grid-cols-2 gap-x-6 gap-y-10', columnasLg(cifras.length))}>
                 {cifras.map((cifra, i) => (
-                    <Stat key={i} light value={cifra.titulo} label={cifra.descripcion} />
+                    <Revelar key={i} desde="zoom" retraso={i * 120}>
+                        <Stat light value={cifra.titulo} label={cifra.descripcion} />
+                    </Revelar>
                 ))}
             </div>
         </Section>

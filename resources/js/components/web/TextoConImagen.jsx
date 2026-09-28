@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
 import { useSitio } from '@/hooks/useSitio';
@@ -16,7 +17,7 @@ export default function TextoConImagen({ seccion, background = 'white', invertid
     return (
         <Section background={background}>
             <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-                <div className={cn(invertido && 'lg:order-2')}>
+                <Revelar className={cn(invertido && 'lg:order-2')}>
                     <SectionHeading align="left" eyebrow={seccion.subtitulo} title={seccion.titulo} />
                     {seccion.contenido && (
                         <p className="mt-5 text-base whitespace-pre-line text-primary-700/80 sm:text-lg">{seccion.contenido}</p>
@@ -26,20 +27,23 @@ export default function TextoConImagen({ seccion, background = 'white', invertid
                             {seccion.boton_texto}
                         </Button>
                     )}
-                </div>
+                </Revelar>
 
-                {seccion.imagen_url ? (
-                    <img
-                        src={seccion.imagen_url}
-                        alt={seccion.titulo ?? ''}
-                        className="aspect-[4/3] w-full rounded-3xl object-cover shadow-xl"
-                    />
-                ) : (
-                    <div className="relative flex aspect-[4/3] items-center justify-center overflow-clip rounded-3xl bg-primary p-10">
-                        <div aria-hidden="true" className="absolute -top-16 -right-16 size-64 resplandor-acento" />
-                        <img src={sitio.logo} alt="" className="relative w-1/2 max-w-xs object-contain drop-shadow-2xl" />
-                    </div>
-                )}
+                {/* La imagen entra desde su lado */}
+                <Revelar desde={invertido ? 'izquierda' : 'derecha'} retraso={150}>
+                    {seccion.imagen_url ? (
+                        <img
+                            src={seccion.imagen_url}
+                            alt={seccion.titulo ?? ''}
+                            className="aspect-[4/3] w-full rounded-3xl object-cover shadow-xl"
+                        />
+                    ) : (
+                        <div className="relative flex aspect-[4/3] items-center justify-center overflow-clip rounded-3xl bg-primary p-10">
+                            <div aria-hidden="true" className="absolute -top-16 -right-16 size-64 resplandor-acento" />
+                            <img src={sitio.logo} alt="" className="relative w-1/2 max-w-xs object-contain drop-shadow-2xl" />
+                        </div>
+                    )}
+                </Revelar>
             </div>
         </Section>
     );

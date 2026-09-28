@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import Button from '@/components/ui/Button';
+import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import { useSitio } from '@/hooks/useSitio';
 
@@ -11,7 +12,7 @@ export default function CtaSection({ seccion }) {
 
     return (
         <Section background="accent" className="py-14 sm:py-16 lg:py-20">
-            <div className="flex flex-col items-center gap-8 text-center lg:flex-row lg:justify-between lg:text-left">
+            <Revelar className="flex flex-col items-center gap-8 text-center lg:flex-row lg:justify-between lg:text-left">
                 <div className="max-w-2xl">
                     <h2 className="text-3xl font-extrabold tracking-tight text-balance sm:text-4xl">{seccion.titulo}</h2>
                     {seccion.contenido && <p className="mt-3 text-base text-primary-800 sm:text-lg">{seccion.contenido}</p>}
@@ -28,7 +29,7 @@ export default function CtaSection({ seccion }) {
                         </Button>
                     )}
                 </div>
-            </div>
+            </Revelar>
         </Section>
     );
 }

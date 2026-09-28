@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { BookOpenText, Send } from 'lucide-react';
+import { BookOpenText, FileText, ImagePlus, Send, Video } from 'lucide-react';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
 import ArchivoInput from '@/components/ui/ArchivoInput';
@@ -18,15 +18,16 @@ import { cn } from '@/lib/utils';
 const LONGITUD_DOCUMENTO = { DNI: 8, RUC: 11 };
 const AYUDA_DOCUMENTO = { DNI: 'El DNI debe tener 8 dígitos.', RUC: 'El RUC debe tener 11 dígitos.' };
 
-function Bloque({ numero, titulo, descripcion, children }) {
+function Bloque({ numero, titulo, descripcion, opcional = false, children }) {
     return (
         <fieldset className="grid gap-5 sm:grid-cols-2">
-            <legend className="mb-4 sm:col-span-2">
-                <span className="flex items-center gap-3 text-lg font-bold text-primary uppercase">
+            <legend className="mb-5 w-full border-b border-primary-100 pb-4">
+                <span className="flex items-center gap-3 text-base font-bold tracking-wide text-primary uppercase sm:text-lg">
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm text-accent">{numero}</span>
                     {titulo}
+                    {opcional && <span className="text-xs font-medium tracking-normal text-primary-400 normal-case sm:text-sm">(opcional)</span>}
                 </span>
-                {descripcion && <span className="mt-1 block pl-11 text-sm text-primary-700/80">{descripcion}</span>}
+                {descripcion && <span className="mt-2 block text-sm text-primary-700/80 sm:pl-11">{descripcion}</span>}
             </legend>
             {children}
         </fieldset>
@@ -285,38 +286,43 @@ export default function LibroReclamaciones({ tiposDocumento, tiposComprobante, s
                                 </FormField>
                             </Bloque>
 
-                            <Bloque numero="5" titulo="Información adicional" descripcion="Opcional. Puedes adjuntar archivos que nos ayuden a entender mejor tu caso.">
-                                <ArchivoInput
-                                    id="fotos"
-                                    label="Fotografías"
-                                    hint="JPG o PNG, máx. 5 MB cada una (hasta 5)."
-                                    accept="image/jpeg,image/png"
-                                    maxMb={5}
-                                    multiple
-                                    value={data.fotos}
-                                    onChange={(archivos) => setData('fotos', archivos)}
-                                    error={errorFotos}
-                                />
-                                <ArchivoInput
-                                    id="comprobante_archivo"
-                                    label="Factura o comprobante"
-                                    hint="PDF, JPG o PNG, máx. 5 MB."
-                                    accept="application/pdf,image/jpeg,image/png"
-                                    maxMb={5}
-                                    value={data.comprobante_archivo}
-                                    onChange={(archivo) => setData('comprobante_archivo', archivo)}
-                                    error={errors.comprobante_archivo}
-                                />
-                                <ArchivoInput
-                                    id="video"
-                                    label="Video"
-                                    hint="MP4, máx. 20 MB."
-                                    accept="video/mp4"
-                                    maxMb={20}
-                                    value={data.video}
-                                    onChange={(archivo) => setData('video', archivo)}
-                                    error={errors.video}
-                                />
+                            <Bloque numero="5" titulo="Información adicional" opcional descripcion="Puedes adjuntar archivos que nos ayuden a entender mejor tu caso.">
+                                <div className="grid gap-4 sm:col-span-2 md:grid-cols-3">
+                                    <ArchivoInput
+                                        id="fotos"
+                                        icon={ImagePlus}
+                                        titulo="Adjuntar fotografías"
+                                        formatos="JPG, PNG (máx. 5 MB c/u, hasta 5)"
+                                        accept="image/jpeg,image/png"
+                                        maxMb={5}
+                                        multiple
+                                        value={data.fotos}
+                                        onChange={(archivos) => setData('fotos', archivos)}
+                                        error={errorFotos}
+                                    />
+                                    <ArchivoInput
+                                        id="comprobante_archivo"
+                                        icon={FileText}
+                                        titulo="Adjuntar factura"
+                                        formatos="PDF, JPG, PNG (máx. 5 MB)"
+                                        accept="application/pdf,image/jpeg,image/png"
+                                        maxMb={5}
+                                        value={data.comprobante_archivo}
+                                        onChange={(archivo) => setData('comprobante_archivo', archivo)}
+                                        error={errors.comprobante_archivo}
+                                    />
+                                    <ArchivoInput
+                                        id="video"
+                                        icon={Video}
+                                        titulo="Adjuntar video"
+                                        formatos="MP4 (máx. 20 MB)"
+                                        accept="video/mp4"
+                                        maxMb={20}
+                                        value={data.video}
+                                        onChange={(archivo) => setData('video', archivo)}
+                                        error={errors.video}
+                                    />
+                                </div>
                             </Bloque>
 
                             <Bloque numero="6" titulo="Confirmación">

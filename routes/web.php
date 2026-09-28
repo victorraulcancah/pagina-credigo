@@ -45,6 +45,8 @@ Route::controller(LibroReclamacionesController::class)->prefix('libro-de-reclama
     Route::get('/', 'create')->name('create');
     Route::post('/', 'store')->middleware('throttle:5,1')->name('store');
     Route::get('/constancia/{reclamacion}', 'constancia')->middleware('signed')->name('constancia');
+    Route::get('/consultar', 'consultar')->name('consultar');
+    Route::post('/consultar', 'buscar')->middleware('throttle:10,1')->name('buscar');
 });
 
 /*

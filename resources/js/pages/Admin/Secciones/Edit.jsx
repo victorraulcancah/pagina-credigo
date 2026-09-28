@@ -39,6 +39,8 @@ const LISTAS = {
 export default function SeccionEdit({ seccion }) {
     const usa = (campo) => seccion.campos.includes(campo);
     const esEncabezado = seccion.clave === 'hero';
+    // Misión, visión y objetivo: la imagen va al costado del texto en Nosotros
+    const esPilar = seccion.pagina === 'nosotros' && ['mision', 'vision', 'objetivo'].includes(seccion.clave);
     const lista = LISTAS[seccion.clave] ?? LISTA_GENERAL;
     const tieneTextos = ['subtitulo', 'titulo', 'contenido'].some(usa);
 
@@ -167,9 +169,11 @@ export default function SeccionEdit({ seccion }) {
                                 hint={
                                     esEncabezado
                                         ? 'Se muestra tal cual detrás del título. Deja libre el lado izquierdo para el texto. Recomendado 1920×700 px. Sin imagen se ve el color de marca.'
-                                        : 'Recomendado 1200×900 px. Sin imagen se muestra el logo.'
+                                        : esPilar
+                                          ? 'Va al costado del texto (los lados se alternan). Recomendado 1600×900 px. Sin imagen se muestra un recuadro con el ícono.'
+                                          : 'Recomendado 1200×900 px. Sin imagen se muestra el logo.'
                                 }
-                                aspect={esEncabezado ? 'aspect-[16/6]' : 'aspect-[4/3]'}
+                                aspect={esEncabezado ? 'aspect-[16/6]' : esPilar ? 'aspect-video' : 'aspect-[4/3]'}
                             />
                         </Panel>
                     )}

@@ -1,4 +1,4 @@
-import { CircleCheckBig, Printer } from 'lucide-react';
+import { CircleCheckBig, Printer, Search } from 'lucide-react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -32,9 +32,17 @@ export default function ReclamacionConstancia({ reclamacion, diasRespuesta }) {
                             Enviamos una copia a <strong>{r.email}</strong>. Te responderemos en un plazo no mayor a {diasRespuesta} días hábiles
                             (hasta el {formatoFecha(r.fecha_limite + 'T12:00:00', false)}).
                         </p>
-                        <Button variant="outline" icon={Printer} onClick={() => window.print()}>
-                            Imprimir o guardar como PDF
-                        </Button>
+                        <p className="max-w-xl text-sm text-primary-700/80">
+                            Guarda tu número de hoja <strong>{r.codigo}</strong>: con él y tu documento puedes consultar el estado de tu {r.tipo}.
+                        </p>
+                        <div className="flex flex-wrap justify-center gap-3">
+                            <Button variant="outline" icon={Printer} onClick={() => window.print()}>
+                                Imprimir o guardar como PDF
+                            </Button>
+                            <Button href="/libro-de-reclamaciones/consultar" variant="secondary" icon={Search}>
+                                Consultar mi reclamo
+                            </Button>
+                        </div>
                     </div>
 
                     <Card>

@@ -15,6 +15,12 @@ use Illuminate\Database\Seeder;
  */
 class ContenidoSeeder extends Seeder
 {
+    /** También lo usa la migración que agrega la sección a sitios ya instalados. */
+    public const OBJETIVO = [
+        'titulo' => 'Objetivo',
+        'contenido' => 'Que cada vez más conductores de aplicativo tengan su propio vehículo de trabajo, con planes claros, cuotas semanales accesibles y acompañamiento en cada etapa.',
+    ];
+
     public function run(): void
     {
         $this->secciones();
@@ -73,14 +79,15 @@ class ContenidoSeeder extends Seeder
                 'titulo' => 'Nacimos para impulsar a los conductores',
                 'contenido' => "CrediGo es una marca de Arequipa Go S.A.C. que ofrece financiamiento a conductores de plataformas como Yango e InDrive.\n\nSabemos que tu vehículo es tu herramienta de trabajo. Por eso creamos planes con cuotas semanales, productos para tu día a día y beneficios por tu productividad.",
             ]],
-            ['nosotros', 'mision', 'Nosotros · Misión', ['titulo', 'contenido'], [
+            ['nosotros', 'mision', 'Nosotros · Misión', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Misión',
                 'contenido' => 'Brindar financiamiento accesible y responsable a los conductores de aplicativo para que mejoren sus ingresos y su calidad de vida.',
             ]],
-            ['nosotros', 'vision', 'Nosotros · Visión', ['titulo', 'contenido'], [
+            ['nosotros', 'vision', 'Nosotros · Visión', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Visión',
                 'contenido' => 'Ser la empresa de financiamiento de referencia para los conductores de aplicativo del Perú.',
             ]],
+            ['nosotros', 'objetivo', 'Nosotros · Objetivo', ['titulo', 'contenido', 'imagen'], self::OBJETIVO],
             ['nosotros', 'valores', 'Nosotros · Valores', ['subtitulo', 'titulo', 'items'], [
                 'subtitulo' => 'Nuestros valores',
                 'titulo' => 'Lo que nos guía',

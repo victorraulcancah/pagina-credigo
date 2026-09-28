@@ -1,7 +1,6 @@
-import { Eye, Target } from 'lucide-react';
+import { Compass, Eye, Target } from 'lucide-react';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
-import Card from '@/components/ui/Card';
 import FeatureCard from '@/components/ui/FeatureCard';
 import Icono from '@/components/ui/Icono';
 import Section from '@/components/ui/Section';
@@ -11,24 +10,42 @@ import CtaSection from '@/components/web/CtaSection';
 import TextoConImagen from '@/components/web/TextoConImagen';
 import { cn, columnasLg } from '@/lib/utils';
 
-function MisionVisionCard({ seccion, icon: Icon }) {
-    if (!seccion) return null;
-
+/**
+ * Misión, visión u objetivo en una fila: texto a un lado e imagen al otro,
+ * alternando el lado en cada fila. Sin imagen se muestra un recuadro con el ícono.
+ */
+function PilarFila({ seccion, icon: Icon, invertida }) {
     return (
-        <Card className="h-full">
-            <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-primary text-accent">
-                <Icon className="size-7" aria-hidden="true" />
+        <article className="grid items-center gap-8 py-10 first:pt-0 last:pb-0 md:grid-cols-2 md:gap-12 lg:gap-16 sm:py-12">
+            <div className={cn('overflow-hidden rounded-2xl ring-1 ring-white/10', !invertida && 'md:order-last')}>
+                {seccion.imagen_url ? (
+                    <img src={seccion.imagen_url} alt={seccion.titulo} loading="lazy" className="aspect-video size-full object-cover" />
+                ) : (
+                    <div className="relative flex aspect-video items-center justify-center overflow-clip bg-white/5">
+                        <div aria-hidden="true" className="absolute size-56 resplandor-acento opacity-40" />
+                        <Icon className="relative size-20 text-accent sm:size-24" strokeWidth={1.25} aria-hidden="true" />
+                    </div>
+                )}
             </div>
-            <h3 className="text-2xl font-bold text-primary">{seccion.titulo}</h3>
-            <p className="mt-3 text-base whitespace-pre-line text-primary-700/80 sm:text-lg">{seccion.contenido}</p>
-        </Card>
+
+            <div>
+                <span className="mb-4 flex size-11 items-center justify-center rounded-xl bg-accent text-primary">
+                    <Icon className="size-5" aria-hidden="true" />
+                </span>
+                <h3 className="text-2xl font-extrabold tracking-wide text-white uppercase sm:text-3xl">{seccion.titulo}</h3>
+                <p className="mt-4 text-base leading-relaxed whitespace-pre-line text-white/75 sm:text-lg">{seccion.contenido}</p>
+            </div>
+        </article>
     );
 }
 
 export default function Nosotros({ secciones }) {
     const hero = secciones['nosotros.hero'];
-    const mision = secciones['nosotros.mision'];
-    const vision = secciones['nosotros.vision'];
+    const pilares = [
+        { seccion: secciones['nosotros.mision'], icon: Compass },
+        { seccion: secciones['nosotros.vision'], icon: Eye },
+        { seccion: secciones['nosotros.objetivo'], icon: Target },
+    ].filter((pilar) => pilar.seccion);
     const valores = secciones['nosotros.valores'];
     const listaValores = valores?.items ?? [];
 
@@ -38,11 +55,12 @@ export default function Nosotros({ secciones }) {
 
             <TextoConImagen seccion={secciones['nosotros.historia']} />
 
-            {(mision || vision) && (
-                <Section background="muted">
-                    <div className={cn('grid gap-6', mision && vision && 'md:grid-cols-2')}>
-                        <MisionVisionCard seccion={mision} icon={Target} />
-                        <MisionVisionCard seccion={vision} icon={Eye} />
+            {pilares.length > 0 && (
+                <Section background="dark">
+                    <div className="mx-auto max-w-5xl divide-y divide-white/10">
+                        {pilares.map(({ seccion, icon }, i) => (
+                            <PilarFila key={seccion.clave} seccion={seccion} icon={icon} invertida={i % 2 === 1} />
+                        ))}
                     </div>
                 </Section>
             )}

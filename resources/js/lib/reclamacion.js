@@ -1,7 +1,7 @@
 import { formatoFecha } from '@/lib/fechas';
 
 // Las fechas sin hora ("2026-09-20") se leen a mediodía para evitar desfases de zona horaria
-const fechaSimple = (fecha) => (fecha ? formatoFecha(`${fecha}T12:00:00`, false) : null);
+export const fechaSimple = (fecha) => (fecha ? formatoFecha(`${fecha}T12:00:00`, false) : null);
 
 /** Filas [etiqueta, valor] de una hoja de reclamación (constancia pública y panel). */
 export function filasHoja(r) {
@@ -29,3 +29,14 @@ export function filasHoja(r) {
 export const ETIQUETA_ADJUNTO = { foto: 'Fotografía', comprobante: 'Comprobante', video: 'Video' };
 
 export const tamanoArchivo = (bytes) => (bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.ceil(bytes / 1024)} KB`);
+
+/** Suma días hábiles (lunes a viernes), igual que el plazo que calcula el backend. */
+export function sumarDiasHabiles(desde, dias) {
+    const fecha = new Date(desde);
+    let restantes = dias;
+    while (restantes > 0) {
+        fecha.setDate(fecha.getDate() + 1);
+        if (fecha.getDay() !== 0 && fecha.getDay() !== 6) restantes--;
+    }
+    return fecha;
+}

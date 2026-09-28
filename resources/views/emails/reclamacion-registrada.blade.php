@@ -43,6 +43,12 @@ Te responderemos a este correo en un plazo no mayor a **{{ \App\Models\Reclamaci
 **Archivos adjuntos:** {{ $reclamacion->adjuntos->pluck('nombre_original')->implode(', ') }}
 
 @endif
+<x-mail::button :url="route('reclamaciones.consultar')">
+Consultar el estado de mi reclamo
+</x-mail::button>
+
+Para consultarlo usa tu número de hoja (**{{ $reclamacion->codigo }}**) y tu número de documento.
+
 <small>La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI.</small>
 
 {{ $reclamacion->proveedor['razon_social'] ?? config('app.name') }}

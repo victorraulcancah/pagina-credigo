@@ -172,3 +172,31 @@ it('lista las reclamaciones en el panel', function () {
             ->has('reclamaciones.data', 1)
             ->where('reclamacionesPendientes', 1));
 });
+
+it('consulta el estado con número de hoja y documento sin exponer datos personales', function () {
+    $this->post('/libro-de-reclamaciones', datosReclamacion());
+    $reclamacion = Reclamacion::sole();
+
+    $this->get('/libro-de-reclamaciones/consultar')->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Web/ConsultarReclamacion')->where('resultado', null));
+
+    $this->post('/libro-de-reclamaciones/consultar', ['codigo' => $reclamacion->codigo, 'numero_documento' => ' 1234 5678 '])
+        ->assertRedirect('/libro-de-reclamaciones/consultar');
+
+    $this->get('/libro-de-reclamaciones/consultar')
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('resultado.codigo', $reclamacion->codigo)
+            ->where('resultado.estado', 'pendiente')
+            ->missing('resultado.nombre')
+            ->missing('resultado.email'));
+});
+
+it('no muestra la hoja si el documento no coincide', function () {
+    $this->post('/libro-de-reclamaciones', datosReclamacion());
+    $reclamacion = Reclamacion::sole();
+
+    $this->from('/libro-de-reclamaciones/consultar')
+        ->post('/libro-de-reclamaciones/consultar', ['codigo' => $reclamacion->codigo, 'numero_documento' => '87654321'])
+        ->assertRedirect('/libro-de-reclamaciones/consultar')
+        ->assertSessionHasErrors('codigo');
+});

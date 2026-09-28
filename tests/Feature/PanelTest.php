@@ -202,6 +202,29 @@ describe('con sesión iniciada', function () {
             ->where('secciones', fn ($secciones) => str_contains($secciones['contacto.hero']['imagen_url'] ?? '', '/storage/secciones/')));
     });
 
+    it('pone imagen a Misión, Visión y Objetivo de Nosotros', function () {
+        Storage::fake('public');
+        $this->seed(ContenidoSeeder::class);
+
+        foreach (['mision', 'vision', 'objetivo'] as $clave) {
+            $seccion = Seccion::where('pagina', 'nosotros')->where('clave', $clave)->sole();
+
+            $this->post("/admin/secciones/{$seccion->id}", [
+                '_method' => 'put',
+                'titulo' => $seccion->titulo,
+                'contenido' => $seccion->contenido,
+                'imagen' => UploadedFile::fake()->image("{$clave}.jpg", 1200, 800),
+                'activo' => true,
+            ])->assertSessionHasNoErrors();
+
+            Storage::disk('public')->assertExists($seccion->fresh()->imagen);
+        }
+
+        $this->get('/nosotros')->assertInertia(fn (Assert $page) => $page
+            ->where('secciones', fn ($secciones) => collect(['mision', 'vision', 'objetivo'])
+                ->every(fn ($clave) => str_contains($secciones["nosotros.{$clave}"]['imagen_url'] ?? '', '/storage/secciones/'))));
+    });
+
     it('marca un mensaje como leído y como no leído', function () {
         $mensaje = MensajeContacto::create(['nombre' => 'Ana', 'telefono' => '987654321', 'mensaje' => 'Hola']);
 

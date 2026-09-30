@@ -166,7 +166,7 @@ export default function ConsultarReclamacion({ resultado, diasRespuesta }) {
                             {resultado && <Resultado r={resultado} />}
                         </div>
 
-                        <aside className="flex flex-col gap-6 lg:sticky lg:top-20">
+                        <aside className="flex flex-col gap-6 lg:sticky lg:top-24">
                             <TarjetaLateral icon={CircleAlert} titulo="Importante" oscura>
                                 <ul className="flex flex-col gap-3 text-sm text-white/85">
                                     <li className="flex gap-2.5">

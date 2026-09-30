@@ -469,7 +469,7 @@ export default function LibroReclamaciones({ tiposDocumento, tiposComprobante, s
                             </TarjetaLateral>
 
                             {/* Al bajar, "Importante" y la ayuda quedan a la vista */}
-                            <div className="flex flex-col gap-6 lg:sticky lg:top-20">
+                            <div className="flex flex-col gap-6 lg:sticky lg:top-24">
                                 <TarjetaLateral icon={CircleAlert} titulo="Importante" oscura>
                                     <ul className="flex flex-col gap-3 text-sm text-white/85">
                                         <li className="flex gap-2.5">

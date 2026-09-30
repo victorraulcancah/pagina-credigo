@@ -37,7 +37,7 @@ function DatoContacto({ icon: Icon, titulo, href, externo = false, children }) {
     );
 }
 
-export default function Contacto({ secciones, servicios, preguntas }) {
+export default function Contacto({ secciones, tiposConsulta, preguntas }) {
     const sitio = useSitio();
     const hero = secciones['contacto.hero'];
     const formulario = secciones['contacto.formulario'];
@@ -73,8 +73,8 @@ export default function Contacto({ secciones, servicios, preguntas }) {
     ].filter(Boolean);
 
     return (
-        <PublicLayout title="Contacto" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Contacto'} description={hero?.contenido} />
+        <PublicLayout title="Soporte" description={hero?.contenido}>
+            <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Soporte'} description={hero?.contenido} />
 
             <Section background="muted">
                 <div className="grid gap-8 lg:grid-cols-5 lg:gap-10">
@@ -90,7 +90,7 @@ export default function Contacto({ secciones, servicios, preguntas }) {
                         {formulario?.titulo && <h2 className="text-2xl font-bold text-primary sm:text-3xl">{formulario.titulo}</h2>}
                         {formulario?.contenido && <p className="mt-2 text-primary-700/80">{formulario.contenido}</p>}
                         <div className="mt-6">
-                            <ContactoForm servicios={servicios} />
+                            <ContactoForm tiposConsulta={tiposConsulta} />
                         </div>
                     </Revelar>
                 </div>

@@ -15,6 +15,9 @@ use Illuminate\Database\Seeder;
  */
 class ContenidoSeeder extends Seeder
 {
+    /** Botón de "Cómo funciona" hacia la página de requisitos (también lo usa su migración). */
+    public const BOTON_REQUISITOS = ['boton_texto' => '¿Qué necesito? Ver requisitos', 'boton_url' => '/requisitos'];
+
     /** También lo usa la migración que agrega la sección a sitios ya instalados. */
     public const OBJETIVO = [
         'titulo' => 'Objetivo',
@@ -23,16 +26,35 @@ class ContenidoSeeder extends Seeder
 
     public function run(): void
     {
-        $this->secciones();
+        self::crearSecciones();
         $this->servicios();
         $this->opcionesCotizador();
         $this->preguntas();
         $this->banners();
     }
 
-    private function secciones(): void
+    /**
+     * Crea las secciones que falten (no pisa las ya editadas). Con $paginas crea solo
+     * las de esas páginas: lo usan las migraciones que agregan páginas a sitios ya instalados.
+     */
+    public static function crearSecciones(array $paginas = []): void
     {
-        $secciones = [
+        foreach (self::definicionSecciones() as $orden => [$pagina, $clave, $nombre, $campos, $datos]) {
+            if ($paginas && ! in_array($pagina, $paginas, true)) {
+                continue;
+            }
+
+            Seccion::firstOrCreate(
+                ['pagina' => $pagina, 'clave' => $clave],
+                [...$datos, 'nombre' => $nombre, 'campos' => $campos, 'orden' => $orden],
+            );
+        }
+    }
+
+    /** [página, clave, nombre en el panel, campos editables, contenido inicial] */
+    private static function definicionSecciones(): array
+    {
+        return [
             // ── Inicio ──────────────────────────────────────────────
             ['inicio', 'pasos_rapidos', 'Inicio · Franja de pasos (debajo del banner)', ['items'], [
                 'items' => [
@@ -56,7 +78,8 @@ class ContenidoSeeder extends Seeder
                 'boton_texto' => 'Conócenos',
                 'boton_url' => '/nosotros',
             ]],
-            ['inicio', 'como_funciona', 'Inicio · Cómo funciona', ['subtitulo', 'titulo', 'contenido', 'items'], [
+            ['inicio', 'como_funciona', 'Inicio · Cómo funciona', ['subtitulo', 'titulo', 'contenido', 'items', 'boton'], [
+                ...self::BOTON_REQUISITOS,
                 'subtitulo' => 'Cómo funciona',
                 'titulo' => 'De asociado a propietario, un pago a la vez',
                 'contenido' => 'Nuestros grupos de ahorro (Credi Ahorros Autos, CrediGo Autos, Credi Motos y CrediGo InDriver) te acompañan desde la inscripción hasta la entrega de llaves.',
@@ -106,6 +129,102 @@ class ContenidoSeeder extends Seeder
                 'contenido' => 'Financiamiento vehicular, celulares y productos en cuotas para conductores de aplicativo.',
             ]],
 
+            // ── Requisitos ──────────────────────────────────────────
+            ['requisitos', 'hero', 'Requisitos · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
+                'subtitulo' => 'Requisitos',
+                'titulo' => 'Qué necesitas para inscribirte',
+                'contenido' => 'Ten a la mano estos documentos y datos. Un asesor te acompaña en todo el proceso.',
+            ]],
+            ['requisitos', 'documentos', 'Requisitos · Documentos', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Documentos',
+                'titulo' => 'Documentos que te pediremos',
+                'contenido' => 'Envíalos en foto o PDF, legibles y vigentes (máximo 5 MB cada uno).',
+                'items' => [
+                    ['titulo' => 'DNI o Carné de Extranjería', 'descripcion' => 'Foto de ambas caras, sin reflejos y con todos los datos legibles.', 'icono' => 'IdCard'],
+                    ['titulo' => 'Licencia de conducir', 'descripcion' => 'Vigente. Foto de ambas caras.', 'icono' => 'Car'],
+                    ['titulo' => 'Recibo de servicios', 'descripcion' => 'De luz, agua o internet de tu domicilio, para confirmar tu dirección.', 'icono' => 'Receipt'],
+                    ['titulo' => 'Foto de perfil', 'descripcion' => 'Una selfie reciente, de frente y con buena luz.', 'icono' => 'Camera'],
+                ],
+            ]],
+            ['requisitos', 'datos', 'Requisitos · Datos personales', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Tus datos',
+                'titulo' => 'Datos que debes tener a la mano',
+                'contenido' => 'Los usamos para registrarte y coordinar contigo durante todo tu plan.',
+                'items' => [
+                    ['titulo' => 'Ser mayor de edad', 'descripcion' => 'Tener 18 años o más.', 'icono' => 'UserCheck'],
+                    ['titulo' => 'Celular activo', 'descripcion' => 'Tu número de celular y, si tienes, un correo electrónico.', 'icono' => 'Smartphone'],
+                    ['titulo' => 'Dirección y ubicación', 'descripcion' => 'Tu dirección exacta y el enlace de Google Maps de tu domicilio.', 'icono' => 'MapPin'],
+                    ['titulo' => 'Plataforma en la que trabajas', 'descripcion' => 'Yango, InDrive u otra, y los datos de tu vehículo si ya tienes uno.', 'icono' => 'CarFront'],
+                    ['titulo' => 'Contacto de emergencia', 'descripcion' => 'Nombre, celular y parentesco de un familiar o persona de confianza.', 'icono' => 'HeartHandshake'],
+                ],
+            ]],
+            ['requisitos', 'proceso', 'Requisitos · Qué pasa después', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Proceso',
+                'titulo' => 'Qué pasa después de enviar tus datos',
+                'items' => [
+                    ['titulo' => 'Validamos tu identidad', 'descripcion' => 'Confirmamos tus datos con RENIEC y revisamos tus documentos.', 'icono' => 'Fingerprint'],
+                    ['titulo' => 'Aprobamos tu registro', 'descripcion' => 'Nuestro equipo evalúa tu solicitud y te confirma la aprobación.', 'icono' => 'BadgeCheck'],
+                    ['titulo' => 'Pagas tu inscripción', 'descripcion' => 'Al contado o en cuotas. Tu asesor te indica el monto según tu plan.', 'icono' => 'Wallet'],
+                    ['titulo' => 'Verificación domiciliaria', 'descripcion' => 'Al recibir tu vehículo, moto o celular visitamos tu domicilio. Es válida por un año.', 'icono' => 'House'],
+                ],
+            ]],
+            ['requisitos', 'empresas', 'Requisitos · Empresas con RUC', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Con RUC',
+                'titulo' => '¿Te inscribes como empresa?',
+                'contenido' => 'Si te registras con RUC como persona jurídica, no necesitas licencia de conducir. Te pediremos:',
+                'items' => [
+                    ['titulo' => 'Ficha RUC', 'descripcion' => 'Ficha RUC vigente de la empresa, emitida por SUNAT.', 'icono' => 'FileText'],
+                    ['titulo' => 'DNI del representante legal', 'descripcion' => 'Foto de ambas caras del documento de quien representa a la empresa.', 'icono' => 'IdCard'],
+                    ['titulo' => 'Recibo de servicios', 'descripcion' => 'De la dirección de la empresa.', 'icono' => 'Receipt'],
+                ],
+            ]],
+
+            // ── Cómo pagar ──────────────────────────────────────────
+            ['pagos', 'hero', 'Cómo pagar · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
+                'subtitulo' => 'Pagos',
+                'titulo' => 'Cómo pagar tus cuotas',
+                'contenido' => 'Elige el medio que te quede más cómodo y paga seguro en nuestras cuentas oficiales.',
+            ]],
+            ['pagos', 'medios', 'Cómo pagar · Medios de pago', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Medios de pago',
+                'titulo' => 'Paga como prefieras',
+                'contenido' => 'Después de pagar, guarda tu constancia o el número de operación.',
+                'items' => [
+                    ['titulo' => 'Yape o Plin', 'descripcion' => 'Paga al instante desde tu celular y guarda la captura de la operación.', 'icono' => 'Smartphone'],
+                    ['titulo' => 'Transferencia o depósito', 'descripcion' => 'En BCP, BBVA, Interbank, Scotiabank o Banco de la Nación. Guarda el número de operación.', 'icono' => 'Landmark'],
+                    ['titulo' => 'Caja Arequipa', 'descripcion' => 'Pide tu código de pago y úsalo dentro de las 24 horas. Si vence sin pagar, podrás pedir uno nuevo después de 72 horas.', 'icono' => 'Receipt'],
+                    ['titulo' => 'Izipay desde la app', 'descripcion' => 'Paga con el código QR de Izipay y sube la captura. Nuestro equipo valida tu pago.', 'icono' => 'CreditCard'],
+                    ['titulo' => 'En nuestra oficina', 'descripcion' => 'En efectivo o con tarjeta.', 'icono' => 'MapPin'],
+                ],
+            ]],
+            // Sin cuentas al inicio: se cargan desde el panel (el bloque no se muestra vacío)
+            ['pagos', 'cuentas', 'Cómo pagar · Cuentas oficiales', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Cuentas oficiales',
+                'titulo' => 'Nuestras cuentas',
+                'contenido' => 'Todas están a nombre de la empresa. Toca un número para copiarlo.',
+                'items' => [],
+            ]],
+            ['pagos', 'aviso', 'Cómo pagar · Aviso contra estafas', ['titulo', 'contenido'], [
+                'titulo' => 'Cuidado con las estafas',
+                'contenido' => 'Solo paga en las cuentas publicadas en esta página, a nombre de la empresa. Nunca te pediremos depósitos a cuentas personales ni desde números que no sean los oficiales. Si tienes dudas, escríbenos antes de pagar.',
+            ]],
+            ['pagos', 'despues', 'Cómo pagar · Después de pagar', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Después de pagar',
+                'titulo' => 'Así registramos tu pago',
+                'items' => [
+                    ['titulo' => 'Guarda tu constancia', 'descripcion' => 'La captura o el número de operación de tu pago.', 'icono' => 'Receipt'],
+                    ['titulo' => 'Envíala a tu asesor', 'descripcion' => 'Por WhatsApp o por nuestros canales oficiales.', 'icono' => 'MessageCircle'],
+                    ['titulo' => 'Registramos tu pago', 'descripcion' => 'Te confirmamos cuando quede registrado en tu plan.', 'icono' => 'BadgeCheck'],
+                ],
+            ]],
+            ['pagos', 'descuento', 'Cómo pagar · Descuento semanal por viajes', ['subtitulo', 'titulo', 'contenido', 'boton'], [
+                'subtitulo' => 'Beneficio',
+                'titulo' => 'Tu cuota baja si cumples tu meta de viajes',
+                'contenido' => 'Si trabajas con Yango o InDrive, cumples la meta de viajes de la semana y estás al día en tus pagos, tu cuota de la semana siguiente tiene descuento. Consulta con tu asesor la meta y el descuento de tu plan.',
+                'boton_texto' => 'Consultar con un asesor',
+                'boton_url' => '/soporte',
+            ]],
+
             // ── Cotizador ───────────────────────────────────────────
             ['cotizador', 'hero', 'Cotizador · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
                 'subtitulo' => 'Cotizador',
@@ -113,13 +232,13 @@ class ContenidoSeeder extends Seeder
                 'contenido' => 'Elige el plan y la opción que te interesa, revisa las cuotas referenciales y un asesor te contacta.',
             ]],
 
-            // ── Contacto ────────────────────────────────────────────
-            ['contacto', 'hero', 'Contacto · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
-                'subtitulo' => 'Contáctanos',
+            // ── Soporte (página /soporte; en la BD sigue siendo "contacto") ──
+            ['contacto', 'hero', 'Soporte · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
+                'subtitulo' => 'Soporte',
                 'titulo' => 'Hablemos',
                 'contenido' => 'Escríbenos y un asesor te responderá a la brevedad.',
             ]],
-            ['contacto', 'formulario', 'Contacto · Formulario', ['titulo', 'contenido'], [
+            ['contacto', 'formulario', 'Soporte · Formulario', ['titulo', 'contenido'], [
                 'titulo' => 'Envíanos un mensaje',
                 'contenido' => 'Déjanos tus datos y te contactaremos.',
             ]],
@@ -153,7 +272,7 @@ class ContenidoSeeder extends Seeder
                 'titulo' => '¿Listo para empezar?',
                 'contenido' => 'Un asesor te explica los planes y requisitos sin compromiso.',
                 'boton_texto' => 'Escríbenos',
-                'boton_url' => '/contacto',
+                'boton_url' => '/soporte',
             ]],
 
             // ── Páginas legales (texto base: revisar con asesoría legal) ──
@@ -166,13 +285,6 @@ class ContenidoSeeder extends Seeder
                 'contenido' => self::textoPrivacidad(),
             ]],
         ];
-
-        foreach ($secciones as $orden => [$pagina, $clave, $nombre, $campos, $datos]) {
-            Seccion::firstOrCreate(
-                ['pagina' => $pagina, 'clave' => $clave],
-                [...$datos, 'nombre' => $nombre, 'campos' => $campos, 'orden' => $orden],
-            );
-        }
     }
 
     private function servicios(): void
@@ -332,7 +444,7 @@ class ContenidoSeeder extends Seeder
             'titulo' => 'Tu propio vehículo, ahorrando mientras trabajas.',
             'subtitulo' => 'Financiamos motos y autos para conductores de Yango e InDrive. Ahorra semanalmente, resulta adjudicado y trabaja con tu propio vehículo, sin dejar de generar ingresos mientras esperas.',
             'boton_texto' => 'Empieza tu ahorro',
-            'boton_url' => '/contacto',
+            'boton_url' => '/soporte',
             'boton2_texto' => 'Ver cómo funciona',
             'boton2_url' => '/#como-funciona',
         ];

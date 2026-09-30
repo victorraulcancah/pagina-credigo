@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
+use App\Models\MensajeContacto;
 use App\Models\PreguntaFrecuente;
 use App\Models\Seccion;
 use App\Models\Servicio;
@@ -68,15 +69,35 @@ class PaginaController extends Controller
         ]);
     }
 
+    public function requisitos(): Response
+    {
+        $secciones = $this->contenido->secciones(['requisitos', 'general']);
+
+        return Inertia::render('Web/Requisitos', [
+            'secciones' => $secciones,
+            'seo' => $this->seo('Requisitos', $secciones['requisitos.hero'] ?? null),
+        ]);
+    }
+
+    public function pagos(): Response
+    {
+        $secciones = $this->contenido->secciones(['pagos', 'general']);
+
+        return Inertia::render('Web/ComoPagar', [
+            'secciones' => $secciones,
+            'seo' => $this->seo('Cómo pagar', $secciones['pagos.hero'] ?? null),
+        ]);
+    }
+
     public function contacto(): Response
     {
         $secciones = $this->contenido->secciones(['contacto', 'general']);
 
         return Inertia::render('Web/Contacto', [
             'secciones' => $secciones,
-            'servicios' => Servicio::activo()->ordenado()->pluck('titulo'),
+            'tiposConsulta' => MensajeContacto::TIPOS_CONSULTA,
             'preguntas' => PreguntaFrecuente::activo()->ordenado()->get(),
-            'seo' => $this->seo('Contacto', $secciones['contacto.hero'] ?? null),
+            'seo' => $this->seo('Soporte', $secciones['contacto.hero'] ?? null),
         ]);
     }
 

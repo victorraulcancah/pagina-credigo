@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
-/** Enlaces de botones: ruta interna (/contacto), ancla (#faq), http(s), mailto: o tel:. */
+/** Enlaces de botones: ruta interna (/soporte), ancla (#faq), http(s), mailto: o tel:. */
 final class EnlaceRegla
 {
     public const PATRON = '/^(\/|#|https?:\/\/|mailto:|tel:)/';

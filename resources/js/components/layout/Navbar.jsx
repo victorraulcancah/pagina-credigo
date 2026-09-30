@@ -54,14 +54,15 @@ export default function Navbar() {
             <Container className="flex h-14 items-center justify-between gap-4 sm:h-16">
                 <Logo className="h-8 sm:h-10" />
 
-                <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
+                <nav aria-label="Principal" className="hidden items-center gap-0.5 lg:flex xl:gap-1">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
                             aria-current={isActive(link.href) ? 'page' : undefined}
                             className={cn(
-                                'rounded-full px-4 py-1.5 text-sm font-semibold transition-colors',
+                                // Más compacto en 1024 px para que entren todos los enlaces en una línea
+                                'rounded-full px-3 py-1.5 text-sm font-semibold whitespace-nowrap transition-colors xl:px-4',
                                 isActive(link.href)
                                     ? 'bg-accent text-primary'
                                     : 'text-white hover:bg-white/10',

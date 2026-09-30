@@ -94,10 +94,10 @@ export default function SolicitudModal({ mensaje, estados, origenes, usuarios, o
                     <div className="bg-primary px-5 py-5 text-white sm:px-6">
                         <div className="flex items-center gap-4 pr-10">
                             <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-accent text-xl font-extrabold text-primary">
-                                {iniciales(mensaje.nombre)}
+                                {iniciales(mensaje.nombre_completo)}
                             </span>
                             <div className="min-w-0">
-                                <h2 className="truncate text-xl font-bold">{mensaje.nombre}</h2>
+                                <h2 className="truncate text-xl font-bold">{mensaje.nombre_completo}</h2>
                                 <p className="text-sm text-primary-200">Recibido el {formatoFecha(mensaje.created_at)}</p>
                                 <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold">
                                     <span className={cn('rounded-full px-2.5 py-1', ui.solido)}>{estados[mensaje.estado]}</span>
@@ -105,6 +105,9 @@ export default function SolicitudModal({ mensaje, estados, origenes, usuarios, o
                                         {mensaje.origen === 'cotizador' ? <Calculator className="size-3.5" /> : <Mail className="size-3.5" />}
                                         {origenes[mensaje.origen]}
                                     </span>
+                                    {mensaje.tipo_consulta_texto && (
+                                        <span className="rounded-full bg-white/15 px-2.5 py-1">{mensaje.tipo_consulta_texto}</span>
+                                    )}
                                     <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1">
                                         <UserRound className="size-3.5" /> {mensaje.asignado?.name ?? 'Sin asignar'}
                                     </span>

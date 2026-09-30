@@ -7,10 +7,10 @@ use App\Http\Controllers\Admin\MensajeContactoController;
 use App\Http\Controllers\Admin\OpcionPlanController;
 use App\Http\Controllers\Admin\PerfilController;
 use App\Http\Controllers\Admin\PreguntaFrecuenteController;
+use App\Http\Controllers\Admin\ReclamacionController;
 use App\Http\Controllers\Admin\SeccionController;
 use App\Http\Controllers\Admin\ServicioController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Admin\ReclamacionController;
 use App\Http\Controllers\Web\ContactoController;
 use App\Http\Controllers\Web\LibroReclamacionesController;
 use App\Http\Controllers\Web\PaginaController;
@@ -27,11 +27,16 @@ Route::controller(PaginaController::class)->group(function () {
     Route::get('/', 'inicio')->name('inicio');
     Route::get('/nosotros', 'nosotros')->name('nosotros');
     Route::get('/servicios', 'servicios')->name('servicios');
-    Route::get('/contacto', 'contacto')->name('contacto');
+    Route::get('/requisitos', 'requisitos')->name('requisitos');
+    Route::get('/como-pagar', 'pagos')->name('pagos');
+    Route::get('/soporte', 'contacto')->name('soporte');
     Route::get('/cotizador', 'cotizador')->name('cotizador');
     Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');
     Route::get('/politica-de-privacidad', 'privacidad')->name('privacidad');
 });
+
+// La página de contacto ahora se llama Soporte
+Route::permanentRedirect('/contacto', '/soporte');
 
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');

@@ -15,11 +15,17 @@ class ContactoRequest extends FormRequest
 
     public function rules(): array
     {
+        // Mismos campos obligatorios que el formulario de soporte del ERP (el celular
+        // también, porque las solicitudes se atienden por WhatsApp)
+        $esContacto = $this->input('origen', 'contacto') === 'contacto';
+
         return [
-            'nombre' => ['required', 'string', 'max:120'],
+            'nombre' => ['required', 'string', 'max:100'],
+            'apellido' => [Rule::requiredIf($esContacto), 'nullable', 'string', 'max:100'],
             'telefono' => ['required', 'string', 'regex:/^\+?[0-9\s]{6,20}$/'],
-            'email' => ['nullable', 'email', 'max:150'],
-            'asunto' => ['nullable', 'string', 'max:150'],
+            'email' => [Rule::requiredIf($esContacto), 'nullable', 'email', 'max:150'],
+            'tipo_consulta' => [Rule::requiredIf($esContacto), 'nullable', Rule::in(array_keys(MensajeContacto::TIPOS_CONSULTA))],
+            'asunto' => [Rule::requiredIf($esContacto), 'nullable', 'string', 'max:150'],
             'mensaje' => ['required', 'string', 'max:2000'],
             'origen' => ['nullable', Rule::in(array_keys(MensajeContacto::ORIGENES))],
             // Campo trampa para bots: los humanos no lo ven, debe llegar vacío
@@ -40,6 +46,7 @@ class ContactoRequest extends FormRequest
     {
         return [
             'telefono' => 'celular',
+            'tipo_consulta' => 'tipo de consulta',
         ];
     }
 }

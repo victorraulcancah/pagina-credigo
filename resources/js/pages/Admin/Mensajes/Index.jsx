@@ -127,14 +127,14 @@ export default function MensajesIndex({ mensajes, filtros, conteos, estados, ori
                                     )}
                                 >
                                     <span className="relative shrink-0">
-                                        <span className={cn('flex size-11 items-center justify-center rounded-full text-sm font-bold', ui.suave)}>{iniciales(m.nombre)}</span>
+                                        <span className={cn('flex size-11 items-center justify-center rounded-full text-sm font-bold', ui.suave)}>{iniciales(m.nombre_completo)}</span>
                                         {noLeido && <span className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-primary ring-2 ring-white" title="No leído" />}
                                     </span>
 
                                     <div className="min-w-0 flex-1">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <p className={cn('truncate', noLeido ? 'font-bold text-gray-900' : 'font-medium text-gray-800')}>
-                                                {m.nombre}
+                                                {m.nombre_completo}
                                                 {noLeido && <span className="sr-only"> (no leído)</span>}
                                             </p>
                                             <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-semibold', ui.suave)}>{estados[m.estado]}</span>
@@ -142,6 +142,9 @@ export default function MensajesIndex({ mensajes, filtros, conteos, estados, ori
                                                 <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-xs font-semibold text-primary">
                                                     <Calculator className="size-3" aria-hidden="true" /> Cotizador
                                                 </span>
+                                            )}
+                                            {m.tipo_consulta_texto && (
+                                                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">{m.tipo_consulta_texto}</span>
                                             )}
                                         </div>
                                         <p className="mt-0.5 truncate text-sm text-gray-500">

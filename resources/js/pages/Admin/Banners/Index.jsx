@@ -200,18 +200,18 @@ export default function BannersIndex({ banners }) {
                             label="Enlace al hacer clic (opcional)"
                             htmlFor="boton_url"
                             error={errors.boton_url}
-                            hint="Toda la imagen lleva a esta página. Ej. /contacto o /#como-funciona"
+                            hint="Toda la imagen lleva a esta página. Ej. /soporte o /#como-funciona"
                             className="sm:col-span-2"
                         >
-                            <Input id="boton_url" value={data.boton_url} onChange={(e) => setData('boton_url', e.target.value)} error={errors.boton_url} placeholder="/contacto" />
+                            <Input id="boton_url" value={data.boton_url} onChange={(e) => setData('boton_url', e.target.value)} error={errors.boton_url} placeholder="/soporte" />
                         </FormField>
                     ) : (
                         <>
                             <FormField label="Botón principal (amarillo)" htmlFor="boton_texto" error={errors.boton_texto}>
                                 <Input id="boton_texto" value={data.boton_texto} onChange={(e) => setData('boton_texto', e.target.value)} error={errors.boton_texto} placeholder="Empieza tu ahorro" />
                             </FormField>
-                            <FormField label="Enlace del botón principal" htmlFor="boton_url" error={errors.boton_url} hint="Ej. /contacto o https://...">
-                                <Input id="boton_url" value={data.boton_url} onChange={(e) => setData('boton_url', e.target.value)} error={errors.boton_url} placeholder="/contacto" />
+                            <FormField label="Enlace del botón principal" htmlFor="boton_url" error={errors.boton_url} hint="Ej. /soporte o https://...">
+                                <Input id="boton_url" value={data.boton_url} onChange={(e) => setData('boton_url', e.target.value)} error={errors.boton_url} placeholder="/soporte" />
                             </FormField>
                             <FormField label="Segundo botón (borde blanco)" htmlFor="boton2_texto" error={errors.boton2_texto} hint="Vacío = se muestra el botón de WhatsApp.">
                                 <Input id="boton2_texto" value={data.boton2_texto} onChange={(e) => setData('boton2_texto', e.target.value)} error={errors.boton2_texto} placeholder="Ver cómo funciona" />

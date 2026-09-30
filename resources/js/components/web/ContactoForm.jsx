@@ -8,12 +8,32 @@ import Textarea from '@/components/ui/Textarea';
 import AceptaPolitica from '@/components/web/AceptaPolitica';
 import { registrarLead } from '@/lib/analitica';
 
-/** Formulario público de contacto → se guarda en la bandeja del panel (/admin/mensajes). */
-export default function ContactoForm({ servicios = [] }) {
-    const form = useForm({ nombre: '', telefono: '', email: '', asunto: '', mensaje: '', website: '', acepta_politica: false });
+const VACIO = {
+    nombre: '',
+    apellido: '',
+    email: '',
+    telefono: '',
+    tipo_consulta: '',
+    asunto: '',
+    mensaje: '',
+    website: '',
+    acepta_politica: false,
+};
+
+/**
+ * Formulario público de contacto, con los mismos campos que el de soporte del ERP.
+ * Se guarda en la bandeja del panel (/admin/mensajes).
+ */
+export default function ContactoForm({ tiposConsulta = {} }) {
+    const form = useForm(VACIO);
     const { data, setData, errors, processing, recentlySuccessful } = form;
 
-    const opcionesAsunto = [...servicios, 'Otro'].map((titulo) => ({ value: titulo, label: titulo }));
+    const campo = (nombre) => ({
+        id: nombre,
+        value: data[nombre],
+        onChange: (e) => setData(nombre, e.target.value),
+        error: errors[nombre],
+    });
 
     const enviar = (e) => {
         e.preventDefault();
@@ -28,57 +48,30 @@ export default function ContactoForm({ servicios = [] }) {
 
     return (
         <form onSubmit={enviar} className="grid gap-5 sm:grid-cols-2" noValidate>
-            <FormField label="Nombre completo" htmlFor="nombre" error={errors.nombre} required>
-                <Input
-                    id="nombre"
-                    autoComplete="name"
-                    value={data.nombre}
-                    onChange={(e) => setData('nombre', e.target.value)}
-                    error={errors.nombre}
-                    placeholder="Tu nombre"
-                />
+            <FormField label="Nombre" htmlFor="nombre" error={errors.nombre} required>
+                <Input {...campo('nombre')} autoComplete="given-name" maxLength={100} placeholder="Tu nombre" />
+            </FormField>
+            <FormField label="Apellido" htmlFor="apellido" error={errors.apellido} required>
+                <Input {...campo('apellido')} autoComplete="family-name" maxLength={100} placeholder="Tu apellido" />
+            </FormField>
+            <FormField label="Correo electrónico" htmlFor="email" error={errors.email} required>
+                <Input {...campo('email')} type="email" autoComplete="email" maxLength={150} placeholder="tucorreo@ejemplo.com" />
             </FormField>
             <FormField label="Celular" htmlFor="telefono" error={errors.telefono} required>
-                <Input
-                    id="telefono"
-                    type="tel"
-                    inputMode="tel"
-                    autoComplete="tel"
-                    value={data.telefono}
-                    onChange={(e) => setData('telefono', e.target.value)}
-                    error={errors.telefono}
-                    placeholder="999 999 999"
-                />
+                <Input {...campo('telefono')} type="tel" inputMode="tel" autoComplete="tel" placeholder="999 999 999" />
             </FormField>
-            <FormField label="Correo" htmlFor="email" error={errors.email}>
-                <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    value={data.email}
-                    onChange={(e) => setData('email', e.target.value)}
-                    error={errors.email}
-                    placeholder="tucorreo@ejemplo.com"
-                />
-            </FormField>
-            <FormField label="¿Qué te interesa?" htmlFor="asunto" error={errors.asunto}>
+            <FormField label="Tipo de consulta" htmlFor="tipo_consulta" error={errors.tipo_consulta} required>
                 <Select
-                    id="asunto"
-                    value={data.asunto}
-                    onChange={(e) => setData('asunto', e.target.value)}
-                    error={errors.asunto}
-                    placeholder="Elige una opción"
-                    options={opcionesAsunto}
+                    {...campo('tipo_consulta')}
+                    placeholder="Selecciona una opción"
+                    options={Object.entries(tiposConsulta).map(([value, label]) => ({ value, label }))}
                 />
+            </FormField>
+            <FormField label="Asunto" htmlFor="asunto" error={errors.asunto} required>
+                <Input {...campo('asunto')} maxLength={150} placeholder="¿Sobre qué es tu consulta?" />
             </FormField>
             <FormField label="Mensaje" htmlFor="mensaje" error={errors.mensaje} required className="sm:col-span-2">
-                <Textarea
-                    id="mensaje"
-                    value={data.mensaje}
-                    onChange={(e) => setData('mensaje', e.target.value)}
-                    error={errors.mensaje}
-                    placeholder="Cuéntanos qué necesitas"
-                />
+                <Textarea {...campo('mensaje')} maxLength={2000} placeholder="Cuéntanos en qué podemos ayudarte" />
             </FormField>
 
             {/* Campo trampa anti-spam: oculto para personas */}

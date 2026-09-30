@@ -74,7 +74,7 @@ export default function HeroBanner({ banners = [], cifras = [] }) {
 
     const slides = banners.length
         ? banners
-        : [{ id: 0, titulo: sitio.empresa_nombre, subtitulo: sitio.empresa_descripcion, boton_texto: 'Contáctanos', boton_url: '/contacto' }];
+        : [{ id: 0, titulo: sitio.empresa_nombre, subtitulo: sitio.empresa_descripcion, boton_texto: 'Ir a soporte', boton_url: '/soporte' }];
 
     const total = slides.length;
     const [actual, setActual] = useState(0);

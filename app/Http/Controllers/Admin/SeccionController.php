@@ -18,7 +18,7 @@ class SeccionController extends Controller
 {
     private const CAMPOS_TEXTO = ['subtitulo', 'titulo', 'contenido'];
 
-    private const ORDEN_PAGINAS = ['inicio', 'nosotros', 'servicios', 'cotizador', 'contacto', 'general', 'legal'];
+    private const ORDEN_PAGINAS = ['inicio', 'nosotros', 'servicios', 'requisitos', 'pagos', 'cotizador', 'contacto', 'general', 'legal'];
 
     public function __construct(private ImagenService $imagenes) {}
 

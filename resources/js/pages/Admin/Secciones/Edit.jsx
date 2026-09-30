@@ -29,6 +29,13 @@ const LISTAS = {
         conIcono: false,
         etiquetas: { titulo: 'Paso', descripcion: 'Detalle' },
     },
+    cuentas: {
+        titulo: 'Cuentas oficiales',
+        descripcion:
+            'Una tarjeta por cuenta. En "Datos" escribe una línea por número, por ejemplo "Cuenta: 193-1234567-0-12" y "CCI: 002-193-001234567012-15". En la web cada número se copia con un toque. Sin cuentas, el bloque no se muestra.',
+        conIcono: true,
+        etiquetas: { titulo: 'Banco y tipo de cuenta', descripcion: 'Datos (una línea por número)' },
+    },
     beneficios: {
         titulo: 'Niveles',
         descripcion: 'En orden: el 1.º se pinta bronce, el 2.º plata y el 3.º oro (este último resaltado).',
@@ -184,7 +191,7 @@ export default function SeccionEdit({ seccion }) {
                                 <FormField label="Texto" htmlFor="boton_texto" error={errors.boton_texto}>
                                     <Input id="boton_texto" value={data.boton_texto} onChange={(e) => setData('boton_texto', e.target.value)} error={errors.boton_texto} />
                                 </FormField>
-                                <FormField label="Enlace" htmlFor="boton_url" error={errors.boton_url} hint="Ej. /contacto o https://... Déjalo vacío para ocultar el botón.">
+                                <FormField label="Enlace" htmlFor="boton_url" error={errors.boton_url} hint="Ej. /soporte o https://... Déjalo vacío para ocultar el botón.">
                                     <Input id="boton_url" value={data.boton_url} onChange={(e) => setData('boton_url', e.target.value)} error={errors.boton_url} />
                                 </FormField>
                             </div>

@@ -34,6 +34,7 @@ it('marca en las tarjetas los planes que se pueden cotizar', function () {
 
 it('la solicitud del cotizador llega a la bandeja de mensajes', function () {
     $this->post('/contacto', [
+        'origen' => 'cotizador',
         'nombre' => 'Luis',
         'telefono' => '987654321',
         'asunto' => 'Cotización: CrediYango',

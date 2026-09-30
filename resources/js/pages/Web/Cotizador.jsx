@@ -76,8 +76,8 @@ export default function Cotizador({ secciones, planes }) {
                     <Card className="mx-auto max-w-xl text-center">
                         <p className="text-lg font-semibold text-primary">Estamos preparando las opciones del cotizador.</p>
                         <p className="mt-2 text-primary-700/80">Mientras tanto, escríbenos y un asesor te da los montos.</p>
-                        <Button href="/contacto" variant="secondary" className="mt-6">
-                            Contáctanos
+                        <Button href="/soporte" variant="secondary" className="mt-6">
+                            Ir a soporte
                         </Button>
                     </Card>
                 ) : (

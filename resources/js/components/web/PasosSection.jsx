@@ -1,10 +1,12 @@
+import { ArrowRight } from 'lucide-react';
+import Button from '@/components/ui/Button';
 import Icono from '@/components/ui/Icono';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
 import { cn, columnasLg } from '@/lib/utils';
 
-/** Lista numerada de pasos (sección con items: titulo, descripcion, icono). */
+/** Lista numerada de pasos (sección con items: titulo, descripcion, icono) y botón opcional. */
 export default function PasosSection({ id, seccion, background = 'muted' }) {
     if (!seccion) return null;
     const pasos = seccion.items ?? [];
@@ -35,6 +37,13 @@ export default function PasosSection({ id, seccion, background = 'muted' }) {
                         </Revelar>
                     ))}
                 </ol>
+            )}
+            {seccion.boton_texto && seccion.boton_url && (
+                <Revelar className="mt-12 text-center">
+                    <Button href={seccion.boton_url} variant="outline" icon={ArrowRight} iconPosition="right">
+                        {seccion.boton_texto}
+                    </Button>
+                </Revelar>
             )}
         </Section>
     );

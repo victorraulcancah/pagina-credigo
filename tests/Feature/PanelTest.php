@@ -198,7 +198,7 @@ describe('con sesión iniciada', function () {
 
         Storage::disk('public')->assertExists($seccion->fresh()->imagen);
 
-        $this->get('/contacto')->assertInertia(fn (Assert $page) => $page
+        $this->get('/soporte')->assertInertia(fn (Assert $page) => $page
             ->where('secciones', fn ($secciones) => str_contains($secciones['contacto.hero']['imagen_url'] ?? '', '/storage/secciones/')));
     });
 

@@ -3,8 +3,10 @@ export const PAGINAS = {
     inicio: { label: 'Inicio', url: '/' },
     nosotros: { label: 'Nosotros', url: '/nosotros' },
     servicios: { label: 'Servicios', url: '/servicios' },
+    requisitos: { label: 'Requisitos', url: '/requisitos' },
+    pagos: { label: 'Cómo pagar', url: '/como-pagar' },
     cotizador: { label: 'Cotizador', url: '/cotizador' },
-    contacto: { label: 'Contacto', url: '/contacto' },
+    contacto: { label: 'Soporte', url: '/soporte' },
     general: { label: 'Bloques compartidos', descripcion: 'Aparecen en varias páginas' },
     legal: { label: 'Páginas legales', descripcion: 'Términos y condiciones · Política de privacidad' },
 };

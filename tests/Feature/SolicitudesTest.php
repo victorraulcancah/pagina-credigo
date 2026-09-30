@@ -13,8 +13,12 @@ use Inertia\Testing\AssertableInertia as Assert;
 function enviarContacto(array $cambios = []): TestResponse
 {
     return test()->post('/contacto', [
-        'nombre' => 'Luis Quispe',
+        'nombre' => 'Luis',
+        'apellido' => 'Quispe',
+        'email' => 'luis@example.com',
         'telefono' => '987654321',
+        'tipo_consulta' => 'consulta_general',
+        'asunto' => 'Plan de ahorro',
         'mensaje' => 'Quiero información del plan.',
         'acepta_politica' => true,
         ...$cambios,
@@ -154,7 +158,10 @@ describe('SEO', function () {
     });
 
     it('genera sitemap.xml y robots.txt', function () {
-        $this->get('/sitemap.xml')->assertOk()->assertSee('<loc>'.url('/cotizador').'</loc>', false);
+        $this->get('/sitemap.xml')->assertOk()
+            ->assertSee('<loc>'.url('/cotizador').'</loc>', false)
+            ->assertSee('<loc>'.url('/requisitos').'</loc>', false)
+            ->assertSee('<loc>'.url('/como-pagar').'</loc>', false);
         $this->get('/robots.txt')->assertOk()->assertSee('Disallow: /admin')->assertSee('Sitemap: '.url('/sitemap.xml'));
     });
 });

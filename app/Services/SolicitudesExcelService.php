@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class SolicitudesExcelService
 {
     private const COLUMNAS = [
-        'Fecha', 'Nombre', 'Celular', 'Correo', 'Asunto', 'Mensaje', 'Origen', 'Estado', 'Asignado a', 'Notas',
+        'Fecha', 'Nombre', 'Celular', 'Correo', 'Tipo de consulta', 'Asunto', 'Mensaje', 'Origen', 'Estado', 'Asignado a', 'Notas',
     ];
 
     /** @param  Collection<int, MensajeContacto>  $mensajes */
@@ -26,9 +26,10 @@ class SolicitudesExcelService
         $hoja->fromArray(self::COLUMNAS);
         $hoja->fromArray($mensajes->map(fn (MensajeContacto $m) => [
             $m->created_at->format('d/m/Y H:i'),
-            $m->nombre,
+            $m->nombre_completo,
             $m->telefono,
             $m->email,
+            $m->tipo_consulta_texto,
             $m->asunto,
             $m->mensaje,
             MensajeContacto::ORIGENES[$m->origen] ?? $m->origen,
@@ -45,7 +46,7 @@ class SolicitudesExcelService
         foreach (range('A', $ultimaColumna) as $columna) {
             $hoja->getColumnDimension($columna)->setAutoSize(true);
         }
-        $hoja->getColumnDimension('F')->setAutoSize(false)->setWidth(60); // mensaje
+        $hoja->getColumnDimension('G')->setAutoSize(false)->setWidth(60); // mensaje
         $hoja->setAutoFilter($hoja->calculateWorksheetDimension());
         $hoja->freezePane('A2');
 

@@ -25,7 +25,7 @@ export const usaEnlaceNativo = (href) => /^(https?:|mailto:|tel:)/.test(href) ||
  *
  * `nativo`: fuerza un <a> normal (ej. descargas de archivos, que no son páginas de Inertia).
  *
- * <Button href="/contacto" icon={ArrowRight} iconPosition="right">Contáctanos</Button>
+ * <Button href="/soporte" icon={ArrowRight} iconPosition="right">Ir a soporte</Button>
  * <Button variant="secondary" type="submit" fullWidth>Enviar</Button>
  */
 export default function Button({

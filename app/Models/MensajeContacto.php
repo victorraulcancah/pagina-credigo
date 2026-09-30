@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -17,23 +18,46 @@ class MensajeContacto extends Model
     ];
 
     public const ORIGENES = [
-        'contacto' => 'Formulario de contacto',
+        'contacto' => 'Formulario de soporte',
         'cotizador' => 'Cotizador',
+    ];
+
+    /** Mismas categorías que el formulario de soporte del ERP (SoporteController). */
+    public const TIPOS_CONSULTA = [
+        'soporte_tecnico' => 'Soporte técnico',
+        'consulta_general' => 'Consulta general',
+        'problema_app' => 'Problema con la app',
+        'sugerencia' => 'Sugerencia',
+        'facturacion' => 'Facturación',
+        'otro' => 'Otro',
     ];
 
     protected $table = 'mensajes_contacto';
 
     protected $fillable = [
-        'nombre', 'telefono', 'email', 'asunto', 'mensaje', 'origen', 'estado', 'asignado_a', 'notas', 'leido_at', 'ip',
+        'nombre', 'apellido', 'telefono', 'email', 'tipo_consulta', 'asunto', 'mensaje',
+        'origen', 'estado', 'asignado_a', 'notas', 'leido_at', 'ip',
     ];
 
     protected $hidden = ['ip'];
+
+    protected $appends = ['nombre_completo', 'tipo_consulta_texto'];
 
     protected function casts(): array
     {
         return [
             'leido_at' => 'datetime',
         ];
+    }
+
+    protected function nombreCompleto(): Attribute
+    {
+        return Attribute::get(fn () => trim("{$this->nombre} {$this->apellido}"));
+    }
+
+    protected function tipoConsultaTexto(): Attribute
+    {
+        return Attribute::get(fn () => self::TIPOS_CONSULTA[$this->tipo_consulta] ?? null);
     }
 
     public function asignado(): BelongsTo
@@ -54,6 +78,7 @@ class MensajeContacto extends Model
 
         return $query->where(function (Builder $q) use ($texto) {
             $q->where('nombre', 'like', "%{$texto}%")
+                ->orWhere('apellido', 'like', "%{$texto}%")
                 ->orWhere('telefono', 'like', "%{$texto}%")
                 ->orWhere('email', 'like', "%{$texto}%")
                 ->orWhere('asunto', 'like', "%{$texto}%");

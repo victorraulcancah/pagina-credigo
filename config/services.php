@@ -28,6 +28,16 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // ERP de CrediGo: la web solo LEE su catálogo público (talleres, etc.) y guarda una copia.
+    // Sin ERP_URL la web funciona igual, sin esos datos.
+    'erp' => [
+        'url' => rtrim((string) env('ERP_URL'), '/'),
+        // Donde el ERP publica sus archivos (logos, imágenes). Por defecto {ERP_URL}/storage
+        'storage_url' => rtrim((string) env('ERP_STORAGE_URL'), '/'),
+        'timeout' => (int) env('ERP_TIMEOUT', 5),
+        'cache_minutos' => (int) env('ERP_CACHE_MINUTOS', 30),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

@@ -225,6 +225,70 @@ class ContenidoSeeder extends Seeder
                 'boton_url' => '/soporte',
             ]],
 
+            // ── Talleres aliados (la lista viene del ERP) ────────────
+            ['talleres', 'hero', 'Talleres aliados · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
+                'subtitulo' => 'Talleres aliados',
+                'titulo' => 'Mantén tu vehículo y págalo en cuotas',
+                'contenido' => 'Mecánica, llantas, baterías, aceite y más en nuestra red de talleres aliados, con una inicial y el resto en cuotas.',
+            ]],
+            ['talleres', 'como', 'Talleres aliados · Cómo funciona', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Cómo funciona',
+                'titulo' => 'Financia tu servicio en 4 pasos',
+                'items' => [
+                    ['titulo' => 'Elige tu taller', 'descripcion' => 'Revisa los servicios, precios y horarios de cada taller aliado.', 'icono' => 'Wrench'],
+                    ['titulo' => 'Solicítalo', 'descripcion' => 'Desde la app CrediGO o con tu asesor.', 'icono' => 'Smartphone'],
+                    ['titulo' => 'Paga tu inicial', 'descripcion' => 'Y confirmamos tu financiamiento con el taller.', 'icono' => 'Wallet'],
+                    ['titulo' => 'Atiéndete y paga en cuotas', 'descripcion' => 'Nosotros le pagamos al taller y tú pagas el resto en cuotas.', 'icono' => 'CalendarCheck'],
+                ],
+            ]],
+
+            // ── Beneficios (puntaje y niveles según el ERP; comercios y cupones vienen del ERP) ──
+            ['beneficios', 'hero', 'Beneficios · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
+                'subtitulo' => 'Beneficios',
+                'titulo' => 'Mientras más cumples, más ganas',
+                'contenido' => 'Tu puntaje y tu nivel te abren más opciones. Además, descuentos en comercios aliados.',
+            ]],
+            ['beneficios', 'puntaje', 'Beneficios · Puntaje CrediGo', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Puntaje CrediGo',
+                'titulo' => 'Tu puntaje depende de cómo pagas',
+                'contenido' => 'Todos empiezan con 100 puntos. Se actualiza cada día y lo ves en la app CrediGO.',
+                'items' => [
+                    ['titulo' => 'Pagas a tiempo', 'descripcion' => 'Sumas 3 puntos por cada cuota pagada a tiempo (1 punto si tienes dos o más financiamientos activos).', 'icono' => 'BadgeCheck'],
+                    ['titulo' => 'Te atrasas', 'descripcion' => 'Restas 5 puntos por cada cuota que se vence sin pagar.', 'icono' => 'Clock'],
+                    ['titulo' => 'Lo revisas cuando quieras', 'descripcion' => 'Tu puntaje se actualiza cada día en la app CrediGO.', 'icono' => 'Smartphone'],
+                ],
+            ]],
+            ['beneficios', 'rangos', 'Beneficios · Qué permite cada puntaje', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Qué puedes solicitar',
+                'titulo' => 'Tu puntaje define tus opciones',
+                'items' => [
+                    ['titulo' => '90 a 100 · Excelente', 'descripcion' => 'Accedes a todos los beneficios.', 'icono' => null],
+                    ['titulo' => '70 a 89 · Bueno', 'descripcion' => 'Accedes a todos los beneficios: talleres, celulares, chip y vehículos.', 'icono' => null],
+                    ['titulo' => '50 a 69 · Regular', 'descripcion' => 'Solo puedes solicitar financiamiento de vehículos.', 'icono' => null],
+                    ['titulo' => 'Menos de 50', 'descripcion' => 'Aún no puedes solicitar nuevos financiamientos. Ponte al día para recuperar puntos.', 'icono' => null],
+                ],
+            ]],
+            ['beneficios', 'niveles', 'Beneficios · Niveles y condiciones', ['subtitulo', 'titulo', 'contenido', 'items'], [
+                'subtitulo' => 'Niveles',
+                'titulo' => 'Sube de nivel y paga menos de inicial',
+                'contenido' => 'Tu nivel sube con cada financiamiento que terminas de pagar. Porcentajes referenciales: tu asesor confirma las condiciones de cada financiamiento.',
+                'items' => [
+                    ['titulo' => 'Bronce', 'descripcion' => 'Con 3 financiamientos terminados. Inicial de 30 % en talleres y 40 % en celulares.', 'icono' => 'Medal'],
+                    ['titulo' => 'Plata', 'descripcion' => 'Con 6 financiamientos terminados. Inicial de 20 % en talleres y 30 % en celulares.', 'icono' => 'Award'],
+                    ['titulo' => 'Oro', 'descripcion' => 'Con 9 financiamientos terminados. Inicial de 10 % en talleres y 20 % en celulares.', 'icono' => 'Crown'],
+                ],
+            ]],
+            ['beneficios', 'cupones', 'Beneficios · Cupones (vienen del ERP)', ['subtitulo', 'titulo', 'contenido'], [
+                'subtitulo' => 'Cupones',
+                'titulo' => 'Cupones vigentes',
+                'contenido' => 'Descuentos para nuestra comunidad. Úsalos desde la app CrediGO.',
+            ]],
+            ['beneficios', 'comercios', 'Beneficios · Comercios GO (vienen del ERP)', ['subtitulo', 'titulo', 'contenido'], [
+                'subtitulo' => 'Comercios GO',
+                'titulo' => 'Comercios aliados cerca de ti',
+                'contenido' => 'Restaurantes, farmacias, tiendas y más con beneficios para ti.',
+            ]],
+
             // ── Cotizador ───────────────────────────────────────────
             ['cotizador', 'hero', 'Cotizador · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
                 'subtitulo' => 'Cotizador',

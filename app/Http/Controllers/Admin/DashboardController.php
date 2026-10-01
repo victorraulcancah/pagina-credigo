@@ -8,14 +8,19 @@ use App\Models\MensajeContacto;
 use App\Models\PreguntaFrecuente;
 use App\Models\Reclamacion;
 use App\Models\Servicio;
+use App\Services\Erp\CatalogosErp;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(CatalogosErp $catalogos): Response
     {
         return Inertia::render('Admin/Dashboard', [
+            'erp' => [
+                'configurado' => (bool) config('services.erp.url'),
+                'catalogos' => $catalogos->estado(),
+            ],
             'resumen' => [
                 'solicitudes_nuevas' => MensajeContacto::where('estado', 'nuevo')->count(),
                 'reclamaciones_pendientes' => Reclamacion::pendiente()->count(),

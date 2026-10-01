@@ -16,6 +16,8 @@ class OpcionPlanRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // El vínculo con el ERP se crea desde "Precios del ERP"; aquí solo se puede mantener o quitar
+            'erp_ref' => ['nullable', Rule::in(array_filter([$this->route('opcion')?->erp_ref]))],
             'servicio_id' => ['required', 'exists:servicios,id'],
             'nombre' => ['required', 'string', 'max:120'],
             'nota' => ['nullable', 'string', 'max:255'],

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\ConfiguracionController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ErpController;
 use App\Http\Controllers\Admin\MensajeContactoController;
 use App\Http\Controllers\Admin\OpcionPlanController;
 use App\Http\Controllers\Admin\PerfilController;
@@ -29,6 +30,8 @@ Route::controller(PaginaController::class)->group(function () {
     Route::get('/servicios', 'servicios')->name('servicios');
     Route::get('/requisitos', 'requisitos')->name('requisitos');
     Route::get('/como-pagar', 'pagos')->name('pagos');
+    Route::get('/talleres', 'talleres')->name('talleres');
+    Route::get('/beneficios', 'beneficios')->name('beneficios');
     Route::get('/soporte', 'contacto')->name('soporte');
     Route::get('/cotizador', 'cotizador')->name('cotizador');
     Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');
@@ -91,6 +94,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         ->parameters(['servicios' => 'servicio']);
 
     Route::get('/cotizador', [OpcionPlanController::class, 'index'])->name('cotizador.index');
+    Route::post('/cotizador/opciones/erp', [OpcionPlanController::class, 'importarErp'])->name('cotizador.opciones.erp');
     Route::resource('cotizador/opciones', OpcionPlanController::class)
         ->only(['store', 'update', 'destroy'])
         ->parameters(['opciones' => 'opcion'])
@@ -109,6 +113,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/reclamaciones', [ReclamacionController::class, 'index'])->name('reclamaciones.index');
     Route::put('/reclamaciones/{reclamacion}/respuesta', [ReclamacionController::class, 'responder'])->name('reclamaciones.responder');
     Route::get('/reclamaciones/adjuntos/{adjunto}', [ReclamacionController::class, 'adjunto'])->name('reclamaciones.adjunto');
+
+    Route::post('/erp/sincronizar', [ErpController::class, 'sincronizar'])->name('erp.sincronizar');
 
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');

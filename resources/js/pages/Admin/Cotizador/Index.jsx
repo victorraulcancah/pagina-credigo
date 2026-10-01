@@ -1,4 +1,6 @@
-import { Calculator, ExternalLink, Plus, Save } from 'lucide-react';
+import { router } from '@inertiajs/react';
+import { Calculator, ExternalLink, Link2, Plus, RefreshCw, Save, Search, Unlink } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
@@ -12,10 +14,12 @@ import Modal from '@/components/ui/Modal';
 import Select from '@/components/ui/Select';
 import Switch from '@/components/ui/Switch';
 import { useCrudModal } from '@/hooks/useCrudModal';
+import { formatoFecha } from '@/lib/fechas';
 import { FRECUENCIAS, resumenOpcion } from '@/lib/moneda';
 
 const VACIO = {
     servicio_id: '',
+    erp_ref: '',
     nombre: '',
     nota: '',
     moneda: 'PEN',
@@ -41,13 +45,142 @@ function montos(opcion) {
     return partes.length ? partes.join(' · ') : 'Sin montos: se muestra "consulta la cuota"';
 }
 
-export default function CotizadorIndex({ planes, monedas, frecuencias }) {
+/** Fila de un precio del ERP con el selector de plan para agregarlo al cotizador. */
+function PrecioErp({ opcion, planes, vinculadaEn }) {
+    const [planId, setPlanId] = useState(planes[0]?.id ?? '');
+    const [enviando, setEnviando] = useState(false);
+
+    const agregar = () =>
+        router.post(
+            '/admin/cotizador/opciones/erp',
+            { servicio_id: planId, erp_ref: opcion.ref },
+            { preserveScroll: true, onStart: () => setEnviando(true), onFinish: () => setEnviando(false) },
+        );
+
+    return (
+        <li className="flex flex-col gap-3 py-3 lg:flex-row lg:items-center">
+            <div className="min-w-0 flex-1">
+                <p className="font-semibold text-gray-900">{opcion.nombre}</p>
+                <p className="text-sm text-gray-600">{montos(opcion)}</p>
+                {opcion.nota && <p className="text-xs text-gray-400">{opcion.nota}</p>}
+                {vinculadaEn.length > 0 && (
+                    <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700">
+                        <Link2 className="size-3" aria-hidden="true" /> En el cotizador: {vinculadaEn.join(', ')}
+                    </p>
+                )}
+            </div>
+            {opcion.importable ? (
+                <div className="flex shrink-0 items-center gap-2">
+                    <Select
+                        aria-label={'Plan para ' + opcion.nombre}
+                        value={planId}
+                        onChange={(e) => setPlanId(e.target.value)}
+                        options={planes.map((p) => ({ value: p.id, label: p.titulo }))}
+                        className="h-9 w-48 text-sm sm:h-9"
+                    />
+                    <Button variant="secondary" size="sm" icon={Plus} onClick={agregar} disabled={enviando || !planId}>
+                        Agregar
+                    </Button>
+                </div>
+            ) : (
+                <p className="shrink-0 text-xs text-gray-400">Frecuencia no compatible con el cotizador</p>
+            )}
+        </li>
+    );
+}
+
+/** Precios de los planes del ERP: al agregarlos quedan vinculados y se actualizan solos. */
+function PreciosErp({ erp, planes }) {
+    const [buscar, setBuscar] = useState('');
+    const [actualizando, setActualizando] = useState(false);
+
+    // En qué planes del cotizador está vinculada cada referencia del ERP
+    const vinculos = useMemo(() => {
+        const mapa = {};
+        planes.forEach((plan) =>
+            plan.opciones.forEach((o) => {
+                if (o.erp_ref) (mapa[o.erp_ref] ??= []).push(plan.titulo);
+            }),
+        );
+        return mapa;
+    }, [planes]);
+
+    const texto = buscar.trim().toLowerCase();
+    const visibles = erp.planes
+        .map((plan) => ({
+            ...plan,
+            opciones: plan.opciones.filter((o) => !texto || [plan.nombre, plan.categoria, o.nombre].join(' ').toLowerCase().includes(texto)),
+        }))
+        .filter((plan) => plan.opciones.length > 0);
+
+    const actualizar = () =>
+        router.post('/admin/erp/sincronizar', {}, { preserveScroll: true, onStart: () => setActualizando(true), onFinish: () => setActualizando(false) });
+
+    return (
+        <section className="mt-8 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-5">
+            <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h2 className="flex items-center gap-2 font-bold text-gray-900">
+                        <Link2 className="size-5 text-primary" aria-hidden="true" /> Precios del ERP
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                        Agrega una opción con los precios del ERP: queda vinculada y sus montos se actualizan solos cada 30 minutos.
+                        {erp.actualizado && ' Última lectura: ' + formatoFecha(erp.actualizado) + '.'}
+                    </p>
+                </div>
+                {erp.configurado && (
+                    <Button variant="ghost" size="sm" icon={RefreshCw} onClick={actualizar} disabled={actualizando} className="shrink-0 border border-gray-200">
+                        {actualizando ? 'Actualizando...' : 'Actualizar'}
+                    </Button>
+                )}
+            </header>
+
+            {!erp.configurado ? (
+                <p className="rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-500">
+                    Falta configurar <code className="rounded bg-white px-1.5 py-0.5">ERP_URL</code> en el .env del servidor.
+                </p>
+            ) : erp.planes.length === 0 ? (
+                <p className="rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-500">El ERP no respondió o no tiene planes con precio. Intenta actualizar en unos minutos.</p>
+            ) : (
+                <>
+                    <div className="relative mb-2 max-w-sm">
+                        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+                        <Input
+                            type="search"
+                            aria-label="Buscar en los precios del ERP"
+                            placeholder="Buscar plan o variante"
+                            value={buscar}
+                            onChange={(e) => setBuscar(e.target.value)}
+                            className="h-10 pl-9 sm:h-10"
+                        />
+                    </div>
+                    {visibles.map((plan) => (
+                        <div key={plan.id} className="mt-4">
+                            <p className="text-xs font-bold tracking-wide text-gray-400 uppercase">
+                                {plan.categoria ? plan.categoria + ' · ' : ''}
+                                {plan.nombre}
+                            </p>
+                            <ul className="divide-y divide-gray-100">
+                                {plan.opciones.map((opcion) => (
+                                    <PrecioErp key={opcion.ref} opcion={opcion} planes={planes} vinculadaEn={vinculos[opcion.ref] ?? []} />
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </>
+            )}
+        </section>
+    );
+}
+
+export default function CotizadorIndex({ planes, monedas, frecuencias, erp }) {
     const crud = useCrudModal({
         url: '/admin/cotizador/opciones',
         vacio: VACIO,
         aFormulario: (o) => ({
             ...VACIO,
             ...o,
+            erp_ref: o.erp_ref ?? '',
             nota: o.nota ?? '',
             inicial: o.inicial ?? '',
             cuota: o.cuota ?? '',
@@ -109,6 +242,11 @@ export default function CotizadorIndex({ planes, monedas, frecuencias }) {
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <p className="font-semibold text-gray-900">{opcion.nombre}</p>
                                                     <EstadoBadge activo={opcion.activo} />
+                                                    {opcion.erp_ref && (
+                                                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-xs font-semibold text-primary">
+                                                            <Link2 className="size-3" aria-hidden="true" /> Precio del ERP
+                                                        </span>
+                                                    )}
                                                 </div>
                                                 <p className="text-sm text-gray-600">{montos(opcion)}</p>
                                                 {opcion.nota && <p className="text-xs text-gray-400">{opcion.nota}</p>}
@@ -122,6 +260,8 @@ export default function CotizadorIndex({ planes, monedas, frecuencias }) {
                     ))}
                 </div>
             )}
+
+            {planes.length > 0 && <PreciosErp erp={erp} planes={planes} />}
 
             <Modal
                 open={crud.abierto}
@@ -139,6 +279,24 @@ export default function CotizadorIndex({ planes, monedas, frecuencias }) {
                 }
             >
                 <form id="form-opcion" onSubmit={crud.guardar} className="grid gap-5 sm:grid-cols-2">
+                    {data.erp_ref && (
+                        <div className="flex flex-col gap-3 rounded-xl bg-primary-50 px-4 py-3 text-sm text-primary sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
+                            <p className="flex items-start gap-2">
+                                <Link2 className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                                Vinculada al ERP: los montos se actualizan solos cada 30 minutos. El nombre y la nota puedes cambiarlos.
+                            </p>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                icon={Unlink}
+                                onClick={() => setData('erp_ref', '')}
+                                className="shrink-0 border border-primary-200 bg-white"
+                            >
+                                Quitar vínculo
+                            </Button>
+                        </div>
+                    )}
                     <FormField label="Plan" htmlFor="servicio_id" error={errors.servicio_id} required className="sm:col-span-2">
                         <Select
                             id="servicio_id"

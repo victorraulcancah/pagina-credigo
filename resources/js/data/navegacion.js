@@ -3,6 +3,8 @@ export const navLinks = [
     { label: 'Inicio', href: '/' },
     { label: 'Nosotros', href: '/nosotros' },
     { label: 'Servicios', href: '/servicios' },
+    { label: 'Talleres aliados', href: '/talleres' },
+    { label: 'Beneficios', href: '/beneficios' },
     { label: 'Requisitos', href: '/requisitos' },
     { label: 'Cómo pagar', href: '/como-pagar' },
     { label: 'Cotizador', href: '/cotizador' },
@@ -17,12 +19,14 @@ export const navLinks = [
 export const menuPrincipal = [
     { label: 'Inicio', href: '/' },
     { label: 'Nosotros', href: '/nosotros' },
+    { label: 'Beneficios', href: '/beneficios' },
     {
         label: 'Planes',
         grupo: 'Nuestros planes',
         items: [
             { label: 'Servicios y planes', href: '/servicios' },
             { label: 'Cotizador', href: '/cotizador' },
+            { label: 'Talleres aliados', href: '/talleres' },
         ],
         destacado: {
             titulo: 'Cotiza en segundos',

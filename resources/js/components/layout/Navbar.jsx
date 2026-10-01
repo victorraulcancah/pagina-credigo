@@ -142,7 +142,8 @@ export default function Navbar() {
 
     const claseOpcion = (activo, desplegado = false) =>
         cn(
-            'inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition-colors',
+            // Más compacto en 1024 px para que entre todo en una línea
+            'inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap transition-colors xl:px-4',
             activo ? 'bg-accent text-primary' : desplegado ? 'bg-white/10 text-white' : 'text-white/85 hover:bg-white/10 hover:text-white',
         );
 
@@ -199,10 +200,12 @@ export default function Navbar() {
                     <div className="flex items-center gap-1 sm:gap-2">
                         <Link
                             href={usuario ? '/admin' : '/login'}
+                            title={usuario ? 'Ir al panel' : 'Acceso al sistema'}
                             className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap text-white/85 transition hover:bg-white/10 hover:text-white lg:inline-flex"
                         >
                             {usuario ? <LayoutDashboard className="size-4" aria-hidden="true" /> : <LogIn className="size-4" aria-hidden="true" />}
-                            {usuario ? 'Ir al panel' : 'Acceso al sistema'}
+                            {/* En 1024 px solo el ícono (el nombre queda para lectores de pantalla) */}
+                            <span className="sr-only xl:not-sr-only">{usuario ? 'Ir al panel' : 'Acceso al sistema'}</span>
                         </Link>
                         <Link
                             href="/cotizador"

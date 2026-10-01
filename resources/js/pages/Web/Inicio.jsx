@@ -10,9 +10,9 @@ import HeroBanner from '@/components/web/HeroBanner';
 import NivelesSection from '@/components/web/NivelesSection';
 import PasosRapidos from '@/components/web/PasosRapidos';
 import PasosSection from '@/components/web/PasosSection';
-import ServicioCard from '@/components/web/ServicioCard';
+import ServicioCard, { columnasPlanes } from '@/components/web/ServicioCard';
 import TextoConImagen from '@/components/web/TextoConImagen';
-import { cn, columnasLg } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 export default function Inicio({ banners, secciones, servicios, preguntas }) {
     const encabezadoPlanes = secciones['inicio.servicios'];
@@ -31,7 +31,7 @@ export default function Inicio({ banners, secciones, servicios, preguntas }) {
                             description={encabezadoPlanes?.contenido}
                         />
                     </Revelar>
-                    <div className={cn('mt-12 grid gap-6 sm:grid-cols-2', columnasLg(servicios.length))}>
+                    <div className={cn('mt-12 grid gap-6 sm:grid-cols-2', columnasPlanes(servicios.length))}>
                         {servicios.map((servicio, i) => (
                             <Revelar key={servicio.id} retraso={escalonar(i)} className="h-full">
                                 <ServicioCard servicio={servicio} />

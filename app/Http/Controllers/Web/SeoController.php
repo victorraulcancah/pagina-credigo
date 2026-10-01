@@ -22,6 +22,8 @@ class SeoController extends Controller
             ['/cotizador', 0.9, max($ultimaEdicion(['cotizador']), $serviciosEditados)],
             ['/requisitos', 0.8, $ultimaEdicion(['requisitos'])],
             ['/como-pagar', 0.7, $ultimaEdicion(['pagos'])],
+            ['/talleres', 0.7, $ultimaEdicion(['talleres'])],
+            ['/beneficios', 0.7, $ultimaEdicion(['beneficios'])],
             ['/nosotros', 0.8, $ultimaEdicion(['nosotros', 'general'])],
             ['/soporte', 0.8, $ultimaEdicion(['contacto'])],
             ['/libro-de-reclamaciones', 0.3, null],

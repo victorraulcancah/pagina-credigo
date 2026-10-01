@@ -161,7 +161,9 @@ describe('SEO', function () {
         $this->get('/sitemap.xml')->assertOk()
             ->assertSee('<loc>'.url('/cotizador').'</loc>', false)
             ->assertSee('<loc>'.url('/requisitos').'</loc>', false)
-            ->assertSee('<loc>'.url('/como-pagar').'</loc>', false);
+            ->assertSee('<loc>'.url('/como-pagar').'</loc>', false)
+            ->assertSee('<loc>'.url('/talleres').'</loc>', false)
+            ->assertSee('<loc>'.url('/beneficios').'</loc>', false);
         $this->get('/robots.txt')->assertOk()->assertSee('Disallow: /admin')->assertSee('Sitemap: '.url('/sitemap.xml'));
     });
 });

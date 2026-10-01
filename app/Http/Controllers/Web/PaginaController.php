@@ -9,6 +9,9 @@ use App\Models\PreguntaFrecuente;
 use App\Models\Seccion;
 use App\Models\Servicio;
 use App\Services\ContenidoService;
+use App\Services\Erp\ComerciosErp;
+use App\Services\Erp\CuponesErp;
+use App\Services\Erp\TalleresErp;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -86,6 +89,29 @@ class PaginaController extends Controller
         return Inertia::render('Web/ComoPagar', [
             'secciones' => $secciones,
             'seo' => $this->seo('Cómo pagar', $secciones['pagos.hero'] ?? null),
+        ]);
+    }
+
+    public function talleres(TalleresErp $talleres): Response
+    {
+        $secciones = $this->contenido->secciones(['talleres', 'general']);
+
+        return Inertia::render('Web/Talleres', [
+            'secciones' => $secciones,
+            'talleres' => $talleres->items(),
+            'seo' => $this->seo('Talleres aliados', $secciones['talleres.hero'] ?? null),
+        ]);
+    }
+
+    public function beneficios(ComerciosErp $comercios, CuponesErp $cupones): Response
+    {
+        $secciones = $this->contenido->secciones(['beneficios', 'general']);
+
+        return Inertia::render('Web/Beneficios', [
+            'secciones' => $secciones,
+            'comercios' => $comercios->items(),
+            'cupones' => $cupones->vigentes(),
+            'seo' => $this->seo('Beneficios', $secciones['beneficios.hero'] ?? null),
         ]);
     }
 

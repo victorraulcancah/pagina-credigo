@@ -1,12 +1,76 @@
-import { Link } from '@inertiajs/react';
-import { ArrowRight, BookOpenText, Briefcase, Building, CircleQuestionMark, Images, Inbox, LayoutTemplate, Palette } from 'lucide-react';
+import { Link, router } from '@inertiajs/react';
+import { ArrowRight, BookOpenText, Briefcase, Building, CircleQuestionMark, Images, Inbox, LayoutTemplate, Palette, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
 import PageHeader from '@/components/admin/PageHeader';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { formatoFecha } from '@/lib/fechas';
 import { cn } from '@/lib/utils';
 
-export default function Dashboard({ resumen, ultimosMensajes }) {
+const CATALOGOS_ERP = [
+    { clave: 'talleres', etiqueta: 'Talleres aliados', href: '/talleres' },
+    { clave: 'comercios', etiqueta: 'Comercios GO', href: '/beneficios' },
+    { clave: 'cupones', etiqueta: 'Cupones públicos', href: '/beneficios' },
+    { clave: 'planes', etiqueta: 'Precios de planes', href: '/admin/cotizador' },
+];
+
+/** Conexión con el ERP: qué se muestra en la web y cuándo se actualizó cada cosa. */
+function PanelErp({ erp }) {
+    const [actualizando, setActualizando] = useState(false);
+
+    const actualizar = () =>
+        router.post('/admin/erp/sincronizar', {}, { preserveScroll: true, onStart: () => setActualizando(true), onFinish: () => setActualizando(false) });
+
+    return (
+        <Panel title="Datos del ERP" className="mt-6">
+            {erp.configurado ? (
+                <div className="flex flex-col gap-4">
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        {CATALOGOS_ERP.map((c) => {
+                            const estado = erp.catalogos[c.clave] ?? { cantidad: 0, actualizado: null };
+                            return (
+                                <a
+                                    key={c.clave}
+                                    href={c.href}
+                                    className="flex items-center gap-3 rounded-xl p-3 ring-1 ring-gray-200 transition hover:bg-gray-50"
+                                >
+                                    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-lg font-extrabold text-accent">
+                                        {estado.cantidad}
+                                    </span>
+                                    <span className="min-w-0">
+                                        <span className="block text-sm font-semibold text-gray-900">{c.etiqueta}</span>
+                                        <span className={cn('block truncate text-xs', estado.actualizado ? 'text-gray-500' : 'text-red-600')}>
+                                            {estado.actualizado ? formatoFecha(estado.actualizado) : 'El ERP no respondió'}
+                                        </span>
+                                    </span>
+                                </a>
+                            );
+                        })}
+                    </div>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-sm text-gray-500">Se actualiza solo cada 30 minutos. Si el ERP no responde, la web sigue mostrando la última copia.</p>
+                        <button
+                            type="button"
+                            onClick={actualizar}
+                            disabled={actualizando}
+                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:opacity-60"
+                        >
+                            <RefreshCw className={cn('size-4', actualizando && 'animate-spin')} aria-hidden="true" />
+                            {actualizando ? 'Actualizando...' : 'Actualizar ahora'}
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <p className="text-sm text-gray-500">
+                    Falta configurar <code className="rounded bg-gray-100 px-1.5 py-0.5">ERP_URL</code> en el archivo .env del servidor para mostrar talleres,
+                    comercios, cupones y precios del ERP.
+                </p>
+            )}
+        </Panel>
+    );
+}
+
+export default function Dashboard({ resumen, ultimosMensajes, erp }) {
     const tarjetas = [
         { label: 'Solicitudes nuevas', valor: resumen.solicitudes_nuevas, icon: Inbox, href: '/admin/mensajes?estado=nuevo', alerta: resumen.solicitudes_nuevas > 0 },
         {
@@ -49,6 +113,8 @@ export default function Dashboard({ resumen, ultimosMensajes }) {
                     </Link>
                 ))}
             </div>
+
+            <PanelErp erp={erp} />
 
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
                 <Panel title="Últimas solicitudes" className="lg:col-span-2">

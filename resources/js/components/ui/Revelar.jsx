@@ -20,11 +20,12 @@ export const escalonar = (indice, paso = 120, maximo = 5) => Math.min(indice, ma
  */
 export default function Revelar({ as: Tag = 'div', desde = 'abajo', retraso = 0, className, style, children, ...props }) {
     const ref = useRef(null);
-    const [visible, setVisible] = useState(false);
+    // Con "reducir movimiento" (o sin IntersectionObserver) se muestra desde el primer render, sin transición
+    const [sinAnimacion] = useState(() => !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const [visible, setVisible] = useState(sinAnimacion);
 
     useEffect(() => {
         const elemento = ref.current;
-        const sinAnimacion = !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         if (!elemento || sinAnimacion) {
             setVisible(true);
@@ -44,14 +45,15 @@ export default function Revelar({ as: Tag = 'div', desde = 'abajo', retraso = 0,
         observador.observe(elemento);
 
         return () => observador.disconnect();
-    }, []);
+    }, [sinAnimacion]);
 
     return (
         <Tag
             ref={ref}
             style={retraso ? { ...style, transitionDelay: `${retraso}ms` } : style}
             className={cn(
-                'transition-[opacity,translate,scale] duration-700 ease-out print:translate-none print:scale-100 print:opacity-100',
+                !sinAnimacion && 'transition-[opacity,translate,scale] duration-700 ease-out',
+                'print:translate-none print:scale-100 print:opacity-100',
                 visible ? 'translate-none scale-100 opacity-100' : ['opacity-0', DESDE[desde]],
                 className,
             )}

@@ -65,6 +65,20 @@
         color: var(--color-primary);
     }
 
+    /* Superficies del navegador con la marca: barra de desplazamiento, foco y subrayados */
+    html {
+        scrollbar-color: color-mix(in oklab, var(--color-primary) 45%, white) transparent;
+    }
+
+    :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 3px;
+    }
+
+    a {
+        text-underline-offset: 0.22em;
+    }
+
     button:not(:disabled),
     [role='button']:not(:disabled) {
         cursor: pointer;

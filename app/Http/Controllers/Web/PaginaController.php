@@ -29,7 +29,10 @@ class PaginaController extends Controller
         return Inertia::render('Web/Inicio', [
             'banners' => Banner::activo()->ordenado()->get(),
             'secciones' => $this->contenido->secciones(['inicio', 'general']),
-            'servicios' => Servicio::activo()->destacado()->conOpcionesActivas()->ordenado()->get(),
+            // Con sus opciones activas: el inicio muestra "desde S/ X por semana" de cada plan
+            'servicios' => Servicio::activo()->destacado()->conOpcionesActivas()->ordenado()
+                ->with(['opciones' => fn ($q) => $q->activo()->ordenado()->select(['id', 'servicio_id', 'moneda', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia'])])
+                ->get(),
             'preguntas' => PreguntaFrecuente::activo()->ordenado()->get(),
             'seo' => [],
         ]);

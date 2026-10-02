@@ -12,7 +12,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 
 function enviarContacto(array $cambios = []): TestResponse
 {
-    return test()->post('/contacto', [
+    return test()->post('/api/solicitudes', [
         'nombre' => 'Luis',
         'apellido' => 'Quispe',
         'email' => 'luis@example.com',
@@ -40,7 +40,7 @@ describe('avisos por correo', function () {
     it('avisa a los correos del equipo cuando llega una solicitud', function () {
         configurar('notificaciones_email', 'ventas@credigo.test, gerencia@credigo.test');
 
-        enviarContacto()->assertSessionHasNoErrors();
+        enviarContacto()->assertSuccessful();
 
         Mail::assertSent(NuevaSolicitud::class, fn ($mail) => $mail->hasTo('ventas@credigo.test') && $mail->hasTo('gerencia@credigo.test'));
     });
@@ -59,8 +59,8 @@ describe('avisos por correo', function () {
 
     it('rechaza correos de aviso mal escritos y no los expone en el sitio público', function () {
         $this->actingAs(User::factory()->create())
-            ->put('/admin/configuracion', ['notificaciones_email' => 'bien@credigo.test, mal-correo'])
-            ->assertSessionHasErrors('notificaciones_email');
+            ->put('/api/admin/configuracion', ['notificaciones_email' => 'bien@credigo.test, mal-correo'])
+            ->assertJsonValidationErrors('notificaciones_email');
 
         configurar('notificaciones_email', 'interno@credigo.test');
         $this->get('/')->assertInertia(fn (Assert $page) => $page->missing('sitio.notificaciones_email'));
@@ -83,11 +83,11 @@ describe('seguimiento de solicitudes', function () {
         enviarContacto();
         $mensaje = MensajeContacto::sole();
 
-        $this->put("/admin/mensajes/{$mensaje->id}/seguimiento", [
+        $this->put("/api/admin/solicitudes/{$mensaje->id}/seguimiento", [
             'estado' => 'contactado',
             'asignado_a' => $this->asesor->id,
             'notas' => 'Llamé el lunes.',
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         expect($mensaje->fresh())
             ->estado->toBe('contactado')

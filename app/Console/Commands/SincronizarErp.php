@@ -21,7 +21,9 @@ class SincronizarErp extends Command
         }
 
         foreach ($catalogos->estado(sincronizar: true) as $nombre => $estado) {
-            $this->line(sprintf('%-10s %3d  (actualizado: %s)', $nombre, $estado['cantidad'], $estado['actualizado'] ?? 'nunca'));
+            $linea = sprintf('%-10s %3d  (actualizado: %s)', $nombre, $estado['cantidad'], $estado['actualizado'] ?? 'nunca');
+            // Si el ERP no respondió se sigue usando la última copia
+            $estado['fallo'] ? $this->warn("{$linea}  sin respuesta del ERP") : $this->line($linea);
         }
 
         return self::SUCCESS;

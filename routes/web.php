@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\ConfiguracionController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DocumentoController;
-use App\Http\Controllers\Admin\ErpController;
 use App\Http\Controllers\Admin\MensajeContactoController;
 use App\Http\Controllers\Admin\OpcionPlanController;
 use App\Http\Controllers\Admin\PerfilController;
@@ -13,7 +12,6 @@ use App\Http\Controllers\Admin\ReclamacionController;
 use App\Http\Controllers\Admin\SeccionController;
 use App\Http\Controllers\Admin\ServicioController;
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Web\ContactoController;
 use App\Http\Controllers\Web\LibroReclamacionesController;
 use App\Http\Controllers\Web\PaginaController;
 use App\Http\Controllers\Web\SeoController;
@@ -22,14 +20,19 @@ use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
-| Sitio público
+| Rutas web: solo páginas (Inertia) y descargas.
+| Todo lo que guarda o borra va por la API REST (routes/api.php).
 |--------------------------------------------------------------------------
+*/
+
+/*
+| Sitio público (los datos llegan desde el servidor: Google y WhatsApp leen el título y la imagen)
 */
 Route::controller(PaginaController::class)->group(function () {
     Route::get('/', 'inicio')->name('inicio');
     Route::get('/nosotros', 'nosotros')->name('nosotros');
     Route::get('/servicios', 'servicios')->name('servicios');
-    Route::get('/servicios/{servicio:slug}', 'plan')->name('plan');
+    Route::get('/servicios/{slug}', 'plan')->name('plan');
     Route::get('/requisitos', 'requisitos')->name('requisitos');
     Route::get('/como-pagar', 'pagos')->name('pagos');
     Route::get('/talleres', 'talleres')->name('talleres');
@@ -46,23 +49,15 @@ Route::permanentRedirect('/contacto', '/soporte');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
-Route::post('/contacto', [ContactoController::class, 'store'])
-    ->middleware('throttle:5,1')
-    ->name('contacto.store');
-
-// Libro de Reclamaciones virtual (Indecopi)
+// Libro de Reclamaciones virtual (Indecopi): registrar y consultar van por la API
 Route::controller(LibroReclamacionesController::class)->prefix('libro-de-reclamaciones')->name('reclamaciones.')->group(function () {
     Route::get('/', 'create')->name('create');
-    Route::post('/', 'store')->middleware('throttle:5,1')->name('store');
     Route::get('/constancia/{reclamacion}', 'constancia')->middleware('signed')->name('constancia');
     Route::get('/consultar', 'consultar')->name('consultar');
-    Route::post('/consultar', 'buscar')->middleware('throttle:10,1')->name('buscar');
 });
 
 /*
-|--------------------------------------------------------------------------
-| Autenticación del panel
-|--------------------------------------------------------------------------
+| Autenticación del panel (sesión: la misma que usa la API del panel)
 */
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -72,9 +67,7 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
 /*
-|--------------------------------------------------------------------------
-| Panel administrativo (/admin)
-|--------------------------------------------------------------------------
+| Panel administrativo (/admin): pantallas. Guardan y eliminan con la API (/api/admin).
 */
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
@@ -82,49 +75,22 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/configuracion/empresa', [ConfiguracionController::class, 'empresa'])->name('configuracion.empresa');
     Route::get('/configuracion/apariencia', [ConfiguracionController::class, 'apariencia'])->name('configuracion.apariencia');
     Route::get('/configuracion/seo', [ConfiguracionController::class, 'seo'])->name('configuracion.seo');
-    Route::put('/configuracion', [ConfiguracionController::class, 'update'])->name('configuracion.update');
 
-    Route::resource('banners', BannerController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
-
-    Route::resource('secciones', SeccionController::class)
-        ->only(['index', 'edit', 'update'])
-        ->parameters(['secciones' => 'seccion']);
-
-    Route::resource('servicios', ServicioController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['servicios' => 'servicio']);
-
+    Route::get('/banners', [BannerController::class, 'index'])->name('banners.index');
+    Route::get('/secciones', [SeccionController::class, 'index'])->name('secciones.index');
+    Route::get('/secciones/{seccion}/edit', [SeccionController::class, 'edit'])->name('secciones.edit');
+    Route::get('/servicios', [ServicioController::class, 'index'])->name('servicios.index');
     Route::get('/cotizador', [OpcionPlanController::class, 'index'])->name('cotizador.index');
-    Route::post('/cotizador/opciones/erp', [OpcionPlanController::class, 'importarErp'])->name('cotizador.opciones.erp');
-    Route::resource('cotizador/opciones', OpcionPlanController::class)
-        ->only(['store', 'update', 'destroy'])
-        ->parameters(['opciones' => 'opcion'])
-        ->names('cotizador.opciones');
-
-    Route::resource('preguntas', PreguntaFrecuenteController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['preguntas' => 'pregunta']);
-
-    Route::resource('documentos', DocumentoController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['documentos' => 'documento']);
+    Route::get('/preguntas', [PreguntaFrecuenteController::class, 'index'])->name('preguntas.index');
+    Route::get('/documentos', [DocumentoController::class, 'index'])->name('documentos.index');
 
     Route::get('/mensajes', [MensajeContactoController::class, 'index'])->name('mensajes.index');
     Route::get('/mensajes/exportar', [MensajeContactoController::class, 'exportar'])->name('mensajes.exportar');
-    Route::put('/mensajes/{mensaje}/seguimiento', [MensajeContactoController::class, 'seguimiento'])->name('mensajes.seguimiento');
-    Route::patch('/mensajes/{mensaje}/leido', [MensajeContactoController::class, 'leido'])->name('mensajes.leido');
-    Route::delete('/mensajes/{mensaje}', [MensajeContactoController::class, 'destroy'])->name('mensajes.destroy');
 
     Route::get('/reclamaciones', [ReclamacionController::class, 'index'])->name('reclamaciones.index');
-    Route::put('/reclamaciones/{reclamacion}/respuesta', [ReclamacionController::class, 'responder'])->name('reclamaciones.responder');
     Route::get('/reclamaciones/adjuntos/{adjunto}', [ReclamacionController::class, 'adjunto'])->name('reclamaciones.adjunto');
 
-    Route::post('/erp/sincronizar', [ErpController::class, 'sincronizar'])->name('erp.sincronizar');
-
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
-    Route::put('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
-    Route::put('/perfil/password', [PerfilController::class, 'password'])->name('perfil.password');
 });
 
 // Guía visual de componentes, solo disponible en desarrollo

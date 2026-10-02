@@ -33,14 +33,14 @@ it('marca en las tarjetas los planes que se pueden cotizar', function () {
 });
 
 it('la solicitud del cotizador llega a la bandeja de mensajes', function () {
-    $this->post('/contacto', [
+    $this->post('/api/solicitudes', [
         'origen' => 'cotizador',
         'nombre' => 'Luis',
         'telefono' => '987654321',
         'asunto' => 'Cotización: CrediYango',
         'mensaje' => "Quiero cotizar: CrediYango — CrediYango.\nInicial: S/ 2,000",
         'acepta_politica' => true,
-    ])->assertSessionHasNoErrors();
+    ])->assertSuccessful();
 
     expect(MensajeContacto::sole()->asunto)->toBe('Cotización: CrediYango');
 });
@@ -61,26 +61,26 @@ it('el panel crea, edita y elimina opciones del cotizador', function () {
         'activo' => true,
     ];
 
-    $this->post('/admin/cotizador/opciones', $datos)->assertSessionHasNoErrors();
+    $this->post('/api/admin/cotizador/opciones', $datos)->assertSuccessful();
     $opcion = OpcionPlan::firstWhere('nombre', 'Celular Redmi');
     expect($opcion->frecuencia)->toBe('mensual');
 
-    $this->put("/admin/cotizador/opciones/{$opcion->id}", [...$datos, 'cuota' => 120])->assertSessionHasNoErrors();
+    $this->put("/api/admin/cotizador/opciones/{$opcion->id}", [...$datos, 'cuota' => 120])->assertSuccessful();
     expect($opcion->fresh()->cuota)->toBe(120.0);
 
-    $this->delete("/admin/cotizador/opciones/{$opcion->id}");
+    $this->delete("/api/admin/cotizador/opciones/{$opcion->id}");
     expect(OpcionPlan::find($opcion->id))->toBeNull();
 });
 
 it('exige el monto de la cuota si se indica el número de cuotas', function () {
     $this->actingAs(User::factory()->create());
 
-    $this->post('/admin/cotizador/opciones', [
+    $this->post('/api/admin/cotizador/opciones', [
         'servicio_id' => Servicio::first()->id,
         'nombre' => 'Opción incompleta',
         'moneda' => 'PEN',
         'numero_cuotas' => 10,
         'frecuencia' => 'semanal',
         'orden' => 0,
-    ])->assertSessionHasErrors('cuota');
+    ])->assertJsonValidationErrors('cuota');
 });

@@ -3,39 +3,44 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\Banner;
-use App\Models\Documento;
+use App\Http\Resources\BannerResource;
+use App\Http\Resources\DocumentoResource;
+use App\Http\Resources\PreguntaFrecuenteResource;
+use App\Http\Resources\ServicioResource;
 use App\Models\MensajeContacto;
-use App\Models\OpcionPlan;
-use App\Models\PreguntaFrecuente;
-use App\Models\Seccion;
-use App\Models\Servicio;
-use App\Services\ContenidoService;
+use App\Services\BannerService;
+use App\Services\DocumentoService;
 use App\Services\Erp\ComerciosErp;
 use App\Services\Erp\CuponesErp;
 use App\Services\Erp\TalleresErp;
+use App\Services\PreguntaFrecuenteService;
+use App\Services\SeccionService;
+use App\Services\ServicioService;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Páginas públicas del sitio. Todo el contenido sale de la BD (se edita en /admin).
- * El prop `seo` lo usa app.blade.php para el título, la descripción y la vista
- * previa al compartir (WhatsApp/Facebook leen el HTML del servidor, no el JS).
+ * Páginas públicas del sitio. Los datos salen de los mismos Services y Resources que la API,
+ * pero llegan con la página desde el servidor: el prop `seo` lo usa app.blade.php para el título,
+ * la descripción y la vista previa al compartir (WhatsApp/Facebook leen el HTML, no el JS).
  */
 class PaginaController extends Controller
 {
-    public function __construct(private ContenidoService $contenido) {}
+    public function __construct(
+        private SeccionService $secciones,
+        private ServicioService $servicios,
+        private DocumentoService $documentos,
+        private PreguntaFrecuenteService $preguntas,
+    ) {}
 
-    public function inicio(): Response
+    public function inicio(BannerService $banners): Response
     {
         return Inertia::render('Web/Inicio', [
-            'banners' => Banner::activo()->ordenado()->get(),
-            'secciones' => $this->contenido->secciones(['inicio', 'general']),
-            // Con sus opciones activas: el inicio muestra "desde S/ X por semana" de cada plan
-            'servicios' => Servicio::activo()->destacado()->conOpcionesActivas()->ordenado()
-                ->with(['opciones' => fn ($q) => $q->activo()->ordenado()->select(['id', 'servicio_id', 'moneda', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia'])])
-                ->get(),
-            'preguntas' => PreguntaFrecuente::activo()->ordenado()->get(),
+            'banners' => BannerResource::collection($banners->activos())->resolve(),
+            'secciones' => $this->secciones->publicas(['inicio', 'general']),
+            // Los destacados, con sus opciones visibles: "Cuota desde S/ X por semana"
+            'servicios' => ServicioResource::collection($this->servicios->visibles(soloDestacados: true))->resolve(),
+            'preguntas' => PreguntaFrecuenteResource::collection($this->preguntas->activas())->resolve(),
             'seo' => [],
         ]);
     }
@@ -43,22 +48,18 @@ class PaginaController extends Controller
     /** Cotizador: planes visibles que tienen al menos una opción visible. */
     public function cotizador(): Response
     {
-        $secciones = $this->contenido->secciones(['cotizador']);
+        $secciones = $this->secciones->publicas(['cotizador']);
 
         return Inertia::render('Web/Cotizador', [
             'secciones' => $secciones,
-            'planes' => Servicio::activo()
-                ->whereHas('opciones', fn ($q) => $q->activo())
-                ->with(['opciones' => fn ($q) => $q->activo()->ordenado()])
-                ->ordenado()
-                ->get(['id', 'titulo', 'etiqueta', 'icono', 'descripcion']),
+            'planes' => ServicioResource::collection($this->servicios->cotizables())->resolve(),
             'seo' => $this->seo('Cotizador', $secciones['cotizador.hero'] ?? null),
         ]);
     }
 
     public function nosotros(): Response
     {
-        $secciones = $this->contenido->secciones(['nosotros', 'general']);
+        $secciones = $this->secciones->publicas(['nosotros', 'general']);
 
         return Inertia::render('Web/Nosotros', [
             'secciones' => $secciones,
@@ -68,33 +69,27 @@ class PaginaController extends Controller
 
     public function servicios(): Response
     {
-        $secciones = $this->contenido->secciones(['servicios', 'general']);
+        $secciones = $this->secciones->publicas(['servicios', 'general']);
 
         return Inertia::render('Web/Servicios', [
             'secciones' => $secciones,
-            // Con sus opciones visibles: la lista muestra "Cuota desde" de cada plan
-            'servicios' => Servicio::activo()->conOpcionesActivas()->ordenado()
-                ->with(['opciones' => fn ($q) => $q->activo()->ordenado()->select(['id', 'servicio_id', 'moneda', 'cuota', 'frecuencia'])])
-                ->get(),
+            'servicios' => ServicioResource::collection($this->servicios->visibles())->resolve(),
             // Fichas generales en PDF (las de un plan están en la página de ese plan)
-            'documentos' => Documento::publicos('planes')->whereNull('servicio_id')->values(),
+            'documentos' => DocumentoResource::collection($this->documentos->publicos('planes', false))->resolve(),
             'seo' => $this->seo('Servicios', $secciones['servicios.hero'] ?? null),
         ]);
     }
 
     /** Página de un plan: qué incluye, sus opciones del cotizador, detalle, ficha en PDF y video. */
-    public function plan(Servicio $servicio): Response
+    public function plan(string $slug): Response
     {
-        abort_unless($servicio->activo, 404);
-
-        $secciones = $this->contenido->secciones(['requisitos', 'general']);
-        $servicio->load(['opciones' => fn ($q) => $q->activo()->ordenado()->select(['id', 'servicio_id', 'nombre', 'nota', 'moneda', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia'])]);
+        $servicio = $this->servicios->publicoPorSlug($slug) ?? abort(404);
 
         return Inertia::render('Web/Plan', [
-            'secciones' => $secciones,
-            'servicio' => $servicio,
-            'documentos' => Documento::publicos('planes')->where('servicio_id', $servicio->id)->values(),
-            'otros' => Servicio::activo()->whereKeyNot($servicio->id)->ordenado()->get(['id', 'titulo', 'slug', 'etiqueta', 'descripcion', 'icono']),
+            'secciones' => $this->secciones->publicas(['requisitos', 'general']),
+            'servicio' => (new ServicioResource($servicio))->resolve(),
+            'documentos' => DocumentoResource::collection($this->documentos->publicos('planes', $servicio->id))->resolve(),
+            'otros' => ServicioResource::collection($this->servicios->otros($servicio))->resolve(),
             'seo' => array_filter([
                 'titulo' => $servicio->titulo,
                 'descripcion' => $servicio->descripcion,
@@ -105,46 +100,46 @@ class PaginaController extends Controller
 
     public function requisitos(): Response
     {
-        $secciones = $this->contenido->secciones(['requisitos', 'general']);
+        $secciones = $this->secciones->publicas(['requisitos', 'general']);
 
         return Inertia::render('Web/Requisitos', [
             'secciones' => $secciones,
-            'documentos' => Documento::publicos('requisitos'),
+            'documentos' => DocumentoResource::collection($this->documentos->publicos('requisitos'))->resolve(),
             'seo' => $this->seo('Requisitos', $secciones['requisitos.hero'] ?? null),
         ]);
     }
 
     public function pagos(): Response
     {
-        $secciones = $this->contenido->secciones(['pagos', 'general']);
+        $secciones = $this->secciones->publicas(['pagos', 'general']);
 
         return Inertia::render('Web/ComoPagar', [
             'secciones' => $secciones,
-            'documentos' => Documento::publicos('pagos'),
+            'documentos' => DocumentoResource::collection($this->documentos->publicos('pagos'))->resolve(),
             'seo' => $this->seo('Cómo pagar', $secciones['pagos.hero'] ?? null),
         ]);
     }
 
     public function talleres(TalleresErp $talleres): Response
     {
-        $secciones = $this->contenido->secciones(['talleres', 'general']);
+        $secciones = $this->secciones->publicas(['talleres', 'general']);
 
         return Inertia::render('Web/Talleres', [
             'secciones' => $secciones,
             'talleres' => $talleres->items(),
-            'documentos' => Documento::publicos('talleres'),
+            'documentos' => DocumentoResource::collection($this->documentos->publicos('talleres'))->resolve(),
             'seo' => $this->seo('Talleres aliados', $secciones['talleres.hero'] ?? null),
         ]);
     }
 
     public function beneficios(ComerciosErp $comercios, CuponesErp $cupones): Response
     {
-        $secciones = $this->contenido->secciones(['beneficios', 'general']);
+        $secciones = $this->secciones->publicas(['beneficios', 'general']);
 
         return Inertia::render('Web/Beneficios', [
             'secciones' => $secciones,
             // Franja "Tu semana": el lunes muestra "cuota desde" con el monto real más bajo
-            'cuotaSemanal' => $this->cuotaSemanalMasBaja(),
+            'cuotaSemanal' => $this->servicios->cuotaSemanalMasBaja(),
             'comercios' => $comercios->items(),
             'cupones' => $cupones->vigentes(),
             'seo' => $this->seo('Beneficios', $secciones['beneficios.hero'] ?? null),
@@ -153,12 +148,12 @@ class PaginaController extends Controller
 
     public function contacto(): Response
     {
-        $secciones = $this->contenido->secciones(['contacto', 'general']);
+        $secciones = $this->secciones->publicas(['contacto', 'general']);
 
         return Inertia::render('Web/Contacto', [
             'secciones' => $secciones,
             'tiposConsulta' => MensajeContacto::TIPOS_CONSULTA,
-            'preguntas' => PreguntaFrecuente::activo()->ordenado()->get(),
+            'preguntas' => PreguntaFrecuenteResource::collection($this->preguntas->activas())->resolve(),
             'seo' => $this->seo('Soporte', $secciones['contacto.hero'] ?? null),
         ]);
     }
@@ -176,36 +171,22 @@ class PaginaController extends Controller
     /** Páginas legales: su texto se edita en el panel (Secciones → Páginas legales). */
     private function paginaLegal(string $clave): Response
     {
-        $seccion = $this->contenido->secciones(['legal'])["legal.{$clave}"] ?? abort(404);
+        $seccion = $this->secciones->publicas(['legal'])["legal.{$clave}"] ?? abort(404);
 
         return Inertia::render('Web/Legal', [
             'seccion' => $seccion,
-            'documentos' => Documento::publicos('legal'),
-            'seo' => ['titulo' => $seccion->titulo],
+            'documentos' => DocumentoResource::collection($this->documentos->publicos('legal'))->resolve(),
+            'seo' => ['titulo' => $seccion['titulo']],
         ]);
     }
 
-    /** Cuota semanal más baja de las opciones visibles del cotizador (prefiere soles); null si no hay montos. */
-    private function cuotaSemanalMasBaja(): ?array
-    {
-        $opcion = OpcionPlan::activo()
-            ->where('frecuencia', 'semanal')
-            ->whereNotNull('cuota')
-            ->whereHas('servicio', fn ($q) => $q->activo())
-            ->orderByRaw("moneda = 'PEN' desc")
-            ->orderBy('cuota')
-            ->first(['cuota', 'moneda']);
-
-        return $opcion ? ['cuota' => $opcion->cuota, 'moneda' => $opcion->moneda] : null;
-    }
-
     /** Título, descripción e imagen de una página a partir de su encabezado (sección hero). */
-    private function seo(string $titulo, ?Seccion $hero): array
+    private function seo(string $titulo, ?array $hero): array
     {
         return array_filter([
             'titulo' => $titulo,
-            'descripcion' => $hero?->contenido,
-            'imagen' => $hero?->imagen_url,
+            'descripcion' => $hero['contenido'] ?? null,
+            'imagen' => $hero['imagen_url'] ?? null,
         ]);
     }
 }

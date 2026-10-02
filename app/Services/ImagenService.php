@@ -2,11 +2,10 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-/** Guarda y elimina imágenes subidas desde el panel (disco `public`). */
+/** Guarda y elimina los archivos subidos desde el panel (imágenes y PDFs, disco `public`). */
 class ImagenService
 {
     private const DISCO = 'public';
@@ -14,6 +13,12 @@ class ImagenService
     public function guardar(UploadedFile $archivo, string $carpeta): string
     {
         return $archivo->store($carpeta, self::DISCO);
+    }
+
+    /** Guarda con un nombre elegido (ej. el de un PDF que verá quien lo descarga). */
+    public function guardarComo(UploadedFile $archivo, string $carpeta, string $nombre): string
+    {
+        return $archivo->storeAs($carpeta, $nombre, self::DISCO);
     }
 
     /** Guarda la nueva imagen y borra la anterior. */
@@ -26,17 +31,17 @@ class ImagenService
     }
 
     /**
-     * Resuelve el campo de imagen de un formulario del panel:
+     * Resuelve el campo de imagen de los datos validados de un formulario del panel:
      * archivo nuevo → se guarda (y se borra el anterior); `quitar_{campo}` → se borra;
      * sin cambios → arreglo vacío. El resultado se mezcla con los datos a guardar.
      */
-    public function desdeFormulario(Request $request, ?string $actual, string $carpeta, string $campo = 'imagen'): array
+    public function resolver(array $datos, ?string $actual, string $carpeta, string $campo = 'imagen'): array
     {
-        if ($request->hasFile($campo)) {
-            return [$campo => $this->reemplazar($actual, $request->file($campo), $carpeta)];
+        if (($datos[$campo] ?? null) instanceof UploadedFile) {
+            return [$campo => $this->reemplazar($actual, $datos[$campo], $carpeta)];
         }
 
-        if ($request->boolean("quitar_{$campo}")) {
+        if (filter_var($datos["quitar_{$campo}"] ?? false, FILTER_VALIDATE_BOOLEAN)) {
             $this->eliminar($actual);
 
             return [$campo => null];

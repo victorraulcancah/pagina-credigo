@@ -1,4 +1,4 @@
-import { Link, useForm } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { ArrowLeft, ExternalLink, Save } from 'lucide-react';
 import ImageUpload from '@/components/admin/ImageUpload';
 import ItemsRepeater from '@/components/admin/ItemsRepeater';
@@ -11,6 +11,7 @@ import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
+import { useFormApi } from '@/hooks/useFormApi';
 import { PAGINAS } from '@/data/paginas';
 
 const URLS_LEGALES = { terminos: '/terminos-y-condiciones', privacidad: '/politica-de-privacidad' };
@@ -54,7 +55,7 @@ export default function SeccionEdit({ seccion }) {
     // En las secciones de texto con imagen, el video reemplaza a la imagen
     const esTextoConImagen = usa('imagen') && usa('video');
 
-    const form = useForm({
+    const form = useFormApi({
         subtitulo: seccion.subtitulo ?? '',
         titulo: seccion.titulo ?? '',
         contenido: seccion.contenido ?? '',
@@ -70,10 +71,7 @@ export default function SeccionEdit({ seccion }) {
 
     const guardar = (e) => {
         e.preventDefault();
-        form.transform((datos) => ({ ...datos, _method: 'put' }));
-        form.post(`/admin/secciones/${seccion.id}`, {
-            forceFormData: true,
-            preserveScroll: true,
+        form.put(`/admin/secciones/${seccion.id}`, {
             onSuccess: () => setData((d) => ({ ...d, imagen: null, quitar_imagen: false })),
         });
     };

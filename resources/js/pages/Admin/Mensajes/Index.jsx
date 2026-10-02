@@ -9,6 +9,7 @@ import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
+import { useAccionApi } from '@/hooks/useAccionApi';
 import { formatoFecha } from '@/lib/fechas';
 import { cn } from '@/lib/utils';
 import { deleteConfirm } from '@/utils/sweetalert';
@@ -36,8 +37,10 @@ export default function MensajesIndex({ mensajes, filtros, conteos, estados, ori
         return () => clearTimeout(id);
     }, [buscar]);
 
-    const marcarLeido = (mensaje, leido) =>
-        router.patch(`/admin/mensajes/${mensaje.id}/leido`, { leido }, { preserveState: true, preserveScroll: true });
+    const { ejecutar } = useAccionApi();
+
+    // Abrir una solicitud la marca como leída sin aviso; desmarcarla sí avisa
+    const marcarLeido = (mensaje, leido) => ejecutar('patch', `/admin/solicitudes/${mensaje.id}/leido`, { leido }, { avisar: !leido });
 
     const abrir = (mensaje) => {
         setSeleccionadoId(mensaje.id);
@@ -46,7 +49,8 @@ export default function MensajesIndex({ mensajes, filtros, conteos, estados, ori
 
     const eliminar = async (mensaje) => {
         if (await deleteConfirm('¿Eliminar esta solicitud?')) {
-            router.delete(`/admin/mensajes/${mensaje.id}`, { preserveScroll: true, onSuccess: () => setSeleccionadoId(null) });
+            const { success } = await ejecutar('delete', `/admin/solicitudes/${mensaje.id}`);
+            if (success) setSeleccionadoId(null);
         }
     };
 

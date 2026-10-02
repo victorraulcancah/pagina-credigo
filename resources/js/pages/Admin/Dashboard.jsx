@@ -1,9 +1,9 @@
-import { Link, router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { ArrowRight, BookOpenText, Briefcase, Building, CircleQuestionMark, Images, Inbox, LayoutTemplate, Palette, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
 import PageHeader from '@/components/admin/PageHeader';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
+import { useAccionApi } from '@/hooks/useAccionApi';
 import { formatoFecha } from '@/lib/fechas';
 import { cn } from '@/lib/utils';
 
@@ -16,10 +16,9 @@ const CATALOGOS_ERP = [
 
 /** Conexión con el ERP: qué se muestra en la web y cuándo se actualizó cada cosa. */
 function PanelErp({ erp }) {
-    const [actualizando, setActualizando] = useState(false);
+    const { ejecutar, enCurso: actualizando } = useAccionApi();
 
-    const actualizar = () =>
-        router.post('/admin/erp/sincronizar', {}, { preserveScroll: true, onStart: () => setActualizando(true), onFinish: () => setActualizando(false) });
+    const actualizar = () => ejecutar('post', '/admin/erp/sincronizar');
 
     return (
         <Panel title="Datos del ERP" className="mt-6">

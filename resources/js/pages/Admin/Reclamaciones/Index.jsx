@@ -1,4 +1,4 @@
-import { router, useForm } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { BookOpenText, ChevronLeft, ChevronRight, FileText, Paperclip, Search, Send, Video } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import EmptyState from '@/components/admin/EmptyState';
@@ -9,6 +9,7 @@ import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Textarea from '@/components/ui/Textarea';
+import { useFormApi } from '@/hooks/useFormApi';
 import { formatoFecha } from '@/lib/fechas';
 import { ETIQUETA_ADJUNTO, filasHoja, tamanoArchivo } from '@/lib/reclamacion';
 import { cn } from '@/lib/utils';
@@ -53,7 +54,7 @@ export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespues
     const [buscar, setBuscar] = useState(filtros.buscar);
     const [seleccionadaId, setSeleccionadaId] = useState(null);
     const primeraCarga = useRef(true);
-    const respuesta = useForm({ respuesta: '' });
+    const respuesta = useFormApi({ respuesta: '' });
 
     const seleccionada = reclamaciones.data.find((r) => r.id === seleccionadaId);
 
@@ -76,7 +77,7 @@ export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespues
 
     const responder = (e) => {
         e.preventDefault();
-        respuesta.put(`/admin/reclamaciones/${seleccionada.id}/respuesta`, { preserveScroll: true, preserveState: true });
+        respuesta.put(`/admin/reclamaciones/${seleccionada.id}/respuesta`);
     };
 
     return (

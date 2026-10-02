@@ -1,5 +1,6 @@
-import { Link, useForm } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { Check, CircleAlert, CircleCheck, FilePlus, IdCard, Search, Ticket } from 'lucide-react';
+import { useState } from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Button from '@/components/ui/Button';
 import Container from '@/components/ui/Container';
@@ -7,6 +8,7 @@ import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import LibroEncabezado from '@/components/web/LibroEncabezado';
 import { AyudaLateral, DatoLateral, TarjetaLateral } from '@/components/web/LibroLateral';
+import { useFormApi } from '@/hooks/useFormApi';
 import { formatoFecha } from '@/lib/fechas';
 import { fechaSimple } from '@/lib/reclamacion';
 import { cn } from '@/lib/utils';
@@ -96,13 +98,15 @@ function Resultado({ r }) {
 }
 
 /** Consulta pública del estado de una hoja de reclamación (número de hoja + documento). */
-export default function ConsultarReclamacion({ resultado, diasRespuesta }) {
-    const form = useForm({ codigo: '', numero_documento: '' });
+export default function ConsultarReclamacion({ diasRespuesta }) {
+    const form = useFormApi({ codigo: '', numero_documento: '' });
     const { data, setData, errors, processing } = form;
+    const [resultado, setResultado] = useState(null);
 
     const buscar = (e) => {
         e.preventDefault();
-        form.post('/libro-de-reclamaciones/consultar', { preserveScroll: true });
+        setResultado(null);
+        form.post('/reclamaciones/consultar', { recargar: false, avisar: false, onSuccess: (respuesta) => setResultado(respuesta.data) });
     };
 
     return (

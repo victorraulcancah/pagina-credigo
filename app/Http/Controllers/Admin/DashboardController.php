@@ -3,33 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Banner;
-use App\Models\MensajeContacto;
-use App\Models\PreguntaFrecuente;
-use App\Models\Reclamacion;
-use App\Models\Servicio;
-use App\Services\Erp\CatalogosErp;
+use App\Http\Resources\MensajeContactoResource;
+use App\Services\DashboardService;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(CatalogosErp $catalogos): Response
+    public function __invoke(DashboardService $dashboard): Response
     {
         return Inertia::render('Admin/Dashboard', [
-            'erp' => [
-                'configurado' => (bool) config('services.erp.url'),
-                'catalogos' => $catalogos->estado(),
-            ],
-            'resumen' => [
-                'solicitudes_nuevas' => MensajeContacto::where('estado', 'nuevo')->count(),
-                'reclamaciones_pendientes' => Reclamacion::pendiente()->count(),
-                'mensajes_total' => MensajeContacto::count(),
-                'servicios_activos' => Servicio::activo()->count(),
-                'banners_activos' => Banner::activo()->count(),
-                'preguntas_activas' => PreguntaFrecuente::activo()->count(),
-            ],
-            'ultimosMensajes' => MensajeContacto::latest()->limit(5)->get(),
+            'erp' => $dashboard->erp(),
+            'resumen' => $dashboard->resumen(),
+            'ultimosMensajes' => MensajeContactoResource::collection($dashboard->ultimasSolicitudes())->resolve(),
         ]);
     }
 }

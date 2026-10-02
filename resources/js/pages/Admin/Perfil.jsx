@@ -1,4 +1,4 @@
-import { useForm, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { KeyRound, Save } from 'lucide-react';
 import PageHeader from '@/components/admin/PageHeader';
 import Panel from '@/components/admin/Panel';
@@ -6,21 +6,22 @@ import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
+import { useFormApi } from '@/hooks/useFormApi';
 
 export default function Perfil() {
     const { auth } = usePage().props;
 
-    const datos = useForm({ name: auth.user.name, email: auth.user.email });
-    const clave = useForm({ current_password: '', password: '', password_confirmation: '' });
+    const datos = useFormApi({ name: auth.user.name, email: auth.user.email });
+    const clave = useFormApi({ current_password: '', password: '', password_confirmation: '' });
 
     const guardarDatos = (e) => {
         e.preventDefault();
-        datos.put('/admin/perfil', { preserveScroll: true, onSuccess: () => datos.setDefaults() });
+        datos.put('/admin/perfil', { onSuccess: () => datos.setDefaults() });
     };
 
     const guardarClave = (e) => {
         e.preventDefault();
-        clave.put('/admin/perfil/password', { preserveScroll: true, onSuccess: () => clave.reset() });
+        clave.put('/admin/perfil/password', { recargar: false, onSuccess: () => clave.reset() });
     };
 
     return (

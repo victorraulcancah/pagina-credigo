@@ -55,8 +55,8 @@ describe('con sesión iniciada', function () {
     ]);
 
     it('actualiza los colores y los comparte con el sitio', function () {
-        $this->put('/admin/configuracion', ['color_primario' => '#112233', 'color_acento' => '#ffcc00'])
-            ->assertSessionHasNoErrors();
+        $this->put('/api/admin/configuracion', ['color_primario' => '#112233', 'color_acento' => '#ffcc00'])
+            ->assertSuccessful();
 
         $this->get('/')->assertInertia(fn (Assert $page) => $page
             ->where('sitio.color_primario', '#112233')
@@ -64,14 +64,14 @@ describe('con sesión iniciada', function () {
     });
 
     it('rechaza colores que no son hexadecimales', function () {
-        $this->put('/admin/configuracion', ['color_primario' => 'red;}body{'])
-            ->assertSessionHasErrors('color_primario');
+        $this->put('/api/admin/configuracion', ['color_primario' => 'red;}body{'])
+            ->assertJsonValidationErrors('color_primario');
     });
 
     it('extrae el enlace cuando pegan el iframe de Google Maps', function () {
         $iframe = '<iframe src="https://www.google.com/maps/embed?pb=abc&amp;x=1" width="600"></iframe>';
 
-        $this->put('/admin/configuracion', ['contacto_mapa_url' => $iframe])->assertSessionHasNoErrors();
+        $this->put('/api/admin/configuracion', ['contacto_mapa_url' => $iframe])->assertSuccessful();
 
         expect(Configuracion::where('clave', 'contacto_mapa_url')->value('valor'))
             ->toBe('https://www.google.com/maps/embed?pb=abc&x=1');
@@ -80,10 +80,10 @@ describe('con sesión iniciada', function () {
     it('sube el logo y borra el anterior al reemplazarlo', function () {
         Storage::fake('public');
 
-        $this->post('/admin/configuracion', ['_method' => 'put', 'logo' => UploadedFile::fake()->image('logo.png')]);
+        $this->post('/api/admin/configuracion', ['_method' => 'put', 'logo' => UploadedFile::fake()->image('logo.png')]);
         $primero = Configuracion::where('clave', 'logo')->value('valor');
 
-        $this->post('/admin/configuracion', ['_method' => 'put', 'logo' => UploadedFile::fake()->image('nuevo.png')]);
+        $this->post('/api/admin/configuracion', ['_method' => 'put', 'logo' => UploadedFile::fake()->image('nuevo.png')]);
         $segundo = Configuracion::where('clave', 'logo')->value('valor');
 
         Storage::disk('public')->assertMissing($primero);
@@ -93,43 +93,43 @@ describe('con sesión iniciada', function () {
     it('crea, edita y elimina un servicio', function () {
         $datos = ['titulo' => 'Seguros', 'descripcion' => 'Seguro vehicular', 'icono' => 'ShieldCheck', 'orden' => 1, 'activo' => true, 'destacado' => false];
 
-        $this->post('/admin/servicios', $datos)->assertSessionHasNoErrors();
+        $this->post('/api/admin/servicios', $datos)->assertSuccessful();
         $servicio = Servicio::sole();
 
-        $this->put("/admin/servicios/{$servicio->id}", [...$datos, 'titulo' => 'Seguros vehiculares'])->assertSessionHasNoErrors();
+        $this->put("/api/admin/servicios/{$servicio->id}", [...$datos, 'titulo' => 'Seguros vehiculares'])->assertSuccessful();
         expect($servicio->fresh()->titulo)->toBe('Seguros vehiculares');
 
-        $this->delete("/admin/servicios/{$servicio->id}");
+        $this->delete("/api/admin/servicios/{$servicio->id}");
         expect(Servicio::count())->toBe(0);
     });
 
     it('guarda la etiqueta y las características de un plan, y las vacía si se quitan todas', function () {
         $datos = ['titulo' => 'CrediYango', 'etiqueta' => 'Entrega más rápida', 'descripcion' => 'Plan', 'orden' => 0, 'activo' => true, 'destacado' => true];
 
-        $this->post('/admin/servicios', [...$datos, 'caracteristicas' => ['Inicial de S/2,000', '200 cuotas semanales de S/100']])
-            ->assertSessionHasNoErrors();
+        $this->post('/api/admin/servicios', [...$datos, 'caracteristicas' => ['Inicial de S/2,000', '200 cuotas semanales de S/100']])
+            ->assertSuccessful();
         $servicio = Servicio::sole();
         expect($servicio->etiqueta)->toBe('Entrega más rápida')
             ->and($servicio->caracteristicas)->toBe(['Inicial de S/2,000', '200 cuotas semanales de S/100']);
 
-        $this->put("/admin/servicios/{$servicio->id}", $datos)->assertSessionHasNoErrors();
+        $this->put("/api/admin/servicios/{$servicio->id}", $datos)->assertSuccessful();
         expect($servicio->fresh()->caracteristicas)->toBe([]);
     });
 
     it('rechaza características vacías', function () {
-        $this->post('/admin/servicios', ['titulo' => 'X', 'descripcion' => 'Y', 'orden' => 0, 'caracteristicas' => ['Válida', '']])
-            ->assertSessionHasErrors('caracteristicas.1');
+        $this->post('/api/admin/servicios', ['titulo' => 'X', 'descripcion' => 'Y', 'orden' => 0, 'caracteristicas' => ['Válida', '']])
+            ->assertJsonValidationErrors('caracteristicas.1');
     });
 
     it('guarda el segundo botón del banner (ancla a una sección)', function () {
-        $this->post('/admin/banners', [
+        $this->post('/api/admin/banners', [
             'titulo' => 'Tu propio vehículo',
             'etiqueta' => 'Anda con el tuyo',
             'boton2_texto' => 'Ver cómo funciona',
             'boton2_url' => '/#como-funciona',
             'orden' => 0,
             'activo' => true,
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         expect(Banner::sole())
             ->etiqueta->toBe('Anda con el tuyo')
@@ -139,7 +139,7 @@ describe('con sesión iniciada', function () {
     it('guarda un banner "solo imagen" con imagen para celular y enlace sin texto de botón', function () {
         Storage::fake('public');
 
-        $this->post('/admin/banners', [
+        $this->post('/api/admin/banners', [
             'titulo' => 'Campaña de verano',
             'solo_imagen' => true,
             'imagen' => UploadedFile::fake()->image('diseno.jpg', 1920, 1080),
@@ -147,13 +147,13 @@ describe('con sesión iniciada', function () {
             'boton_url' => '/contacto',
             'orden' => 0,
             'activo' => true,
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $banner = Banner::sole();
         expect($banner->solo_imagen)->toBeTrue()
             ->and($banner->imagen_movil_url)->toContain('/storage/banners/');
 
-        $this->delete("/admin/banners/{$banner->id}");
+        $this->delete("/api/admin/banners/{$banner->id}");
         Storage::disk('public')->assertMissing($banner->imagen_movil);
     });
 
@@ -161,13 +161,13 @@ describe('con sesión iniciada', function () {
         $this->seed(ContenidoSeeder::class);
         $seccion = Seccion::where('pagina', 'nosotros')->where('clave', 'valores')->sole();
 
-        $this->put("/admin/secciones/{$seccion->id}", [
+        $this->put("/api/admin/secciones/{$seccion->id}", [
             'subtitulo' => 'Valores',
             'titulo' => 'Nuestros pilares',
             'contenido' => 'Este campo no aplica a la sección',
             'items' => [['titulo' => 'Honestidad', 'descripcion' => 'Siempre', 'icono' => 'Heart']],
             'activo' => true,
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $seccion->refresh();
         expect($seccion->titulo)->toBe('Nuestros pilares')
@@ -179,7 +179,7 @@ describe('con sesión iniciada', function () {
         $this->seed(ContenidoSeeder::class);
         $seccion = Seccion::where('pagina', 'nosotros')->where('clave', 'valores')->sole();
 
-        $this->put("/admin/secciones/{$seccion->id}", ['titulo' => 'Valores', 'activo' => true])->assertSessionHasNoErrors();
+        $this->put("/api/admin/secciones/{$seccion->id}", ['titulo' => 'Valores', 'activo' => true])->assertSuccessful();
 
         expect($seccion->fresh()->items)->toBe([]);
     });
@@ -189,12 +189,12 @@ describe('con sesión iniciada', function () {
         $this->seed(ContenidoSeeder::class);
         $seccion = Seccion::where('pagina', 'contacto')->where('clave', 'hero')->sole();
 
-        $this->post("/admin/secciones/{$seccion->id}", [
+        $this->post("/api/admin/secciones/{$seccion->id}", [
             '_method' => 'put',
             'titulo' => 'Hablemos',
             'imagen' => UploadedFile::fake()->image('fondo.jpg', 1920, 700),
             'activo' => true,
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         Storage::disk('public')->assertExists($seccion->fresh()->imagen);
 
@@ -209,13 +209,13 @@ describe('con sesión iniciada', function () {
         foreach (['mision', 'vision', 'objetivo'] as $clave) {
             $seccion = Seccion::where('pagina', 'nosotros')->where('clave', $clave)->sole();
 
-            $this->post("/admin/secciones/{$seccion->id}", [
+            $this->post("/api/admin/secciones/{$seccion->id}", [
                 '_method' => 'put',
                 'titulo' => $seccion->titulo,
                 'contenido' => $seccion->contenido,
                 'imagen' => UploadedFile::fake()->image("{$clave}.jpg", 1200, 800),
                 'activo' => true,
-            ])->assertSessionHasNoErrors();
+            ])->assertSuccessful();
 
             Storage::disk('public')->assertExists($seccion->fresh()->imagen);
         }
@@ -228,10 +228,10 @@ describe('con sesión iniciada', function () {
     it('marca un mensaje como leído y como no leído', function () {
         $mensaje = MensajeContacto::create(['nombre' => 'Ana', 'telefono' => '987654321', 'mensaje' => 'Hola']);
 
-        $this->patch("/admin/mensajes/{$mensaje->id}/leido", ['leido' => true]);
+        $this->patch("/api/admin/solicitudes/{$mensaje->id}/leido", ['leido' => true]);
         expect($mensaje->fresh()->leido_at)->not->toBeNull();
 
-        $this->patch("/admin/mensajes/{$mensaje->id}/leido", ['leido' => false]);
+        $this->patch("/api/admin/solicitudes/{$mensaje->id}/leido", ['leido' => false]);
         expect($mensaje->fresh()->leido_at)->toBeNull();
     });
 });

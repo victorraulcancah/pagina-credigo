@@ -7,6 +7,7 @@ use App\Mail\ReclamacionRespondida;
 use App\Models\Reclamacion;
 use App\Models\ReclamacionAdjunto;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -78,6 +79,26 @@ class ReclamacionService
         ]);
 
         $this->enviarCorreo(new ReclamacionRespondida($reclamacion), $reclamacion);
+    }
+
+    /** Bandeja del panel: búsqueda por texto y estado (pendiente / atendido). */
+    public function paginar(?string $buscar, string $estado): LengthAwarePaginator
+    {
+        return Reclamacion::query()
+            ->with(['respondidoPor:id,name', 'adjuntos:id,reclamacion_id,tipo,nombre_original,mime,tamano'])
+            ->buscar($buscar)
+            ->when($estado !== 'todos', fn ($q) => $q->where('estado', $estado))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+    }
+
+    /** Hoja de un consumidor por su número y su documento (así nadie consulta hojas ajenas). */
+    public function consultar(string $codigo, string $numeroDocumento): ?Reclamacion
+    {
+        return Reclamacion::where('codigo', trim($codigo))
+            ->where('numero_documento', strtoupper(preg_replace('/\s+/', '', $numeroDocumento)))
+            ->first();
     }
 
     private function datosProveedor(): array

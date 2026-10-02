@@ -1,4 +1,3 @@
-import { useForm } from '@inertiajs/react';
 import { ExternalLink, Save } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -8,11 +7,12 @@ import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
+import { useFormApi } from '@/hooks/useFormApi';
 import { LOGO_POR_DEFECTO } from '@/hooks/useSitio';
 
 /** Vista previa al compartir (Open Graph), Google Analytics y píxel de Meta. */
 export default function Seo({ ajustes }) {
-    const form = useForm({
+    const form = useFormApi({
         imagen_compartir: null,
         quitar_imagen_compartir: false,
         analytics_ga4: ajustes.analytics_ga4 ?? '',
@@ -22,10 +22,7 @@ export default function Seo({ ajustes }) {
 
     const guardar = (e) => {
         e.preventDefault();
-        form.transform((datos) => ({ ...datos, _method: 'put' }));
-        form.post('/admin/configuracion', {
-            forceFormData: true,
-            preserveScroll: true,
+        form.put('/admin/configuracion', {
             onSuccess: () => {
                 setData((d) => ({ ...d, imagen_compartir: null, quitar_imagen_compartir: false }));
                 form.setDefaults({

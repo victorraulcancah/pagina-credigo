@@ -15,6 +15,17 @@ export function toast(title, icon = 'success') {
     });
 }
 
+/** Alerta de error (cuando la API no pudo completar la operación). */
+export function errorAlert(title = 'Algo salió mal', text = '') {
+    return Swal.fire({
+        icon: 'error',
+        title,
+        text,
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: colorTema('--color-primary'),
+    });
+}
+
 /** Confirmación de eliminación. Devuelve true si el usuario confirma. */
 export async function deleteConfirm(title = '¿Eliminar este registro?', text = 'Esta acción no se puede deshacer.') {
     const { isConfirmed } = await Swal.fire({

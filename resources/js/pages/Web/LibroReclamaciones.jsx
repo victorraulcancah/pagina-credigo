@@ -1,4 +1,4 @@
-import { Link, useForm } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { CircleAlert, CircleCheck, ClipboardList, FileText, ImagePlus, Mail, Search, Send, Smartphone, Video } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
@@ -12,6 +12,7 @@ import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import LibroEncabezado from '@/components/web/LibroEncabezado';
 import { AyudaLateral, DatoLateral, TarjetaLateral } from '@/components/web/LibroLateral';
+import { useFormApi } from '@/hooks/useFormApi';
 import { useSitio } from '@/hooks/useSitio';
 import { formatoFecha } from '@/lib/fechas';
 import { sumarDiasHabiles } from '@/lib/reclamacion';
@@ -85,7 +86,7 @@ function OpcionTipo({ valor, actual, onChange, titulo, descripcion }) {
 /** Libro de Reclamaciones virtual (Ley N° 29571, Código de Protección y Defensa del Consumidor). */
 export default function LibroReclamaciones({ tiposDocumento, tiposComprobante, soluciones, diasRespuesta }) {
     const sitio = useSitio();
-    const form = useForm({
+    const form = useFormApi({
         // 1. Consumidor
         nombre: '',
         tipo_documento: 'DNI',
@@ -141,7 +142,8 @@ export default function LibroReclamaciones({ tiposDocumento, tiposComprobante, s
 
     const enviar = (e) => {
         e.preventDefault();
-        form.post('/libro-de-reclamaciones', { preserveScroll: true, forceFormData: true });
+        // La API devuelve el enlace firmado a la constancia (solo lo ve quien registró la hoja)
+        form.post('/reclamaciones', { recargar: false, avisar: false, onSuccess: (respuesta) => router.visit(respuesta.data.constancia_url) });
     };
 
     return (

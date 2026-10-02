@@ -1,4 +1,4 @@
-import { useForm, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { Calculator, CircleCheckBig, Mail, MailOpen, Phone, Save, Trash, UserRound } from 'lucide-react';
 import { useEffect } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
+import { useFormApi } from '@/hooks/useFormApi';
 import { formatoFecha } from '@/lib/fechas';
 import { cn } from '@/lib/utils';
 
@@ -65,7 +66,7 @@ function DatoContacto({ icono: Icono, etiqueta, children }) {
 /** Detalle de una solicitud con acciones de contacto y formulario de seguimiento. */
 export default function SolicitudModal({ mensaje, estados, origenes, usuarios, onClose, onMarcarNoLeido, onEliminar }) {
     const { auth } = usePage().props;
-    const form = useForm({ estado: 'nuevo', asignado_a: '', notas: '' });
+    const form = useFormApi({ estado: 'nuevo', asignado_a: '', notas: '' });
     const { data, setData, errors, processing, recentlySuccessful } = form;
 
     // Al abrir otra solicitud, el formulario toma sus datos
@@ -78,7 +79,7 @@ export default function SolicitudModal({ mensaje, estados, origenes, usuarios, o
 
     const guardar = (e) => {
         e.preventDefault();
-        form.put(`/admin/mensajes/${mensaje.id}/seguimiento`, { preserveScroll: true, preserveState: true, onSuccess: () => form.setDefaults() });
+        form.put(`/admin/solicitudes/${mensaje.id}/seguimiento`, { onSuccess: () => form.setDefaults() });
     };
 
     const ui = mensaje ? estadoUi(mensaje.estado) : null;

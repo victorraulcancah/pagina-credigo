@@ -1,4 +1,3 @@
-import { useForm } from '@inertiajs/react';
 import { CircleCheckBig, Send } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
@@ -6,6 +5,7 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
 import AceptaPolitica from '@/components/web/AceptaPolitica';
+import { useFormApi } from '@/hooks/useFormApi';
 import { registrarLead } from '@/lib/analitica';
 
 const VACIO = {
@@ -22,10 +22,10 @@ const VACIO = {
 
 /**
  * Formulario público de contacto, con los mismos campos que el de soporte del ERP.
- * Se guarda en la bandeja del panel (/admin/mensajes).
+ * Se envía a la API (POST /api/solicitudes) y llega a la bandeja del panel.
  */
 export default function ContactoForm({ tiposConsulta = {} }) {
-    const form = useForm(VACIO);
+    const form = useFormApi(VACIO);
     const { data, setData, errors, processing, recentlySuccessful } = form;
 
     const campo = (nombre) => ({
@@ -37,8 +37,8 @@ export default function ContactoForm({ tiposConsulta = {} }) {
 
     const enviar = (e) => {
         e.preventDefault();
-        form.post('/contacto', {
-            preserveScroll: true,
+        form.post('/solicitudes', {
+            recargar: false,
             onSuccess: () => {
                 registrarLead('contacto');
                 form.reset();

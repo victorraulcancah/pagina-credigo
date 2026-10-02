@@ -85,25 +85,25 @@ describe('en el panel', function () {
     });
 
     it('guarda la dirección y el detalle del plan; vacía se arma sola', function () {
-        $this->post('/admin/servicios', ['titulo' => 'Motos y Mototaxis', 'descripcion' => 'x', 'detalle' => '- Uno', 'orden' => 0, 'activo' => true])
-            ->assertSessionHasNoErrors();
+        $this->post('/api/admin/servicios', ['titulo' => 'Motos y Mototaxis', 'descripcion' => 'x', 'detalle' => '- Uno', 'orden' => 0, 'activo' => true])
+            ->assertSuccessful();
         $plan = Servicio::firstWhere('titulo', 'Motos y Mototaxis');
         expect($plan->slug)->toBe('motos-y-mototaxis')->and($plan->detalle)->toBe('- Uno');
 
-        $this->post("/admin/servicios/{$plan->id}", ['_method' => 'put', 'titulo' => 'Motos y Mototaxis', 'slug' => 'motos', 'descripcion' => 'x', 'orden' => 0])
-            ->assertSessionHasNoErrors();
+        $this->post("/api/admin/servicios/{$plan->id}", ['_method' => 'put', 'titulo' => 'Motos y Mototaxis', 'slug' => 'motos', 'descripcion' => 'x', 'orden' => 0])
+            ->assertSuccessful();
         expect($plan->fresh()->slug)->toBe('motos');
 
         // Borrar la dirección la vuelve a armar con el nombre
-        $this->post("/admin/servicios/{$plan->id}", ['_method' => 'put', 'titulo' => 'Motos y Mototaxis', 'slug' => '', 'descripcion' => 'x', 'orden' => 0])
-            ->assertSessionHasNoErrors();
+        $this->post("/api/admin/servicios/{$plan->id}", ['_method' => 'put', 'titulo' => 'Motos y Mototaxis', 'slug' => '', 'descripcion' => 'x', 'orden' => 0])
+            ->assertSuccessful();
         expect($plan->fresh()->slug)->toBe('motos-y-mototaxis');
     });
 
     it('rechaza direcciones con espacios, mayúsculas o repetidas', function (string $slug) {
         Servicio::create(['titulo' => 'CrediYango', 'descripcion' => 'x']);
 
-        $this->post('/admin/servicios', ['titulo' => 'Nuevo', 'slug' => $slug, 'descripcion' => 'x', 'orden' => 0])
-            ->assertSessionHasErrors('slug');
+        $this->post('/api/admin/servicios', ['titulo' => 'Nuevo', 'slug' => $slug, 'descripcion' => 'x', 'orden' => 0])
+            ->assertJsonValidationErrors('slug');
     })->with(['Credi Motos', 'credi_motos', 'crediyango', '-motos', 'motos/']);
 });

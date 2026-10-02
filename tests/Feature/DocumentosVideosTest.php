@@ -19,14 +19,14 @@ beforeEach(function () {
 /** Sube un PDF desde el panel y devuelve el documento creado. */
 function subirDocumento(array $datos = []): Documento
 {
-    test()->post('/admin/documentos', [
+    test()->post('/api/admin/documentos', [
         'titulo' => 'Lista de requisitos',
         'categoria' => 'requisitos',
         'orden' => 0,
         'activo' => true,
         'archivo' => UploadedFile::fake()->create('requisitos.pdf', 300, 'application/pdf'),
         ...$datos,
-    ])->assertSessionHasNoErrors();
+    ])->assertSuccessful();
 
     return Documento::latest('id')->firstOrFail();
 }
@@ -66,18 +66,18 @@ describe('documentos PDF', function () {
     });
 
     it('solo acepta PDF de hasta 10 MB', function () {
-        $this->post('/admin/documentos', [
+        $this->post('/api/admin/documentos', [
             'titulo' => 'Imagen', 'categoria' => 'requisitos', 'orden' => 0,
             'archivo' => UploadedFile::fake()->image('foto.jpg'),
-        ])->assertSessionHasErrors('archivo');
+        ])->assertJsonValidationErrors('archivo');
 
-        $this->post('/admin/documentos', [
+        $this->post('/api/admin/documentos', [
             'titulo' => 'Pesado', 'categoria' => 'requisitos', 'orden' => 0,
             'archivo' => UploadedFile::fake()->create('pesado.pdf', 11 * 1024, 'application/pdf'),
-        ])->assertSessionHasErrors('archivo');
+        ])->assertJsonValidationErrors('archivo');
 
-        $this->post('/admin/documentos', ['titulo' => 'Sin archivo', 'categoria' => 'requisitos', 'orden' => 0])
-            ->assertSessionHasErrors('archivo');
+        $this->post('/api/admin/documentos', ['titulo' => 'Sin archivo', 'categoria' => 'requisitos', 'orden' => 0])
+            ->assertJsonValidationErrors('archivo');
 
         expect(Documento::count())->toBe(0);
     });
@@ -87,21 +87,21 @@ describe('documentos PDF', function () {
         $anterior = $documento->archivo;
 
         // Editar sin archivo conserva el PDF
-        $this->post("/admin/documentos/{$documento->id}", ['_method' => 'put', 'titulo' => 'Requisitos 2026', 'categoria' => 'requisitos', 'orden' => 1])
-            ->assertSessionHasNoErrors();
+        $this->post("/api/admin/documentos/{$documento->id}", ['_method' => 'put', 'titulo' => 'Requisitos 2026', 'categoria' => 'requisitos', 'orden' => 1])
+            ->assertSuccessful();
         expect($documento->fresh()->archivo)->toBe($anterior);
 
-        $this->post("/admin/documentos/{$documento->id}", [
+        $this->post("/api/admin/documentos/{$documento->id}", [
             '_method' => 'put', 'titulo' => 'Requisitos 2026', 'categoria' => 'requisitos', 'orden' => 1,
             'archivo' => UploadedFile::fake()->create('nuevo.pdf', 100, 'application/pdf'),
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
         $nuevo = $documento->fresh()->archivo;
         expect($nuevo)->not->toBe($anterior);
         Storage::disk('public')->assertMissing($anterior);
         Storage::disk('public')->assertExists($nuevo);
 
-        $this->delete("/admin/documentos/{$documento->id}");
+        $this->delete("/api/admin/documentos/{$documento->id}");
         Storage::disk('public')->assertMissing($nuevo);
         expect(Documento::count())->toBe(0);
     });
@@ -141,8 +141,8 @@ describe('videos por enlace', function () {
     it('acepta enlaces de YouTube, TikTok, Facebook y Vimeo en las secciones que admiten video', function (string $url) {
         $seccion = Seccion::where('pagina', 'inicio')->where('clave', 'como_funciona')->firstOrFail();
 
-        $this->post("/admin/secciones/{$seccion->id}", ['_method' => 'put', 'titulo' => 'Cómo funciona', 'video_url' => $url, 'activo' => true])
-            ->assertSessionHasNoErrors();
+        $this->post("/api/admin/secciones/{$seccion->id}", ['_method' => 'put', 'titulo' => 'Cómo funciona', 'video_url' => $url, 'activo' => true])
+            ->assertSuccessful();
 
         expect($seccion->fresh()->video_url)->toBe($url);
     })->with([
@@ -159,8 +159,8 @@ describe('videos por enlace', function () {
     it('rechaza enlaces que no son de un video', function (string $url) {
         $seccion = Seccion::where('pagina', 'inicio')->where('clave', 'como_funciona')->firstOrFail();
 
-        $this->post("/admin/secciones/{$seccion->id}", ['_method' => 'put', 'titulo' => 'Cómo funciona', 'video_url' => $url, 'activo' => true])
-            ->assertSessionHasErrors('video_url');
+        $this->post("/api/admin/secciones/{$seccion->id}", ['_method' => 'put', 'titulo' => 'Cómo funciona', 'video_url' => $url, 'activo' => true])
+            ->assertJsonValidationErrors('video_url');
     })->with([
         'https://example.com/video.mp4',
         'https://vm.tiktok.com/ZMabc123/',
@@ -172,25 +172,25 @@ describe('videos por enlace', function () {
     it('ignora el video en secciones que no lo admiten', function () {
         $seccion = Seccion::where('pagina', 'inicio')->where('clave', 'servicios')->firstOrFail();
 
-        $this->post("/admin/secciones/{$seccion->id}", ['_method' => 'put', 'titulo' => 'Planes', 'video_url' => 'https://youtu.be/dQw4w9WgXcQ', 'activo' => true])
-            ->assertSessionHasNoErrors();
+        $this->post("/api/admin/secciones/{$seccion->id}", ['_method' => 'put', 'titulo' => 'Planes', 'video_url' => 'https://youtu.be/dQw4w9WgXcQ', 'activo' => true])
+            ->assertSuccessful();
 
         expect($seccion->fresh()->video_url)->toBeNull();
     });
 
     it('guarda el video de un plan y de un banner', function () {
-        $this->post('/admin/servicios', [
+        $this->post('/api/admin/servicios', [
             'titulo' => 'Credi Motos', 'descripcion' => 'Moto propia', 'orden' => 0, 'activo' => true,
             'video_url' => 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
-        $this->post('/admin/banners', [
+        $this->post('/api/admin/banners', [
             'titulo' => 'Tu propio vehículo', 'orden' => 0, 'activo' => true,
             'video_url' => 'https://youtu.be/dQw4w9WgXcQ',
-        ])->assertSessionHasNoErrors();
+        ])->assertSuccessful();
 
-        $this->post('/admin/servicios', ['titulo' => 'Otro', 'descripcion' => 'x', 'orden' => 1, 'video_url' => 'https://example.com'])
-            ->assertSessionHasErrors('video_url');
+        $this->post('/api/admin/servicios', ['titulo' => 'Otro', 'descripcion' => 'x', 'orden' => 1, 'video_url' => 'https://example.com'])
+            ->assertJsonValidationErrors('video_url');
 
         expect(Servicio::where('titulo', 'Credi Motos')->value('video_url'))->toBe('https://www.youtube.com/shorts/dQw4w9WgXcQ')
             ->and(Banner::where('titulo', 'Tu propio vehículo')->value('video_url'))->toBe('https://youtu.be/dQw4w9WgXcQ');

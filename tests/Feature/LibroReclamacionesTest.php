@@ -45,10 +45,14 @@ it('muestra el formulario del libro de reclamaciones', function () {
 });
 
 it('registra la hoja con número correlativo, datos del proveedor y copia por correo', function () {
-    $respuesta = $this->post('/libro-de-reclamaciones', datosReclamacion());
+    $respuesta = $this->post('/api/reclamaciones', datosReclamacion());
 
     $reclamacion = Reclamacion::sole();
-    $respuesta->assertRedirect(URL::signedRoute('reclamaciones.constancia', $reclamacion));
+    // La API devuelve el número y el enlace firmado a la constancia
+    $respuesta->assertCreated()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data.codigo', $reclamacion->codigo)
+        ->assertJsonPath('data.constancia_url', URL::signedRoute('reclamaciones.constancia', $reclamacion));
 
     expect($reclamacion->codigo)->toBe(now()->year.'-000001')
         ->and($reclamacion->estado)->toBe('pendiente')
@@ -59,7 +63,7 @@ it('registra la hoja con número correlativo, datos del proveedor y copia por co
 });
 
 it('valida documento, celular, mínimos de texto, apoderado, "otra solución" y confirmaciones', function () {
-    $this->post('/libro-de-reclamaciones', datosReclamacion([
+    $this->post('/api/reclamaciones', datosReclamacion([
         'numero_documento' => '123',
         'telefono' => '812345678',
         'detalle' => 'Muy corto',
@@ -72,7 +76,7 @@ it('valida documento, celular, mínimos de texto, apoderado, "otra solución" y 
         'declara_veracidad' => false,
         'acepta_politica' => false,
         'conforme' => false,
-    ]))->assertSessionHasErrors([
+    ]))->assertJsonValidationErrors([
         'numero_documento', 'telefono', 'detalle', 'pedido', 'monto_reclamado',
         'apoderado', 'apoderado_numero_documento', 'solucion_otra',
         'declara_veracidad', 'acepta_politica', 'conforme',
@@ -82,7 +86,7 @@ it('valida documento, celular, mínimos de texto, apoderado, "otra solución" y 
 });
 
 it('acepta el celular con espacios y guarda los datos de la compra y la solución', function () {
-    $this->post('/libro-de-reclamaciones', datosReclamacion([
+    $this->post('/api/reclamaciones', datosReclamacion([
         'telefono' => '987 654 321',
         'comprobante_tipo' => 'boleta',
         'comprobante_numero' => 'B001-00012345',
@@ -91,7 +95,7 @@ it('acepta el celular con espacios y guarda los datos de la compra y la solució
         'producto_marca' => 'Xiaomi',
         'solucion_esperada' => 'otra',
         'solucion_otra' => 'Que me llamen',
-    ]))->assertSessionHasNoErrors();
+    ]))->assertSuccessful();
 
     $reclamacion = Reclamacion::sole();
     expect($reclamacion->telefono)->toBe('987654321')
@@ -105,11 +109,11 @@ it('acepta el celular con espacios y guarda los datos de la compra y la solució
 it('guarda los adjuntos en el disco privado y el panel los puede ver', function () {
     Storage::fake('local');
 
-    $this->post('/libro-de-reclamaciones', datosReclamacion([
+    $this->post('/api/reclamaciones', datosReclamacion([
         'fotos' => [UploadedFile::fake()->image('foto1.jpg'), UploadedFile::fake()->image('foto2.png')],
         'comprobante_archivo' => UploadedFile::fake()->create('boleta.pdf', 200, 'application/pdf'),
         'video' => UploadedFile::fake()->create('video.mp4', 1024, 'video/mp4'),
-    ]))->assertSessionHasNoErrors();
+    ]))->assertSuccessful();
 
     $reclamacion = Reclamacion::sole();
     expect($reclamacion->adjuntos)->toHaveCount(4)
@@ -124,16 +128,16 @@ it('guarda los adjuntos en el disco privado y el panel los puede ver', function 
 });
 
 it('rechaza adjuntos demasiado pesados o de otro formato', function () {
-    $this->post('/libro-de-reclamaciones', datosReclamacion([
+    $this->post('/api/reclamaciones', datosReclamacion([
         'fotos' => [UploadedFile::fake()->image('grande.jpg')->size(6000)],
         'video' => UploadedFile::fake()->create('video.avi', 100, 'video/x-msvideo'),
-    ]))->assertSessionHasErrors(['fotos.0', 'video']);
+    ]))->assertJsonValidationErrors(['fotos.0', 'video']);
 
     expect(Reclamacion::count())->toBe(0);
 });
 
 it('solo muestra la constancia con el enlace firmado', function () {
-    $this->post('/libro-de-reclamaciones', datosReclamacion());
+    $this->post('/api/reclamaciones', datosReclamacion());
     $reclamacion = Reclamacion::sole();
 
     $this->get("/libro-de-reclamaciones/constancia/{$reclamacion->id}")->assertForbidden();
@@ -145,13 +149,13 @@ it('solo muestra la constancia con el enlace firmado', function () {
 });
 
 it('el panel responde la reclamación y la envía por correo', function () {
-    $this->post('/libro-de-reclamaciones', datosReclamacion());
+    $this->post('/api/reclamaciones', datosReclamacion());
     $reclamacion = Reclamacion::sole();
     $admin = User::factory()->create();
 
     $this->actingAs($admin)
-        ->put("/admin/reclamaciones/{$reclamacion->id}/respuesta", ['respuesta' => 'Te enviamos tu código de pago por WhatsApp.'])
-        ->assertSessionHasNoErrors();
+        ->put("/api/admin/reclamaciones/{$reclamacion->id}/respuesta", ['respuesta' => 'Te enviamos tu código de pago por WhatsApp.'])
+        ->assertSuccessful();
 
     $reclamacion->refresh();
     expect($reclamacion->estado)->toBe('atendido')
@@ -162,7 +166,7 @@ it('el panel responde la reclamación y la envía por correo', function () {
 });
 
 it('lista las reclamaciones en el panel', function () {
-    $this->post('/libro-de-reclamaciones', datosReclamacion());
+    $this->post('/api/reclamaciones', datosReclamacion());
 
     $this->actingAs(User::factory()->create())
         ->get('/admin/reclamaciones?estado=pendiente')
@@ -174,29 +178,28 @@ it('lista las reclamaciones en el panel', function () {
 });
 
 it('consulta el estado con número de hoja y documento sin exponer datos personales', function () {
-    $this->post('/libro-de-reclamaciones', datosReclamacion());
+    $this->post('/api/reclamaciones', datosReclamacion());
     $reclamacion = Reclamacion::sole();
 
     $this->get('/libro-de-reclamaciones/consultar')->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('Web/ConsultarReclamacion')->where('resultado', null));
+        ->assertInertia(fn (Assert $page) => $page->component('Web/ConsultarReclamacion')->missing('resultado'));
 
-    $this->post('/libro-de-reclamaciones/consultar', ['codigo' => $reclamacion->codigo, 'numero_documento' => ' 1234 5678 '])
-        ->assertRedirect('/libro-de-reclamaciones/consultar');
-
-    $this->get('/libro-de-reclamaciones/consultar')
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('resultado.codigo', $reclamacion->codigo)
-            ->where('resultado.estado', 'pendiente')
-            ->missing('resultado.nombre')
-            ->missing('resultado.email'));
+    $this->post('/api/reclamaciones/consultar', ['codigo' => $reclamacion->codigo, 'numero_documento' => ' 1234 5678 '])
+        ->assertOk()
+        ->assertJsonPath('data.codigo', $reclamacion->codigo)
+        ->assertJsonPath('data.estado', 'pendiente')
+        ->assertJsonMissingPath('data.nombre')
+        ->assertJsonMissingPath('data.email')
+        ->assertJsonMissingPath('data.numero_documento');
 });
 
 it('no muestra la hoja si el documento no coincide', function () {
-    $this->post('/libro-de-reclamaciones', datosReclamacion());
+    $this->post('/api/reclamaciones', datosReclamacion());
     $reclamacion = Reclamacion::sole();
 
-    $this->from('/libro-de-reclamaciones/consultar')
-        ->post('/libro-de-reclamaciones/consultar', ['codigo' => $reclamacion->codigo, 'numero_documento' => '87654321'])
-        ->assertRedirect('/libro-de-reclamaciones/consultar')
-        ->assertSessionHasErrors('codigo');
+    $this->post('/api/reclamaciones/consultar', ['codigo' => $reclamacion->codigo, 'numero_documento' => '87654321'])
+        ->assertNotFound()
+        ->assertJsonPath('success', false)
+        ->assertJsonValidationErrors('codigo')
+        ->assertJsonMissingPath('data');
 });

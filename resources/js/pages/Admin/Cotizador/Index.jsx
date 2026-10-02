@@ -1,4 +1,3 @@
-import { router } from '@inertiajs/react';
 import { Calculator, ExternalLink, Link2, Plus, RefreshCw, Save, Search, Unlink } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AccionesFila from '@/components/admin/AccionesFila';
@@ -13,6 +12,7 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Select from '@/components/ui/Select';
 import Switch from '@/components/ui/Switch';
+import { useAccionApi } from '@/hooks/useAccionApi';
 import { useCrudModal } from '@/hooks/useCrudModal';
 import { formatoFecha } from '@/lib/fechas';
 import { FRECUENCIAS, resumenOpcion } from '@/lib/moneda';
@@ -48,14 +48,9 @@ function montos(opcion) {
 /** Fila de un precio del ERP con el selector de plan para agregarlo al cotizador. */
 function PrecioErp({ opcion, planes, vinculadaEn }) {
     const [planId, setPlanId] = useState(planes[0]?.id ?? '');
-    const [enviando, setEnviando] = useState(false);
+    const { ejecutar, enCurso: enviando } = useAccionApi();
 
-    const agregar = () =>
-        router.post(
-            '/admin/cotizador/opciones/erp',
-            { servicio_id: planId, erp_ref: opcion.ref },
-            { preserveScroll: true, onStart: () => setEnviando(true), onFinish: () => setEnviando(false) },
-        );
+    const agregar = () => ejecutar('post', '/admin/cotizador/opciones/erp', { servicio_id: planId, erp_ref: opcion.ref });
 
     return (
         <li className="flex flex-col gap-3 py-3 lg:flex-row lg:items-center">
@@ -92,7 +87,7 @@ function PrecioErp({ opcion, planes, vinculadaEn }) {
 /** Precios de los planes del ERP: al agregarlos quedan vinculados y se actualizan solos. */
 function PreciosErp({ erp, planes }) {
     const [buscar, setBuscar] = useState('');
-    const [actualizando, setActualizando] = useState(false);
+    const { ejecutar, enCurso: actualizando } = useAccionApi();
 
     // En qué planes del cotizador está vinculada cada referencia del ERP
     const vinculos = useMemo(() => {
@@ -113,8 +108,7 @@ function PreciosErp({ erp, planes }) {
         }))
         .filter((plan) => plan.opciones.length > 0);
 
-    const actualizar = () =>
-        router.post('/admin/erp/sincronizar', {}, { preserveScroll: true, onStart: () => setActualizando(true), onFinish: () => setActualizando(false) });
+    const actualizar = () => ejecutar('post', '/admin/erp/sincronizar');
 
     return (
         <section className="mt-8 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-5">

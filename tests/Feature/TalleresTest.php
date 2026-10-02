@@ -141,13 +141,14 @@ it('el panel muestra el estado del ERP y actualiza la copia a pedido', function 
         ->where('erp.configurado', true)
         ->where('erp.catalogos.talleres.cantidad', 1));
 
-    $this->post('/admin/erp/sincronizar')->assertRedirect();
+    $this->post('/api/admin/erp/sincronizar')->assertOk()->assertJsonPath('data.catalogos.talleres.cantidad', 1);
 
+    // Si el ERP no responde, avisa cuál falló y se sigue mostrando la última copia
     $caido = true;
-    $this->post('/admin/erp/sincronizar')->assertRedirect();
+    $this->post('/api/admin/erp/sincronizar')->assertStatus(502)->assertJsonPath('success', false);
     expect(app(TalleresErp::class)->items())->toHaveCount(1);
 });
 
 it('solo el panel puede forzar la actualización', function () {
-    $this->post('/admin/erp/sincronizar')->assertRedirect('/login');
+    $this->postJson('/api/admin/erp/sincronizar')->assertUnauthorized();
 });

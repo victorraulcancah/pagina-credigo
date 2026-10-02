@@ -1,4 +1,3 @@
-import { useForm } from '@inertiajs/react';
 import { Save } from 'lucide-react';
 import PageHeader from '@/components/admin/PageHeader';
 import Panel from '@/components/admin/Panel';
@@ -7,6 +6,7 @@ import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
+import { useFormApi } from '@/hooks/useFormApi';
 
 const CAMPOS = [
     'empresa_nombre', 'empresa_razon_social', 'empresa_ruc', 'empresa_eslogan', 'empresa_descripcion',
@@ -17,7 +17,7 @@ const CAMPOS = [
 ];
 
 export default function Empresa({ ajustes }) {
-    const { data, setData, put, processing, errors, isDirty, setDefaults } = useForm(
+    const { data, setData, put, processing, errors, isDirty, setDefaults } = useFormApi(
         Object.fromEntries(CAMPOS.map((campo) => [campo, ajustes[campo] ?? ''])),
     );
 
@@ -31,7 +31,7 @@ export default function Empresa({ ajustes }) {
 
     const guardar = (e) => {
         e.preventDefault();
-        put('/admin/configuracion', { preserveScroll: true, onSuccess: () => setDefaults() });
+        put('/admin/configuracion', { onSuccess: () => setDefaults() });
     };
 
     const botonGuardar = (

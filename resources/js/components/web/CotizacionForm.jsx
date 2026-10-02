@@ -1,30 +1,26 @@
-import { useForm } from '@inertiajs/react';
 import { CircleCheckBig, Send } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import Textarea from '@/components/ui/Textarea';
 import AceptaPolitica from '@/components/web/AceptaPolitica';
+import { useFormApi } from '@/hooks/useFormApi';
 import { registrarLead } from '@/lib/analitica';
 
 /**
- * Pedido de información de una cotización. Se guarda como mensaje de contacto
- * (bandeja del panel) con el plan y los montos elegidos en el asunto y el mensaje.
+ * Pedido de información de una cotización. Se envía a la API (POST /api/solicitudes) como solicitud
+ * del cotizador, con el plan y los montos elegidos en el asunto y el mensaje.
  */
 export default function CotizacionForm({ asunto, detalle }) {
-    const form = useForm({ nombre: '', telefono: '', email: '', comentario: '', website: '', acepta_politica: false });
+    const form = useFormApi({ nombre: '', telefono: '', email: '', comentario: '', website: '', acepta_politica: false });
     const { data, setData, errors, processing, recentlySuccessful } = form;
 
     const enviar = (e) => {
         e.preventDefault();
-        form.transform(({ comentario, ...resto }) => ({
-            ...resto,
-            asunto,
-            origen: 'cotizador',
-            mensaje: comentario ? `${detalle}\n\nComentario: ${comentario}` : detalle,
-        }));
-        form.post('/contacto', {
-            preserveScroll: true,
+        const { comentario, ...resto } = data;
+        form.post('/solicitudes', {
+            recargar: false,
+            datos: { ...resto, asunto, origen: 'cotizador', mensaje: comentario ? `${detalle}\n\nComentario: ${comentario}` : detalle },
             onSuccess: () => {
                 registrarLead('cotizador');
                 form.reset();

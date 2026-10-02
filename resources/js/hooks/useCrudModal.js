@@ -1,19 +1,21 @@
-import { router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { useFormApi } from '@/hooks/useFormApi';
 import { deleteConfirm } from '@/utils/sweetalert';
 
 /**
- * CRUD con formulario en modal para listas del panel (banners, servicios, preguntas).
+ * CRUD con formulario en modal para listas del panel (banners, servicios, preguntas, documentos),
+ * guardando por la API REST. `url`: recurso de la API sin "/api" (ej. '/admin/banners').
  *
  * const crud = useCrudModal({ url: '/admin/banners', vacio: {...}, aFormulario: (item) => ({...}) });
  * crud.abrirNuevo() · crud.abrirEditar(item) · crud.guardar(e) · crud.eliminar(item, 'nombre')
  *
- * Envía siempre FormData (soporta imágenes); al editar usa POST + _method=put.
+ * Crear: POST url · Editar: PUT url/{id} (con archivos va como POST + _method) · Eliminar: DELETE url/{id}.
+ * Después de cada cambio la lista se recarga desde el servidor.
  */
 export function useCrudModal({ url, vacio, aFormulario = (item) => item }) {
     const [abierto, setAbierto] = useState(false);
     const [editando, setEditando] = useState(null);
-    const form = useForm(vacio);
+    const form = useFormApi(vacio);
 
     /** `extra`: valores iniciales adicionales (ej. { orden: items.length }). */
     const abrirNuevo = (extra = {}) => {
@@ -34,21 +36,16 @@ export function useCrudModal({ url, vacio, aFormulario = (item) => item }) {
 
     const guardar = (e) => {
         e?.preventDefault();
-        const opciones = { preserveScroll: true, forceFormData: true, onSuccess: () => setAbierto(false) };
+        const opciones = { onSuccess: () => setAbierto(false) };
 
-        if (editando) {
-            form.transform((datos) => ({ ...datos, _method: 'put' }));
-            form.post(`${url}/${editando.id}`, opciones);
-        } else {
-            form.transform((datos) => datos);
-            form.post(url, opciones);
-        }
+        return editando ? form.put(`${url}/${editando.id}`, opciones) : form.post(url, opciones);
     };
 
     const eliminar = async (item, nombre = 'este registro') => {
         if (await deleteConfirm(`¿Eliminar ${nombre}?`)) {
-            router.delete(`${url}/${item.id}`, { preserveScroll: true });
+            return form.delete(`${url}/${item.id}`);
         }
+        return { success: false };
     };
 
     return { form, abierto, editando, abrirNuevo, abrirEditar, cerrar, guardar, eliminar };

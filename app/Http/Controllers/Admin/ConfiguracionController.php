@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\ConfiguracionRequest;
 use App\Services\ConfiguracionService;
-use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/** Pantallas de configuración. Guardar va por la API: PUT /api/admin/configuracion. */
 class ConfiguracionController extends Controller
 {
     public function __construct(private ConfiguracionService $configuracion) {}
@@ -39,27 +38,5 @@ class ConfiguracionController extends Controller
                 'color_acento' => config('sitio.defaults.color_acento'),
             ],
         ]);
-    }
-
-    public function update(ConfiguracionRequest $request): RedirectResponse
-    {
-        $imagenes = config('sitio.imagenes');
-
-        $this->configuracion->actualizar($request->safe()->except([
-            ...$imagenes,
-            ...array_map(fn ($clave) => "quitar_{$clave}", $imagenes),
-        ]));
-
-        foreach ($imagenes as $clave) {
-            if ($request->hasFile($clave)) {
-                $this->configuracion->actualizarImagen($clave, $request->file($clave));
-            } elseif ($request->boolean("quitar_{$clave}")) {
-                $this->configuracion->quitarImagen($clave);
-            }
-        }
-
-        Inertia::flash('success', 'Configuración guardada');
-
-        return back();
     }
 }

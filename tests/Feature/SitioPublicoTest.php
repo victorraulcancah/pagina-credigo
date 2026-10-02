@@ -66,7 +66,7 @@ it('no envía al sitio las secciones desactivadas', function () {
 });
 
 it('guarda el mensaje del formulario de contacto', function () {
-    $this->post('/contacto', [
+    $this->post('/api/solicitudes', [
         'nombre' => 'Juan',
         'apellido' => 'Pérez',
         'email' => 'juan@example.com',
@@ -75,7 +75,7 @@ it('guarda el mensaje del formulario de contacto', function () {
         'asunto' => 'No puedo entrar a la app',
         'mensaje' => 'Quiero información',
         'acepta_politica' => true,
-    ])->assertRedirect()->assertSessionHasNoErrors();
+    ])->assertRedirect()->assertSuccessful();
 
     expect(MensajeContacto::sole())
         ->nombre_completo->toBe('Juan Pérez')
@@ -85,20 +85,25 @@ it('guarda el mensaje del formulario de contacto', function () {
 });
 
 it('valida el formulario de contacto (incluida la aceptación de la política)', function () {
-    $this->post('/contacto', ['nombre' => '', 'telefono' => 'abc', 'tipo_consulta' => 'inventado', 'mensaje' => ''])
-        ->assertSessionHasErrors(['nombre', 'apellido', 'email', 'telefono', 'tipo_consulta', 'asunto', 'mensaje', 'acepta_politica']);
+    $this->post('/api/solicitudes', ['nombre' => '', 'telefono' => 'abc', 'tipo_consulta' => 'inventado', 'mensaje' => ''])
+        ->assertJsonValidationErrors(['nombre', 'apellido', 'email', 'telefono', 'tipo_consulta', 'asunto', 'mensaje', 'acepta_politica']);
 
     expect(MensajeContacto::count())->toBe(0);
 });
 
 it('descarta los envíos de bots (campo trampa lleno)', function () {
-    $this->post('/contacto', [
+    // Responde igual que a una persona (no le avisa que fue descartado), pero no se guarda
+    $this->post('/api/solicitudes', [
         'nombre' => 'Bot',
+        'apellido' => 'Spam',
+        'email' => 'bot@spam.test',
         'telefono' => '999999999',
+        'tipo_consulta' => 'otro',
+        'asunto' => 'Oferta',
         'mensaje' => 'spam',
         'website' => 'http://spam.test',
         'acepta_politica' => true,
-    ])->assertRedirect();
+    ])->assertCreated()->assertJsonPath('success', true);
 
     expect(MensajeContacto::count())->toBe(0);
 });

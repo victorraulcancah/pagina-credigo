@@ -130,7 +130,7 @@ it('el panel agrega una opción con los precios del ERP y la mantiene actualizad
         ->where('erp.planes.0.opciones.0.ref', 'v7')
         ->missing('erp.planes.0.opciones.0.tasa_interes'));
 
-    $this->post('/admin/cotizador/opciones/erp', ['servicio_id' => $plan->id, 'erp_ref' => 'v7'])->assertSessionHasNoErrors();
+    $this->post('/api/admin/cotizador/opciones/erp', ['servicio_id' => $plan->id, 'erp_ref' => 'v7'])->assertSuccessful();
 
     $opcion = OpcionPlan::where('erp_ref', 'v7')->sole();
     expect($opcion)
@@ -154,9 +154,9 @@ it('no agrega precios que el ERP ya no tiene ni permite inventar un vínculo', f
     $this->actingAs(User::factory()->create());
     $plan = Servicio::firstOrFail();
 
-    $this->post('/admin/cotizador/opciones/erp', ['servicio_id' => $plan->id, 'erp_ref' => 'v999'])->assertSessionHasErrors('erp_ref');
+    $this->post('/api/admin/cotizador/opciones/erp', ['servicio_id' => $plan->id, 'erp_ref' => 'v999'])->assertJsonValidationErrors('erp_ref');
 
-    $this->post('/admin/cotizador/opciones', [
+    $this->post('/api/admin/cotizador/opciones', [
         'servicio_id' => $plan->id, 'erp_ref' => 'v7', 'nombre' => 'Manual', 'moneda' => 'PEN', 'frecuencia' => 'semanal', 'orden' => 0,
-    ])->assertSessionHasErrors('erp_ref');
+    ])->assertJsonValidationErrors('erp_ref');
 });

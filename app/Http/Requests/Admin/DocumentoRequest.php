@@ -43,13 +43,4 @@ class DocumentoRequest extends FormRequest
     {
         return ['servicio_id' => 'plan', 'archivo' => 'archivo PDF'];
     }
-
-    /** Datos a guardar (el archivo lo resuelve el controlador). */
-    public function datos(): array
-    {
-        return [
-            ...$this->safe()->except(['archivo', 'servicio_id']),
-            'servicio_id' => $this->input('categoria') === 'planes' ? $this->validated('servicio_id') : null,
-        ];
-    }
 }

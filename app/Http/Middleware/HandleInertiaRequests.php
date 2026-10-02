@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use App\Models\MensajeContacto;
 use App\Models\Reclamacion;
-use App\Models\Servicio;
 use App\Services\ConfiguracionService;
+use App\Services\ServicioService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -47,7 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => fn () => $request->user()?->only(['id', 'name', 'email']),
             ],
             // Planes del menú "Planes" del sitio público (cada uno lleva a su página)
-            'planesMenu' => fn () => $request->is('admin', 'admin/*') ? [] : Servicio::activo()->ordenado()->limit(8)->get(['titulo', 'slug']),
+            'planesMenu' => fn () => $request->is('admin', 'admin/*') ? [] : app(ServicioService::class)->paraMenu(),
             'mensajesNoLeidos' => fn () => $request->user() ? MensajeContacto::noLeido()->count() : 0,
             'reclamacionesPendientes' => fn () => $request->user() ? Reclamacion::pendiente()->count() : 0,
         ];

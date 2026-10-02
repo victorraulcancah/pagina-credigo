@@ -47,13 +47,4 @@ class ServicioRequest extends FormRequest
     {
         return ['slug' => 'dirección en la web', 'detalle' => 'detalle del plan'];
     }
-
-    /** Datos a guardar: si se quitaron todas las características, el campo no llega → lista vacía. */
-    public function datos(): array
-    {
-        return [
-            ...$this->safe()->except(['imagen', 'quitar_imagen']),
-            'caracteristicas' => array_values($this->validated('caracteristicas') ?? []),
-        ];
-    }
 }

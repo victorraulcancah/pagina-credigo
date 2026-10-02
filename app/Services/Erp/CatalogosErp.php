@@ -30,8 +30,27 @@ class CatalogosErp
             ->map(function (CatalogoErp $catalogo) use ($sincronizar) {
                 $datos = $sincronizar ? $catalogo->sincronizar() : $catalogo->catalogo();
 
-                return ['cantidad' => count($datos['items']), 'actualizado' => $datos['actualizado']];
+                return [
+                    'cantidad' => count($datos['items']),
+                    'actualizado' => $datos['actualizado'],
+                    // Solo al sincronizar: el ERP no respondió y se muestra la última copia
+                    ...($sincronizar ? ['fallo' => $datos['fallo'] ?? false] : []),
+                ];
             })
+            ->all();
+    }
+
+    /**
+     * Descarga todos los catálogos ya mismo (sin esperar la actualización automática).
+     * Devuelve los que el ERP no respondió: de esos se sigue mostrando la última copia.
+     *
+     * @return string[]
+     */
+    public function sincronizarTodo(): array
+    {
+        return collect($this->estado(sincronizar: true))
+            ->filter(fn ($estado) => $estado['fallo'])
+            ->keys()
             ->all();
     }
 }

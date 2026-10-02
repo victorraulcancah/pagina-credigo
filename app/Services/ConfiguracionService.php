@@ -88,6 +88,25 @@ class ConfiguracionService
         $this->limpiarCache();
     }
 
+    /**
+     * Guarda un formulario del panel: los ajustes de texto y cada imagen (logo, favicon,
+     * vista previa al compartir): archivo nuevo → se reemplaza; `quitar_{clave}` → se borra.
+     */
+    public function guardar(array $datos): void
+    {
+        $imagenes = config('sitio.imagenes');
+
+        $this->actualizar(collect($datos)->except([...$imagenes, ...array_map(fn ($clave) => "quitar_{$clave}", $imagenes)])->all());
+
+        foreach ($imagenes as $clave) {
+            if (($datos[$clave] ?? null) instanceof UploadedFile) {
+                $this->actualizarImagen($clave, $datos[$clave]);
+            } elseif (filter_var($datos["quitar_{$clave}"] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                $this->quitarImagen($clave);
+            }
+        }
+    }
+
     public function actualizarImagen(string $clave, UploadedFile $archivo): void
     {
         $ruta = $this->imagenes->reemplazar($this->get($clave), $archivo, 'configuracion');

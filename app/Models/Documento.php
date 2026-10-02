@@ -51,13 +51,6 @@ class Documento extends Model
         return $query->where('categoria', $categoria);
     }
 
-    /** Lo que ve la web: visibles de una categoría, en orden. */
-    public static function publicos(string $categoria)
-    {
-        return static::activo()->categoria($categoria)->ordenado()
-            ->get(['id', 'titulo', 'descripcion', 'servicio_id', 'archivo', 'tamano']);
-    }
-
     protected function archivoUrl(): Attribute
     {
         return Attribute::get(fn () => app(ImagenService::class)->url($this->archivo));

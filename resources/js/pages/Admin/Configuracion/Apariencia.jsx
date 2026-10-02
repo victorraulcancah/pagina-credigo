@@ -1,4 +1,3 @@
-import { useForm } from '@inertiajs/react';
 import { LogIn, RotateCcw, Save, TriangleAlert } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import ColorInput from '@/components/admin/ColorInput';
@@ -8,6 +7,7 @@ import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
+import { useFormApi } from '@/hooks/useFormApi';
 import { LOGO_POR_DEFECTO } from '@/hooks/useSitio';
 
 /** Contraste WCAG entre dos colores hex (1 a 21). */
@@ -26,7 +26,7 @@ function contraste(a, b) {
 const esHex = (valor) => /^#[0-9a-fA-F]{6}$/.test(valor);
 
 export default function Apariencia({ ajustes, coloresPorDefecto }) {
-    const form = useForm({
+    const form = useFormApi({
         color_primario: ajustes.color_primario,
         color_acento: ajustes.color_acento,
         logo: null,
@@ -46,10 +46,7 @@ export default function Apariencia({ ajustes, coloresPorDefecto }) {
 
     const guardar = (e) => {
         e.preventDefault();
-        form.transform((datos) => ({ ...datos, _method: 'put' }));
-        form.post('/admin/configuracion', {
-            forceFormData: true,
-            preserveScroll: true,
+        form.put('/admin/configuracion', {
             onSuccess: () => {
                 const archivosLimpios = { logo: null, quitar_logo: false, favicon: null, quitar_favicon: false };
                 setData((d) => ({ ...d, ...archivosLimpios }));

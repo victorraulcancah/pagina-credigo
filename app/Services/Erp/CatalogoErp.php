@@ -53,7 +53,10 @@ abstract class CatalogoErp
         return $this->catalogo()['items'];
     }
 
-    /** Descarga de nuevo. Si el ERP falla, usa el respaldo y reintenta en 5 minutos. */
+    /**
+     * Descarga de nuevo. Si el ERP falla, usa el respaldo y reintenta en 5 minutos;
+     * en ese caso lo devuelto lleva `fallo: true` (para avisar en el panel).
+     */
     public function sincronizar(): array
     {
         $items = $this->erp->configurado() ? $this->descargar() : null;
@@ -62,7 +65,7 @@ abstract class CatalogoErp
             $respaldo = Cache::get($this->claveCache().'.respaldo', self::VACIO);
             Cache::put($this->claveCache(), $respaldo, now()->addMinutes(5));
 
-            return $respaldo;
+            return [...$respaldo, 'fallo' => true];
         }
 
         $catalogo = ['items' => $items, 'actualizado' => now()->toIso8601String()];

@@ -3,19 +3,14 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ReclamacionRequest;
+use App\Http\Resources\ReclamacionResource;
 use App\Models\Reclamacion;
-use App\Services\ReclamacionService;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/** Pantallas del Libro de Reclamaciones. Registrar y consultar van por la API (/api/reclamaciones). */
 class LibroReclamacionesController extends Controller
 {
-    public function __construct(private ReclamacionService $reclamaciones) {}
-
     public function create(): Response
     {
         return Inertia::render('Web/LibroReclamaciones', [
@@ -30,56 +25,23 @@ class LibroReclamacionesController extends Controller
         ]);
     }
 
-    public function store(ReclamacionRequest $request): RedirectResponse
-    {
-        $reclamacion = $this->reclamaciones->registrar($request->datos(), $request->archivos(), $request->ip());
-
-        // Enlace firmado: la constancia solo la ve quien la registró (no se puede adivinar el número)
-        return redirect(URL::signedRoute('reclamaciones.constancia', $reclamacion));
-    }
-
+    /** Constancia de la hoja (enlace firmado: solo la ve quien la registró). Sin la respuesta interna. */
     public function constancia(Reclamacion $reclamacion): Response
     {
+        $datos = (new ReclamacionResource($reclamacion->load('adjuntos')))->resolve();
+
         return Inertia::render('Web/ReclamacionConstancia', [
-            'reclamacion' => $reclamacion->load('adjuntos:id,reclamacion_id,tipo,nombre_original,tamano')
-                ->makeHidden(['respuesta', 'respondido_por']),
+            'reclamacion' => collect($datos)->except(['respuesta', 'respondido_por', 'respondido_por_id'])->all(),
             'diasRespuesta' => Reclamacion::DIAS_HABILES_RESPUESTA,
         ]);
     }
 
-    /**
-     * Consulta del estado de una hoja con su número y el documento del consumidor.
-     * El resultado llega por la sesión (tras el POST) y no queda en la URL.
-     */
-    public function consultar(Request $request): Response
+    /** Pantalla de consulta: el resultado llega de POST /api/reclamaciones/consultar (no queda en la URL). */
+    public function consultar(): Response
     {
-        $id = $request->session()->get('reclamacion_consultada');
-        $reclamacion = $id ? Reclamacion::find($id) : null;
-
         return Inertia::render('Web/ConsultarReclamacion', [
-            'resultado' => $reclamacion?->only([
-                'codigo', 'tipo', 'estado', 'created_at', 'fecha_limite', 'vencido', 'respuesta', 'respondido_at',
-            ]),
             'diasRespuesta' => Reclamacion::DIAS_HABILES_RESPUESTA,
             'seo' => ['titulo' => 'Consultar mi reclamo'],
         ]);
-    }
-
-    public function buscar(Request $request): RedirectResponse
-    {
-        $datos = $request->validate([
-            'codigo' => ['required', 'string', 'max:20'],
-            'numero_documento' => ['required', 'string', 'max:20'],
-        ], [], ['codigo' => 'número de hoja', 'numero_documento' => 'número de documento']);
-
-        $reclamacion = Reclamacion::where('codigo', trim($datos['codigo']))
-            ->where('numero_documento', strtoupper(preg_replace('/\s+/', '', $datos['numero_documento'])))
-            ->first();
-
-        if (! $reclamacion) {
-            return back()->withErrors(['codigo' => 'No encontramos una hoja con ese número y documento. Revisa los datos.']);
-        }
-
-        return redirect()->route('reclamaciones.consultar')->with('reclamacion_consultada', $reclamacion->id);
     }
 }

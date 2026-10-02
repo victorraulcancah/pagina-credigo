@@ -168,13 +168,19 @@ it('el panel responde la reclamación y la envía por correo', function () {
 it('lista las reclamaciones en el panel', function () {
     $this->post('/api/reclamaciones', datosReclamacion());
 
-    $this->actingAs(User::factory()->create())
-        ->get('/admin/reclamaciones?estado=pendiente')
-        ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('Admin/Reclamaciones/Index')
-            ->has('reclamaciones.data', 1)
-            ->where('reclamacionesPendientes', 1));
+    $this->actingAs(User::factory()->create());
+
+    // La pantalla muestra el contador del menú; la lista la pide a la API
+    $this->get('/admin/reclamaciones?estado=pendiente')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Admin/Reclamaciones/Index')
+        ->where('reclamacionesPendientes', 1));
+
+    $this->getJson('/api/admin/reclamaciones?estado=pendiente')->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('filtros.estado', 'pendiente')
+        ->assertJsonPath('opciones.dias_respuesta', Reclamacion::DIAS_HABILES_RESPUESTA)
+        ->assertJsonMissingPath('data.0.ip');
+    $this->getJson('/api/admin/reclamaciones?estado=atendido')->assertJsonCount(0, 'data');
 });
 
 it('consulta el estado con número de hoja y documento sin exponer datos personales', function () {

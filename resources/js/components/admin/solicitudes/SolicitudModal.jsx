@@ -64,7 +64,7 @@ function DatoContacto({ icono: Icono, etiqueta, children }) {
 }
 
 /** Detalle de una solicitud con acciones de contacto y formulario de seguimiento. */
-export default function SolicitudModal({ mensaje, estados, origenes, usuarios, onClose, onMarcarNoLeido, onEliminar }) {
+export default function SolicitudModal({ mensaje, estados, origenes, usuarios, recargar, onClose, onMarcarNoLeido, onEliminar }) {
     const { auth } = usePage().props;
     const form = useFormApi({ estado: 'nuevo', asignado_a: '', notas: '' });
     const { data, setData, errors, processing, recentlySuccessful } = form;
@@ -79,7 +79,7 @@ export default function SolicitudModal({ mensaje, estados, origenes, usuarios, o
 
     const guardar = (e) => {
         e.preventDefault();
-        form.put(`/admin/solicitudes/${mensaje.id}/seguimiento`, { onSuccess: () => form.setDefaults() });
+        form.put(`/admin/solicitudes/${mensaje.id}/seguimiento`, { recargar, onSuccess: () => form.setDefaults() });
     };
 
     const ui = mensaje ? estadoUi(mensaje.estado) : null;

@@ -1,5 +1,6 @@
 import { ImageOff, Images, Plus, Save, Smartphone } from 'lucide-react';
 import AccionesFila from '@/components/admin/AccionesFila';
+import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -12,6 +13,7 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
+import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
 
 const VACIO = {
@@ -35,9 +37,12 @@ const VACIO = {
 // Los campos de texto vacíos llegan como null desde la BD; el formulario usa ''
 const sinNulos = (banner) => Object.fromEntries(Object.entries(banner).map(([clave, valor]) => [clave, valor ?? '']));
 
-export default function BannersIndex({ banners }) {
+export default function BannersIndex() {
+    const lista = useConsulta('/admin/banners');
+    const banners = lista.datos ?? [];
     const crud = useCrudModal({
         url: '/admin/banners',
+        recargar: lista.recargar,
         vacio: VACIO,
         aFormulario: (b) => ({
             ...VACIO,
@@ -67,7 +72,9 @@ export default function BannersIndex({ banners }) {
                 actions={nuevo}
             />
 
-            {banners.length === 0 ? (
+            {!lista.datos ? (
+                <Cargando error={lista.error} onReintentar={lista.recargar} />
+            ) : banners.length === 0 ? (
                 <EmptyState icon={Images} title="No hay banners" description="Sin banners, el inicio muestra el nombre y la descripción de la empresa." action={nuevo} />
             ) : (
                 <ul className="flex flex-col gap-3">

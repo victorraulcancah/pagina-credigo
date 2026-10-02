@@ -31,17 +31,19 @@ trait ApiResponseTrait
     }
 
     /**
-     * Respuesta exitosa
+     * Respuesta exitosa. `$extra` va junto a `data` (ej. `opciones` de un formulario del panel).
      */
     protected function successResponse(
         mixed $data = null,
         string $message = 'Operación exitosa',
-        int $statusCode = 200
+        int $statusCode = 200,
+        array $extra = [],
     ): JsonResponse {
         return response()->json([
             'success' => true,
             'message' => $message,
             'data' => $data,
+            ...$extra,
         ], $statusCode);
     }
 

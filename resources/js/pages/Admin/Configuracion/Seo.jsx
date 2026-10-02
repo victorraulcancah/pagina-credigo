@@ -2,6 +2,7 @@ import { ExternalLink, Save } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import ImageUpload from '@/components/admin/ImageUpload';
 import PageHeader from '@/components/admin/PageHeader';
+import PantallaApi from '@/components/admin/PantallaApi';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
@@ -11,7 +12,7 @@ import { useFormApi } from '@/hooks/useFormApi';
 import { LOGO_POR_DEFECTO } from '@/hooks/useSitio';
 
 /** Vista previa al compartir (Open Graph), Google Analytics y píxel de Meta. */
-export default function Seo({ ajustes }) {
+function SeoFormulario({ ajustes }) {
     const form = useFormApi({
         imagen_compartir: null,
         quitar_imagen_compartir: false,
@@ -129,5 +130,14 @@ export default function Seo({ ajustes }) {
                 <div className="flex justify-end lg:col-span-2">{botonGuardar}</div>
             </form>
         </AdminLayout>
+    );
+}
+
+/** Vista previa al compartir y analítica: los ajustes llegan de la API (GET /api/admin/configuracion). */
+export default function Seo() {
+    return (
+        <PantallaApi url="/admin/configuracion" titulo="SEO y marketing">
+            {({ datos }) => <SeoFormulario ajustes={datos} />}
+        </PantallaApi>
     );
 }

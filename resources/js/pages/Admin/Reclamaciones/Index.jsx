@@ -1,8 +1,10 @@
 import { router } from '@inertiajs/react';
-import { BookOpenText, ChevronLeft, ChevronRight, FileText, Paperclip, Search, Send, Video } from 'lucide-react';
+import { BookOpenText, FileText, Paperclip, Search, Send, Video } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
 import PageHeader from '@/components/admin/PageHeader';
+import Paginacion from '@/components/admin/Paginacion';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
@@ -10,11 +12,12 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Textarea from '@/components/ui/Textarea';
 import { useFormApi } from '@/hooks/useFormApi';
+import { useListaFiltrada } from '@/hooks/useListaFiltrada';
 import { formatoFecha } from '@/lib/fechas';
 import { ETIQUETA_ADJUNTO, filasHoja, tamanoArchivo } from '@/lib/reclamacion';
 import { cn } from '@/lib/utils';
 
-const opcionesVisita = { preserveState: true, preserveScroll: true, replace: true };
+const FILTROS = { buscar: '', estado: 'todos', page: 1 };
 
 // fecha_limite viene como "2026-10-17": se lee a mediodía para evitar desfases de zona horaria
 const fechaLocal = (fecha) => new Date(`${fecha}T12:00:00`);
@@ -50,15 +53,25 @@ function Dato({ etiqueta, children, className }) {
     );
 }
 
-export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespuesta }) {
+/** Bandeja del Libro de Reclamaciones: las hojas llegan de la API (GET /api/admin/reclamaciones). */
+export default function ReclamacionesIndex() {
+    const lista = useListaFiltrada('/admin/reclamaciones', FILTROS);
+    const { filtros, filtrar } = lista;
+    const reclamaciones = lista.respuesta?.data ?? [];
+    const diasRespuesta = lista.respuesta?.opciones?.dias_respuesta ?? 15;
+
     const [buscar, setBuscar] = useState(filtros.buscar);
     const [seleccionadaId, setSeleccionadaId] = useState(null);
     const primeraCarga = useRef(true);
     const respuesta = useFormApi({ respuesta: '' });
 
-    const seleccionada = reclamaciones.data.find((r) => r.id === seleccionadaId);
+    const seleccionada = reclamaciones.find((r) => r.id === seleccionadaId);
 
-    const filtrar = (cambios) => router.get('/admin/reclamaciones', { ...filtros, ...cambios }, opcionesVisita);
+    // Tras responder: la lista y el contador de pendientes del menú
+    const actualizar = () => {
+        lista.recargar();
+        router.reload({ only: ['reclamacionesPendientes'] });
+    };
 
     useEffect(() => {
         if (primeraCarga.current) {
@@ -77,7 +90,7 @@ export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespues
 
     const responder = (e) => {
         e.preventDefault();
-        respuesta.put(`/admin/reclamaciones/${seleccionada.id}/respuesta`);
+        respuesta.put(`/admin/reclamaciones/${seleccionada.id}/respuesta`, { recargar: actualizar });
     };
 
     return (
@@ -125,7 +138,9 @@ export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespues
                 </div>
             </div>
 
-            {reclamaciones.data.length === 0 ? (
+            {!lista.respuesta ? (
+                <Cargando error={lista.error} onReintentar={lista.recargar} />
+            ) : reclamaciones.length === 0 ? (
                 <EmptyState
                     icon={BookOpenText}
                     title={filtros.buscar || filtros.estado !== 'todos' ? 'Sin resultados' : 'No hay reclamaciones'}
@@ -133,7 +148,7 @@ export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespues
                 />
             ) : (
                 <ul className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    {reclamaciones.data.map((r) => (
+                    {reclamaciones.map((r) => (
                         <li key={r.id}>
                             <button type="button" onClick={() => abrir(r)} className="flex w-full flex-col gap-2 px-4 py-4 text-left transition hover:bg-gray-50 sm:flex-row sm:items-center sm:gap-4 sm:px-5">
                                 <div className="min-w-0 flex-1">
@@ -168,21 +183,7 @@ export default function ReclamacionesIndex({ reclamaciones, filtros, diasRespues
                 </ul>
             )}
 
-            {reclamaciones.last_page > 1 && (
-                <nav aria-label="Paginación" className="mt-4 flex items-center justify-between gap-3 text-sm">
-                    <span className="text-gray-500">
-                        {reclamaciones.from}–{reclamaciones.to} de {reclamaciones.total}
-                    </span>
-                    <div className="flex gap-2">
-                        <Button href={reclamaciones.prev_page_url ?? undefined} variant="ghost" size="sm" icon={ChevronLeft} disabled={!reclamaciones.prev_page_url} className="border border-gray-200" preserveState>
-                            Anterior
-                        </Button>
-                        <Button href={reclamaciones.next_page_url ?? undefined} variant="ghost" size="sm" icon={ChevronRight} iconPosition="right" disabled={!reclamaciones.next_page_url} className="border border-gray-200" preserveState>
-                            Siguiente
-                        </Button>
-                    </div>
-                </nav>
-            )}
+            <Paginacion paginacion={lista.respuesta?.pagination} onPagina={(pagina) => filtrar({ page: pagina })} />
 
             <Modal
                 open={Boolean(seleccionada)}

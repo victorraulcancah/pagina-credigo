@@ -101,16 +101,16 @@ describe('seguimiento de solicitudes', function () {
         MensajeContacto::create(['nombre' => 'B', 'telefono' => '987654321', 'mensaje' => 'x', 'estado' => 'inscrito', 'asignado_a' => $this->asesor->id]);
         MensajeContacto::create(['nombre' => 'C', 'telefono' => '987654321', 'mensaje' => 'x', 'estado' => 'inscrito']);
 
-        $this->get('/admin/mensajes?estado=inscrito')->assertInertia(fn (Assert $page) => $page
-            ->has('mensajes.data', 2)
-            ->where('conteos.nuevo', 1)
-            ->where('conteos.inscrito', 2));
+        $this->getJson('/api/admin/solicitudes?estado=inscrito')->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('conteos.nuevo', 1)
+            ->assertJsonPath('conteos.inscrito', 2);
 
-        $this->get('/admin/mensajes?asignado=mios')->assertInertia(fn (Assert $page) => $page
-            ->has('mensajes.data', 1)
-            ->where('mensajes.data.0.nombre', 'B'));
+        $this->getJson('/api/admin/solicitudes?asignado=mios')
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.nombre', 'B');
 
-        $this->get('/admin/mensajes?asignado=sin_asignar')->assertInertia(fn (Assert $page) => $page->has('mensajes.data', 2));
+        $this->getJson('/api/admin/solicitudes?asignado=sin_asignar')->assertJsonCount(2, 'data');
     });
 
     it('exporta las solicitudes a Excel', function () {

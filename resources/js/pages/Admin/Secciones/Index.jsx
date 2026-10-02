@@ -1,11 +1,15 @@
 import { Link } from '@inertiajs/react';
 import { ChevronRight, ExternalLink } from 'lucide-react';
+import Cargando from '@/components/admin/Cargando';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import PageHeader from '@/components/admin/PageHeader';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { PAGINAS } from '@/data/paginas';
+import { useConsulta } from '@/hooks/useConsulta';
 
-export default function SeccionesIndex({ secciones }) {
+export default function SeccionesIndex() {
+    const lista = useConsulta('/admin/secciones');
+    const secciones = lista.datos ?? [];
     const grupos = Object.keys(PAGINAS)
         .map((pagina) => ({ pagina, ...PAGINAS[pagina], secciones: secciones.filter((s) => s.pagina === pagina) }))
         .filter((grupo) => grupo.secciones.length > 0);
@@ -14,6 +18,9 @@ export default function SeccionesIndex({ secciones }) {
         <AdminLayout title="Secciones">
             <PageHeader title="Secciones" description="Textos, imágenes y listas de cada página del sitio." />
 
+            {!lista.datos ? (
+                <Cargando error={lista.error} onReintentar={lista.recargar} />
+            ) : (
             <div className="flex flex-col gap-8">
                 {grupos.map((grupo) => (
                     <section key={grupo.pagina}>
@@ -53,6 +60,7 @@ export default function SeccionesIndex({ secciones }) {
                     </section>
                 ))}
             </div>
+            )}
         </AdminLayout>
     );
 }

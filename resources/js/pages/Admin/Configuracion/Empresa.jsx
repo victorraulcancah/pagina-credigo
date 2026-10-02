@@ -1,5 +1,6 @@
 import { Save } from 'lucide-react';
 import PageHeader from '@/components/admin/PageHeader';
+import PantallaApi from '@/components/admin/PantallaApi';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
@@ -16,7 +17,7 @@ const CAMPOS = [
     'notificaciones_email',
 ];
 
-export default function Empresa({ ajustes }) {
+function EmpresaFormulario({ ajustes }) {
     const { data, setData, put, processing, errors, isDirty, setDefaults } = useFormApi(
         Object.fromEntries(CAMPOS.map((campo) => [campo, ajustes[campo] ?? ''])),
     );
@@ -152,5 +153,14 @@ export default function Empresa({ ajustes }) {
                 <div className="flex justify-end">{botonGuardar}</div>
             </form>
         </AdminLayout>
+    );
+}
+
+/** Empresa, contacto y avisos: los ajustes llegan de la API (GET /api/admin/configuracion). */
+export default function Empresa() {
+    return (
+        <PantallaApi url="/admin/configuracion" titulo="Empresa y contacto">
+            {({ datos }) => <EmpresaFormulario ajustes={datos} />}
+        </PantallaApi>
     );
 }

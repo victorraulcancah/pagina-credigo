@@ -137,9 +137,9 @@ it('el panel muestra el estado del ERP y actualiza la copia a pedido', function 
     simularErp($caido);
     $this->actingAs(User::factory()->create());
 
-    $this->get('/admin')->assertInertia(fn (Assert $page) => $page
-        ->where('erp.configurado', true)
-        ->where('erp.catalogos.talleres.cantidad', 1));
+    $this->getJson('/api/admin/dashboard')->assertOk()
+        ->assertJsonPath('data.erp.configurado', true)
+        ->assertJsonPath('data.erp.catalogos.talleres.cantidad', 1);
 
     $this->post('/api/admin/erp/sincronizar')->assertOk()->assertJsonPath('data.catalogos.talleres.cantidad', 1);
 

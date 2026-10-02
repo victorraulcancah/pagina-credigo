@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, BookOpenText, Briefcase, Building, CircleQuestionMark, Images, Inbox, LayoutTemplate, Palette, RefreshCw } from 'lucide-react';
 import PageHeader from '@/components/admin/PageHeader';
+import PantallaApi from '@/components/admin/PantallaApi';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { useAccionApi } from '@/hooks/useAccionApi';
@@ -15,8 +16,8 @@ const CATALOGOS_ERP = [
 ];
 
 /** Conexión con el ERP: qué se muestra en la web y cuándo se actualizó cada cosa. */
-function PanelErp({ erp }) {
-    const { ejecutar, enCurso: actualizando } = useAccionApi();
+function PanelErp({ erp, recargar }) {
+    const { ejecutar, enCurso: actualizando } = useAccionApi(recargar);
 
     const actualizar = () => ejecutar('post', '/admin/erp/sincronizar');
 
@@ -69,7 +70,7 @@ function PanelErp({ erp }) {
     );
 }
 
-export default function Dashboard({ resumen, ultimosMensajes, erp }) {
+function DashboardContenido({ resumen, ultimosMensajes, erp, recargar }) {
     const tarjetas = [
         { label: 'Solicitudes nuevas', valor: resumen.solicitudes_nuevas, icon: Inbox, href: '/admin/mensajes?estado=nuevo', alerta: resumen.solicitudes_nuevas > 0 },
         {
@@ -113,7 +114,7 @@ export default function Dashboard({ resumen, ultimosMensajes, erp }) {
                 ))}
             </div>
 
-            <PanelErp erp={erp} />
+            <PanelErp erp={erp} recargar={recargar} />
 
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
                 <Panel title="Últimas solicitudes" className="lg:col-span-2">
@@ -159,5 +160,16 @@ export default function Dashboard({ resumen, ultimosMensajes, erp }) {
                 </Panel>
             </div>
         </AdminLayout>
+    );
+}
+
+/** Resumen del panel: lo pide a la API (GET /api/admin/dashboard). */
+export default function Dashboard() {
+    return (
+        <PantallaApi url="/admin/dashboard" titulo="Dashboard">
+            {({ datos, recargar }) => (
+                <DashboardContenido resumen={datos.resumen} ultimosMensajes={datos.ultimos_mensajes} erp={datos.erp} recargar={recargar} />
+            )}
+        </PantallaApi>
     );
 }

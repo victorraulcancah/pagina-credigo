@@ -3,6 +3,7 @@ import { useEffect, useMemo } from 'react';
 import ColorInput from '@/components/admin/ColorInput';
 import ImageUpload from '@/components/admin/ImageUpload';
 import PageHeader from '@/components/admin/PageHeader';
+import PantallaApi from '@/components/admin/PantallaApi';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
@@ -25,7 +26,7 @@ function contraste(a, b) {
 
 const esHex = (valor) => /^#[0-9a-fA-F]{6}$/.test(valor);
 
-export default function Apariencia({ ajustes, coloresPorDefecto }) {
+function AparienciaFormulario({ ajustes, coloresPorDefecto }) {
     const form = useFormApi({
         color_primario: ajustes.color_primario,
         color_acento: ajustes.color_acento,
@@ -161,5 +162,14 @@ export default function Apariencia({ ajustes, coloresPorDefecto }) {
                 <div className="flex justify-end lg:col-span-2">{botonGuardar}</div>
             </form>
         </AdminLayout>
+    );
+}
+
+/** Colores, logo y favicon: los ajustes llegan de la API (GET /api/admin/configuracion). */
+export default function Apariencia() {
+    return (
+        <PantallaApi url="/admin/configuracion" titulo="Apariencia">
+            {({ datos, respuesta }) => <AparienciaFormulario ajustes={datos} coloresPorDefecto={respuesta.opciones.colores_por_defecto} />}
+        </PantallaApi>
     );
 }

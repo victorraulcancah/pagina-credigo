@@ -1,5 +1,6 @@
 import { CircleQuestionMark, Plus, Save } from 'lucide-react';
 import AccionesFila from '@/components/admin/AccionesFila';
+import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import PageHeader from '@/components/admin/PageHeader';
@@ -10,12 +11,15 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
+import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
 
 const VACIO = { pregunta: '', respuesta: '', orden: 0, activo: true };
 
-export default function PreguntasIndex({ preguntas }) {
-    const crud = useCrudModal({ url: '/admin/preguntas', vacio: VACIO, aFormulario: (p) => ({ ...VACIO, ...p }) });
+export default function PreguntasIndex() {
+    const lista = useConsulta('/admin/preguntas');
+    const preguntas = lista.datos ?? [];
+    const crud = useCrudModal({ url: '/admin/preguntas', vacio: VACIO, aFormulario: (p) => ({ ...VACIO, ...p }), recargar: lista.recargar });
     const { form } = crud;
     const { data, setData, errors, processing } = form;
 
@@ -29,7 +33,9 @@ export default function PreguntasIndex({ preguntas }) {
         <AdminLayout title="Preguntas frecuentes">
             <PageHeader title="Preguntas frecuentes" description="Se muestran en el inicio y en la página de contacto." actions={nueva} />
 
-            {preguntas.length === 0 ? (
+            {!lista.datos ? (
+                <Cargando error={lista.error} onReintentar={lista.recargar} />
+            ) : preguntas.length === 0 ? (
                 <EmptyState icon={CircleQuestionMark} title="No hay preguntas" description="Agrega las dudas más comunes de tus clientes." action={nueva} />
             ) : (
                 <ul className="flex flex-col gap-3">

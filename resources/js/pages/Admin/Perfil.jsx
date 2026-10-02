@@ -1,6 +1,6 @@
-import { usePage } from '@inertiajs/react';
 import { KeyRound, Save } from 'lucide-react';
 import PageHeader from '@/components/admin/PageHeader';
+import PantallaApi from '@/components/admin/PantallaApi';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
@@ -8,10 +8,8 @@ import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import { useFormApi } from '@/hooks/useFormApi';
 
-export default function Perfil() {
-    const { auth } = usePage().props;
-
-    const datos = useFormApi({ name: auth.user.name, email: auth.user.email });
+function PerfilFormulario({ usuario }) {
+    const datos = useFormApi({ name: usuario.name, email: usuario.email });
     const clave = useFormApi({ current_password: '', password: '', password_confirmation: '' });
 
     const guardarDatos = (e) => {
@@ -61,5 +59,14 @@ export default function Perfil() {
                 </Panel>
             </div>
         </AdminLayout>
+    );
+}
+
+/** Mi perfil: los datos llegan de la API (GET /api/admin/perfil). */
+export default function Perfil() {
+    return (
+        <PantallaApi url="/admin/perfil" titulo="Mi perfil">
+            {({ datos }) => <PerfilFormulario usuario={datos} />}
+        </PantallaApi>
     );
 }

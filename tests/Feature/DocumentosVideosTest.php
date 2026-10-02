@@ -56,13 +56,15 @@ describe('documentos PDF', function () {
     it('lista los documentos en el panel con sus categorías y planes', function () {
         subirDocumento();
 
-        $this->get('/admin/documentos')->assertOk()->assertInertia(fn (Assert $page) => $page
-            ->component('Admin/Documentos/Index')
-            ->has('documentos', 1)
-            ->has('categorias', count(Documento::CATEGORIAS))
-            ->where('categorias.0', ['valor' => 'requisitos', 'nombre' => 'Requisitos', 'url' => '/requisitos'])
-            ->has('planes')
-            ->where('maxMb', 10));
+        // La pantalla se abre vacía y pide la lista y las opciones a la API
+        $this->get('/admin/documentos')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Admin/Documentos/Index'));
+
+        $this->getJson('/api/admin/documentos')->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonCount(count(Documento::CATEGORIAS), 'opciones.categorias')
+            ->assertJsonPath('opciones.categorias.0', ['valor' => 'requisitos', 'nombre' => 'Requisitos', 'url' => '/requisitos'])
+            ->assertJsonPath('opciones.max_mb', 10)
+            ->assertJsonStructure(['opciones' => ['planes']]);
     });
 
     it('solo acepta PDF de hasta 10 MB', function () {

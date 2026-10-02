@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\LeidoRequest;
 use App\Http\Requests\Admin\SeguimientoSolicitudRequest;
 use App\Http\Resources\MensajeContactoResource;
 use App\Models\MensajeContacto;
+use App\Models\User;
 use App\Services\SolicitudService;
 use Illuminate\Http\JsonResponse;
 
@@ -16,7 +17,7 @@ class SolicitudController extends BaseApiController
 {
     public function __construct(private SolicitudService $solicitudes) {}
 
-    /** Lista paginada con filtros + cantidad por estado. */
+    /** Lista paginada con filtros + cantidad por estado + opciones (estados, orígenes y asesores). */
     public function index(FiltroSolicitudesRequest $request): JsonResponse
     {
         $filtros = $this->solicitudes->filtrosPorDefecto($request->validated());
@@ -26,7 +27,15 @@ class SolicitudController extends BaseApiController
             $this->solicitudes->paginar($filtros, $usuario),
             MensajeContactoResource::class,
             'Solicitudes',
-            ['conteos' => $this->solicitudes->conteos($filtros, $usuario)],
+            [
+                'filtros' => $filtros,
+                'conteos' => $this->solicitudes->conteos($filtros, $usuario),
+                'opciones' => [
+                    'estados' => MensajeContacto::ESTADOS,
+                    'origenes' => MensajeContacto::ORIGENES,
+                    'usuarios' => User::orderBy('name')->get(['id', 'name']),
+                ],
+            ],
         );
     }
 

@@ -3,6 +3,7 @@ import { ArrowLeft, ExternalLink, Save } from 'lucide-react';
 import ImageUpload from '@/components/admin/ImageUpload';
 import ItemsRepeater from '@/components/admin/ItemsRepeater';
 import PageHeader from '@/components/admin/PageHeader';
+import PantallaApi from '@/components/admin/PantallaApi';
 import VideoInput from '@/components/admin/VideoInput';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
@@ -45,7 +46,7 @@ const LISTAS = {
     },
 };
 
-export default function SeccionEdit({ seccion }) {
+function SeccionFormulario({ seccion }) {
     const usa = (campo) => seccion.campos.includes(campo);
     const esEncabezado = seccion.clave === 'hero';
     // Misión, visión y objetivo: la imagen va al costado del texto en Nosotros
@@ -208,5 +209,14 @@ export default function SeccionEdit({ seccion }) {
                 </div>
             </form>
         </AdminLayout>
+    );
+}
+
+/** Edición de una sección: la pide a la API (GET /api/admin/secciones/{id}). */
+export default function SeccionEdit({ seccionId }) {
+    return (
+        <PantallaApi url={`/admin/secciones/${seccionId}`} titulo="Sección">
+            {({ datos }) => <SeccionFormulario seccion={datos} />}
+        </PantallaApi>
     );
 }

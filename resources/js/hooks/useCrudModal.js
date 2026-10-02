@@ -4,15 +4,16 @@ import { deleteConfirm } from '@/utils/sweetalert';
 
 /**
  * CRUD con formulario en modal para listas del panel (banners, servicios, preguntas, documentos),
- * guardando por la API REST. `url`: recurso de la API sin "/api" (ej. '/admin/banners').
+ * todo por la API REST. `url`: recurso de la API sin "/api" (ej. '/admin/banners').
  *
- * const crud = useCrudModal({ url: '/admin/banners', vacio: {...}, aFormulario: (item) => ({...}) });
+ * const lista = useConsulta('/admin/banners');
+ * const crud = useCrudModal({ url: '/admin/banners', vacio: {...}, aFormulario: (item) => ({...}), recargar: lista.recargar });
  * crud.abrirNuevo() · crud.abrirEditar(item) · crud.guardar(e) · crud.eliminar(item, 'nombre')
  *
  * Crear: POST url · Editar: PUT url/{id} (con archivos va como POST + _method) · Eliminar: DELETE url/{id}.
- * Después de cada cambio la lista se recarga desde el servidor.
+ * Después de cada cambio se llama a `recargar` para volver a pedir la lista.
  */
-export function useCrudModal({ url, vacio, aFormulario = (item) => item }) {
+export function useCrudModal({ url, vacio, aFormulario = (item) => item, recargar = true }) {
     const [abierto, setAbierto] = useState(false);
     const [editando, setEditando] = useState(null);
     const form = useFormApi(vacio);
@@ -36,14 +37,14 @@ export function useCrudModal({ url, vacio, aFormulario = (item) => item }) {
 
     const guardar = (e) => {
         e?.preventDefault();
-        const opciones = { onSuccess: () => setAbierto(false) };
+        const opciones = { recargar, onSuccess: () => setAbierto(false) };
 
         return editando ? form.put(`${url}/${editando.id}`, opciones) : form.post(url, opciones);
     };
 
     const eliminar = async (item, nombre = 'este registro') => {
         if (await deleteConfirm(`¿Eliminar ${nombre}?`)) {
-            return form.delete(`${url}/${item.id}`);
+            return form.delete(`${url}/${item.id}`, { recargar });
         }
         return { success: false };
     };

@@ -1,8 +1,10 @@
 import { router } from '@inertiajs/react';
-import { Calculator, ChevronLeft, ChevronRight, FileSpreadsheet, Inbox, Search, UserRound } from 'lucide-react';
+import { Calculator, FileSpreadsheet, Inbox, Search, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
 import PageHeader from '@/components/admin/PageHeader';
+import Paginacion from '@/components/admin/Paginacion';
 import { estadoUi, iniciales } from '@/components/admin/solicitudes/estados';
 import SolicitudModal from '@/components/admin/solicitudes/SolicitudModal';
 import AdminLayout from '@/components/layout/AdminLayout';
@@ -10,22 +12,36 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { useAccionApi } from '@/hooks/useAccionApi';
+import { useListaFiltrada } from '@/hooks/useListaFiltrada';
 import { formatoFecha } from '@/lib/fechas';
 import { cn } from '@/lib/utils';
 import { deleteConfirm } from '@/utils/sweetalert';
 
-const opcionesVisita = { preserveState: true, preserveScroll: true, replace: true };
+const FILTROS = { buscar: '', estado: 'todos', origen: 'todos', asignado: 'todos', page: 1 };
 
-export default function MensajesIndex({ mensajes, filtros, conteos, estados, origenes, usuarios }) {
+/** Bandeja de solicitudes: la lista, los conteos y las opciones llegan de la API (GET /api/admin/solicitudes). */
+export default function MensajesIndex() {
+    const lista = useListaFiltrada('/admin/solicitudes', FILTROS);
+    const { filtros, filtrar, respuesta } = lista;
+    const mensajes = respuesta?.data ?? [];
+    const conteos = respuesta?.conteos ?? {};
+    const { estados = {}, origenes = {}, usuarios = [] } = respuesta?.opciones ?? {};
+
     const [buscar, setBuscar] = useState(filtros.buscar);
     const [seleccionadoId, setSeleccionadoId] = useState(null);
     const primeraCarga = useRef(true);
 
-    const seleccionado = mensajes.data.find((m) => m.id === seleccionadoId);
+    const seleccionado = mensajes.find((m) => m.id === seleccionadoId);
     const totalConteos = Object.values(conteos).reduce((suma, n) => suma + n, 0);
 
-    const filtrar = (cambios) => router.get('/admin/mensajes', { ...filtros, ...cambios }, opcionesVisita);
-    const urlExportar = `/admin/mensajes/exportar?${new URLSearchParams(filtros).toString()}`;
+    const { page: _pagina, ...filtrosExcel } = filtros;
+    const urlExportar = `/admin/mensajes/exportar?${new URLSearchParams(filtrosExcel).toString()}`;
+
+    // Tras un cambio: la lista y el contador de "no leídas" del menú
+    const actualizar = () => {
+        lista.recargar();
+        router.reload({ only: ['mensajesNoLeidos'] });
+    };
 
     // Búsqueda con espera (evita una consulta por cada tecla)
     useEffect(() => {
@@ -37,7 +53,7 @@ export default function MensajesIndex({ mensajes, filtros, conteos, estados, ori
         return () => clearTimeout(id);
     }, [buscar]);
 
-    const { ejecutar } = useAccionApi();
+    const { ejecutar } = useAccionApi(actualizar);
 
     // Abrir una solicitud la marca como leída sin aviso; desmarcarla sí avisa
     const marcarLeido = (mensaje, leido) => ejecutar('patch', `/admin/solicitudes/${mensaje.id}/leido`, { leido }, { avisar: !leido });
@@ -113,11 +129,13 @@ export default function MensajesIndex({ mensajes, filtros, conteos, estados, ori
                 />
             </div>
 
-            {mensajes.data.length === 0 ? (
+            {!respuesta ? (
+                <Cargando error={lista.error} onReintentar={lista.recargar} />
+            ) : mensajes.length === 0 ? (
                 <EmptyState icon={Inbox} title="No hay solicitudes con estos filtros" description="Las solicitudes del formulario de contacto y del cotizador aparecerán aquí." />
             ) : (
                 <ul className="flex flex-col gap-2">
-                    {mensajes.data.map((m) => {
+                    {mensajes.map((m) => {
                         const ui = estadoUi(m.estado);
                         const noLeido = !m.leido_at;
                         return (
@@ -171,27 +189,14 @@ export default function MensajesIndex({ mensajes, filtros, conteos, estados, ori
                 </ul>
             )}
 
-            {mensajes.last_page > 1 && (
-                <nav aria-label="Paginación" className="mt-4 flex items-center justify-between gap-3 text-sm">
-                    <span className="text-gray-500">
-                        {mensajes.from}–{mensajes.to} de {mensajes.total}
-                    </span>
-                    <div className="flex gap-2">
-                        <Button href={mensajes.prev_page_url ?? undefined} variant="ghost" size="sm" icon={ChevronLeft} disabled={!mensajes.prev_page_url} className="border border-gray-200" preserveState>
-                            Anterior
-                        </Button>
-                        <Button href={mensajes.next_page_url ?? undefined} variant="ghost" size="sm" icon={ChevronRight} iconPosition="right" disabled={!mensajes.next_page_url} className="border border-gray-200" preserveState>
-                            Siguiente
-                        </Button>
-                    </div>
-                </nav>
-            )}
+            <Paginacion paginacion={respuesta?.pagination} onPagina={(pagina) => filtrar({ page: pagina })} />
 
             <SolicitudModal
                 mensaje={seleccionado}
                 estados={estados}
                 origenes={origenes}
                 usuarios={usuarios}
+                recargar={actualizar}
                 onClose={() => setSeleccionadoId(null)}
                 onMarcarNoLeido={(mensaje) => {
                     marcarLeido(mensaje, false);

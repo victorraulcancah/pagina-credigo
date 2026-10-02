@@ -10,7 +10,8 @@ import { errorAlert, toast } from '@/utils/sweetalert';
  * form.post(url) · form.put(url) · form.patch(url) · form.delete(url) → { success, data, errors }
  * Opciones: { recargar = true, avisar = true, onSuccess(respuesta), datos }
  *  - Con archivos envía FormData (PUT/PATCH van como POST + _method, porque PHP no lee archivos en PUT).
- *  - Si sale bien muestra el mensaje de la API y recarga los datos de la página (Inertia).
+ *  - Si sale bien muestra el mensaje de la API y vuelve a pedir los datos:
+ *    `recargar` = función de useConsulta (el panel) · true = recarga la página (Inertia) · false = nada.
  *  - Errores de validación (422) quedan en `errors`; otros errores se avisan con una alerta.
  */
 export function useFormApi(inicial = {}) {
@@ -63,7 +64,8 @@ export function useFormApi(inicial = {}) {
             temporizador.current = setTimeout(() => setRecentlySuccessful(false), 2000);
 
             onSuccess?.(respuesta.data);
-            if (recargar) router.reload({ preserveScroll: true });
+            if (typeof recargar === 'function') recargar();
+            else if (recargar) router.reload({ preserveScroll: true });
 
             return { success: true, data: respuesta.data?.data, message: respuesta.data?.message };
         } catch (error) {

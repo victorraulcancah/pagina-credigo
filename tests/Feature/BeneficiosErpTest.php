@@ -126,9 +126,9 @@ it('el panel agrega una opción con los precios del ERP y la mantiene actualizad
     $this->actingAs(User::factory()->create());
     $plan = Servicio::firstOrFail();
 
-    $this->get('/admin/cotizador')->assertInertia(fn (Assert $page) => $page
-        ->where('erp.planes.0.opciones.0.ref', 'v7')
-        ->missing('erp.planes.0.opciones.0.tasa_interes'));
+    $this->getJson('/api/admin/cotizador')->assertOk()
+        ->assertJsonPath('data.erp.planes.0.opciones.0.ref', 'v7')
+        ->assertJsonMissingPath('data.erp.planes.0.opciones.0.tasa_interes');
 
     $this->post('/api/admin/cotizador/opciones/erp', ['servicio_id' => $plan->id, 'erp_ref' => 'v7'])->assertSuccessful();
 

@@ -17,10 +17,13 @@ class ReclamacionController extends BaseApiController
 
     public function index(FiltroReclamacionesRequest $request): JsonResponse
     {
+        $filtros = ['buscar' => $request->validated('buscar') ?? '', 'estado' => $request->validated('estado') ?? 'todos'];
+
         return $this->paginatedResponse(
-            $this->reclamaciones->paginar($request->validated('buscar'), $request->validated('estado') ?? 'todos'),
+            $this->reclamaciones->paginar($filtros['buscar'], $filtros['estado']),
             ReclamacionResource::class,
             'Reclamaciones',
+            ['filtros' => $filtros, 'opciones' => ['dias_respuesta' => Reclamacion::DIAS_HABILES_RESPUESTA]],
         );
     }
 

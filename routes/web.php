@@ -1,16 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\BannerController;
-use App\Http\Controllers\Admin\ConfiguracionController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\DocumentoController;
-use App\Http\Controllers\Admin\MensajeContactoController;
-use App\Http\Controllers\Admin\OpcionPlanController;
-use App\Http\Controllers\Admin\PerfilController;
-use App\Http\Controllers\Admin\PreguntaFrecuenteController;
-use App\Http\Controllers\Admin\ReclamacionController;
-use App\Http\Controllers\Admin\SeccionController;
-use App\Http\Controllers\Admin\ServicioController;
+use App\Http\Controllers\Admin\AdjuntoReclamacionController;
+use App\Http\Controllers\Admin\ExportarSolicitudesController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Web\LibroReclamacionesController;
 use App\Http\Controllers\Web\PaginaController;
@@ -67,30 +58,33 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
 /*
-| Panel administrativo (/admin): pantallas. Guardan y eliminan con la API (/api/admin).
+| Panel administrativo (/admin): solo abre cada pantalla. Sus datos los pide a la API (/api/admin)
+| y también guarda y elimina por la API. Las descargas son archivos, no JSON.
 */
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', DashboardController::class)->name('dashboard');
+    Route::inertia('/', 'Admin/Dashboard')->name('dashboard');
 
-    Route::get('/configuracion/empresa', [ConfiguracionController::class, 'empresa'])->name('configuracion.empresa');
-    Route::get('/configuracion/apariencia', [ConfiguracionController::class, 'apariencia'])->name('configuracion.apariencia');
-    Route::get('/configuracion/seo', [ConfiguracionController::class, 'seo'])->name('configuracion.seo');
+    Route::inertia('/configuracion/empresa', 'Admin/Configuracion/Empresa')->name('configuracion.empresa');
+    Route::inertia('/configuracion/apariencia', 'Admin/Configuracion/Apariencia')->name('configuracion.apariencia');
+    Route::inertia('/configuracion/seo', 'Admin/Configuracion/Seo')->name('configuracion.seo');
 
-    Route::get('/banners', [BannerController::class, 'index'])->name('banners.index');
-    Route::get('/secciones', [SeccionController::class, 'index'])->name('secciones.index');
-    Route::get('/secciones/{seccion}/edit', [SeccionController::class, 'edit'])->name('secciones.edit');
-    Route::get('/servicios', [ServicioController::class, 'index'])->name('servicios.index');
-    Route::get('/cotizador', [OpcionPlanController::class, 'index'])->name('cotizador.index');
-    Route::get('/preguntas', [PreguntaFrecuenteController::class, 'index'])->name('preguntas.index');
-    Route::get('/documentos', [DocumentoController::class, 'index'])->name('documentos.index');
+    Route::inertia('/banners', 'Admin/Banners/Index')->name('banners.index');
+    Route::inertia('/secciones', 'Admin/Secciones/Index')->name('secciones.index');
+    Route::get('/secciones/{seccion}/edit', fn (int $seccion) => Inertia::render('Admin/Secciones/Edit', ['seccionId' => $seccion]))
+        ->whereNumber('seccion')
+        ->name('secciones.edit');
+    Route::inertia('/servicios', 'Admin/Servicios/Index')->name('servicios.index');
+    Route::inertia('/cotizador', 'Admin/Cotizador/Index')->name('cotizador.index');
+    Route::inertia('/preguntas', 'Admin/Preguntas/Index')->name('preguntas.index');
+    Route::inertia('/documentos', 'Admin/Documentos/Index')->name('documentos.index');
 
-    Route::get('/mensajes', [MensajeContactoController::class, 'index'])->name('mensajes.index');
-    Route::get('/mensajes/exportar', [MensajeContactoController::class, 'exportar'])->name('mensajes.exportar');
+    Route::inertia('/mensajes', 'Admin/Mensajes/Index')->name('mensajes.index');
+    Route::get('/mensajes/exportar', ExportarSolicitudesController::class)->name('mensajes.exportar');
 
-    Route::get('/reclamaciones', [ReclamacionController::class, 'index'])->name('reclamaciones.index');
-    Route::get('/reclamaciones/adjuntos/{adjunto}', [ReclamacionController::class, 'adjunto'])->name('reclamaciones.adjunto');
+    Route::inertia('/reclamaciones', 'Admin/Reclamaciones/Index')->name('reclamaciones.index');
+    Route::get('/reclamaciones/adjuntos/{adjunto}', AdjuntoReclamacionController::class)->name('reclamaciones.adjunto');
 
-    Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
+    Route::inertia('/perfil', 'Admin/Perfil')->name('perfil.edit');
 });
 
 // Guía visual de componentes, solo disponible en desarrollo

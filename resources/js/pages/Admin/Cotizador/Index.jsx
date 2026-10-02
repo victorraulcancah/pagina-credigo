@@ -4,6 +4,7 @@ import AccionesFila from '@/components/admin/AccionesFila';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import PageHeader from '@/components/admin/PageHeader';
+import PantallaApi from '@/components/admin/PantallaApi';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
@@ -46,9 +47,9 @@ function montos(opcion) {
 }
 
 /** Fila de un precio del ERP con el selector de plan para agregarlo al cotizador. */
-function PrecioErp({ opcion, planes, vinculadaEn }) {
+function PrecioErp({ opcion, planes, vinculadaEn, recargar }) {
     const [planId, setPlanId] = useState(planes[0]?.id ?? '');
-    const { ejecutar, enCurso: enviando } = useAccionApi();
+    const { ejecutar, enCurso: enviando } = useAccionApi(recargar);
 
     const agregar = () => ejecutar('post', '/admin/cotizador/opciones/erp', { servicio_id: planId, erp_ref: opcion.ref });
 
@@ -85,9 +86,9 @@ function PrecioErp({ opcion, planes, vinculadaEn }) {
 }
 
 /** Precios de los planes del ERP: al agregarlos quedan vinculados y se actualizan solos. */
-function PreciosErp({ erp, planes }) {
+function PreciosErp({ erp, planes, recargar }) {
     const [buscar, setBuscar] = useState('');
-    const { ejecutar, enCurso: actualizando } = useAccionApi();
+    const { ejecutar, enCurso: actualizando } = useAccionApi(recargar);
 
     // En qué planes del cotizador está vinculada cada referencia del ERP
     const vinculos = useMemo(() => {
@@ -156,7 +157,7 @@ function PreciosErp({ erp, planes }) {
                             </p>
                             <ul className="divide-y divide-gray-100">
                                 {plan.opciones.map((opcion) => (
-                                    <PrecioErp key={opcion.ref} opcion={opcion} planes={planes} vinculadaEn={vinculos[opcion.ref] ?? []} />
+                                    <PrecioErp key={opcion.ref} opcion={opcion} planes={planes} vinculadaEn={vinculos[opcion.ref] ?? []} recargar={recargar} />
                                 ))}
                             </ul>
                         </div>
@@ -167,9 +168,10 @@ function PreciosErp({ erp, planes }) {
     );
 }
 
-export default function CotizadorIndex({ planes, monedas, frecuencias, erp }) {
+function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
     const crud = useCrudModal({
         url: '/admin/cotizador/opciones',
+        recargar,
         vacio: VACIO,
         aFormulario: (o) => ({
             ...VACIO,
@@ -255,7 +257,7 @@ export default function CotizadorIndex({ planes, monedas, frecuencias, erp }) {
                 </div>
             )}
 
-            {planes.length > 0 && <PreciosErp erp={erp} planes={planes} />}
+            {planes.length > 0 && <PreciosErp erp={erp} planes={planes} recargar={recargar} />}
 
             <Modal
                 open={crud.abierto}
@@ -341,5 +343,14 @@ export default function CotizadorIndex({ planes, monedas, frecuencias, erp }) {
                 </form>
             </Modal>
         </AdminLayout>
+    );
+}
+
+/** Planes con sus opciones y los precios del ERP: los pide a la API (GET /api/admin/cotizador). */
+export default function CotizadorIndex() {
+    return (
+        <PantallaApi url="/admin/cotizador" titulo="Cotizador">
+            {({ datos, recargar }) => <CotizadorContenido {...datos} recargar={recargar} />}
+        </PantallaApi>
     );
 }

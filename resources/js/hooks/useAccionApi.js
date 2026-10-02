@@ -7,16 +7,17 @@ import { errorAlert, toast } from '@/utils/sweetalert';
  * Acción puntual contra la API REST (sin formulario): sincronizar el ERP, marcar como leído,
  * eliminar, agregar un precio del ERP… `url` sin "/api" (ej. '/admin/erp/sincronizar').
  *
- * const { ejecutar, enCurso } = useAccionApi();
- * await ejecutar('post', url, datos, { recargar = true, avisar = true }) → { success, data }
+ * const { ejecutar, enCurso } = useAccionApi(recargar);
+ * await ejecutar('post', url, datos, { avisar = true }) → { success, data }
  *
- * Avisa con el mensaje de la API y recarga los datos de la página (también si falla:
- * por ejemplo, una sincronización parcial con el ERP igual actualiza lo que sí llegó).
+ * Avisa con el mensaje de la API y después llama a `recargar` (la función de useConsulta de la
+ * pantalla), también si falla: por ejemplo, una sincronización parcial con el ERP igual actualiza
+ * lo que sí llegó. Sin `recargar`, recarga la página (Inertia).
  */
-export function useAccionApi() {
+export function useAccionApi(recargar) {
     const [enCurso, setEnCurso] = useState(false);
 
-    const ejecutar = async (metodo, url, datos, { recargar = true, avisar = true } = {}) => {
+    const ejecutar = async (metodo, url, datos, { avisar = true } = {}) => {
         setEnCurso(true);
 
         try {
@@ -31,7 +32,8 @@ export function useAccionApi() {
             return { success: false };
         } finally {
             setEnCurso(false);
-            if (recargar) router.reload({ preserveScroll: true });
+            if (typeof recargar === 'function') recargar();
+            else router.reload({ preserveScroll: true });
         }
     };
 

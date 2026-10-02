@@ -1,5 +1,6 @@
 import { ExternalLink, FileText, Plus, Save } from 'lucide-react';
 import AccionesFila from '@/components/admin/AccionesFila';
+import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import PageHeader from '@/components/admin/PageHeader';
@@ -12,15 +13,21 @@ import Modal from '@/components/ui/Modal';
 import Select from '@/components/ui/Select';
 import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
+import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
 import { formatoTamano } from '@/lib/archivos';
 
 const VACIO = { titulo: '', descripcion: '', categoria: 'requisitos', servicio_id: '', archivo: null, orden: 0, activo: true };
 
 /** PDFs que se descargan en la web. La categoría decide la página donde aparecen. */
-export default function DocumentosIndex({ documentos, categorias, planes, maxMb }) {
+export default function DocumentosIndex() {
+    const lista = useConsulta('/admin/documentos');
+    const documentos = lista.datos ?? [];
+    // Opciones del formulario: dónde se muestra cada categoría, planes y peso máximo
+    const { categorias = [], planes = [], max_mb: maxMb = 10 } = lista.respuesta?.opciones ?? {};
     const crud = useCrudModal({
         url: '/admin/documentos',
+        recargar: lista.recargar,
         vacio: VACIO,
         aFormulario: (d) => ({ ...VACIO, ...d, descripcion: d.descripcion ?? '', servicio_id: d.servicio_id ?? '', archivo: null }),
     });
@@ -43,7 +50,9 @@ export default function DocumentosIndex({ documentos, categorias, planes, maxMb 
                 actions={nuevo}
             />
 
-            {documentos.length === 0 ? (
+            {!lista.datos ? (
+                <Cargando error={lista.error} onReintentar={lista.recargar} />
+            ) : documentos.length === 0 ? (
                 <EmptyState icon={FileText} title="No hay documentos" description="Sube un PDF y elige en qué página se muestra." action={nuevo} />
             ) : (
                 <div className="flex flex-col gap-8">

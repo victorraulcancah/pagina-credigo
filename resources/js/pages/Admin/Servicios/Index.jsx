@@ -1,5 +1,6 @@
 import { Briefcase, ExternalLink, Plus, Save, Star } from 'lucide-react';
 import AccionesFila from '@/components/admin/AccionesFila';
+import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import IconPicker from '@/components/admin/IconPicker';
@@ -15,6 +16,7 @@ import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
+import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
 
 const VACIO = {
@@ -33,9 +35,12 @@ const VACIO = {
     activo: true,
 };
 
-export default function ServiciosIndex({ servicios }) {
+export default function ServiciosIndex() {
+    const lista = useConsulta('/admin/servicios');
+    const servicios = lista.datos ?? [];
     const crud = useCrudModal({
         url: '/admin/servicios',
+        recargar: lista.recargar,
         vacio: VACIO,
         aFormulario: (s) => ({
             ...VACIO,
@@ -66,7 +71,9 @@ export default function ServiciosIndex({ servicios }) {
                 actions={nuevo}
             />
 
-            {servicios.length === 0 ? (
+            {!lista.datos ? (
+                <Cargando error={lista.error} onReintentar={lista.recargar} />
+            ) : servicios.length === 0 ? (
                 <EmptyState icon={Briefcase} title="No hay servicios" description="Agrega los servicios o productos que ofrece la empresa." action={nuevo} />
             ) : (
                 <ul className="grid gap-3 md:grid-cols-2">

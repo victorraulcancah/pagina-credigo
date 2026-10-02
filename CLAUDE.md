@@ -56,6 +56,11 @@ Mismo patrón que el ERP (`C:\laragon\www\credigo`): **Service** para la lógica
 - **API REST** (`routes/api.php`), respuesta `{ success, message, data[, pagination] }` con `App\Traits\ApiResponseTrait` (los controladores extienden `Api\BaseApiController`):
   - Pública (`/api/...`): solo lectura (sitio, secciones, banners, planes, documentos, preguntas, talleres, comercios, cupones) + formularios (`/api/solicitudes`, `/api/reclamaciones`, `/api/reclamaciones/consultar`).
   - Panel (`/api/admin/...`, `auth:sanctum`): CRUD con `apiResource`. Usa la misma sesión del login (Sanctum stateful + XSRF), sin tokens en el navegador.
-- **Rutas web** (`routes/web.php`): solo pantallas Inertia y descargas. Las páginas públicas reciben sus datos desde el servidor (para SEO y la vista previa de WhatsApp) usando los mismos Services y Resources (`->resolve()`).
-- **Frontend**: `@/lib/api` (axios), `useFormApi` (formularios con la forma de `useForm`), `useCrudModal` (listas con modal) y `useAccionApi` (acciones sueltas). Tras guardar se avisa con el mensaje de la API y se recarga la página con `router.reload()`.
+- **Rutas web** (`routes/web.php`): solo pantallas Inertia y descargas.
+  - Panel: `Route::inertia(...)` sin datos; cada pantalla pide los suyos a la API. Solo quedan dos controladores web en `Admin/`: el Excel de solicitudes y los adjuntos de reclamaciones (son archivos).
+  - Páginas públicas: reciben sus datos desde el servidor (SEO y vista previa de WhatsApp) con los mismos Services y Resources (`->resolve()`).
+- **Frontend del panel**:
+  - `useConsulta(url, params)` pide datos (GET); `<PantallaApi url titulo>` muestra la pantalla cuando llegan; `useListaFiltrada` para bandejas con filtros y páginas (los filtros quedan en la URL); `<Paginacion>`.
+  - Para guardar: `useFormApi` (forma de `useForm`), `useCrudModal` (listas con modal) y `useAccionApi` (acciones sueltas). Tras guardar avisan con el mensaje de la API y llaman a `recargar` (la de `useConsulta`). La configuración y el perfil recargan la página para refrescar el logo, los colores y el nombre.
+  - La lista de opciones de un formulario (categorías, estados, asesores…) viene en `opciones` junto a `data`.
 - **Tests** (Pest): los cambios se prueban contra la API (`/api/...`, `assertJsonValidationErrors`, `Sanctum::actingAs`).

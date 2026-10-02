@@ -10,6 +10,7 @@ import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import { ContactoAliado, DatosAliado, LogoAliado, lugar } from '@/components/web/Aliados';
 import CtaSection from '@/components/web/CtaSection';
+import { DocumentosBloque, DocumentosSection } from '@/components/web/Documentos';
 import PasosSection from '@/components/web/PasosSection';
 import { useSitio } from '@/hooks/useSitio';
 import { DIAS_SEMANA } from '@/lib/horario';
@@ -262,7 +263,7 @@ function TallerModal({ taller, onClose }) {
 }
 
 /** Talleres aliados: la lista viene del ERP (con copia en caché); los textos se editan en el panel. */
-export default function Talleres({ secciones, talleres }) {
+export default function Talleres({ secciones, talleres, documentos }) {
     const hero = secciones['talleres.hero'];
     const [ciudad, setCiudad] = useState('');
     const [busqueda, setBusqueda] = useState('');
@@ -288,7 +289,6 @@ export default function Talleres({ secciones, talleres }) {
         <PublicLayout title="Talleres aliados" description={hero?.contenido}>
             <PageHero
                 imagen={hero?.imagen_url}
-                eyebrow={hero?.subtitulo}
                 title={hero?.titulo || 'Talleres aliados'}
                 description={hero?.contenido}
             />
@@ -368,7 +368,10 @@ export default function Talleres({ secciones, talleres }) {
                 )}
             </Section>
 
-            <PasosSection seccion={secciones['talleres.como']} background="white" />
+            <PasosSection seccion={secciones['talleres.como']} background="white">
+                <DocumentosBloque documentos={documentos} />
+            </PasosSection>
+            {!secciones['talleres.como'] && <DocumentosSection documentos={documentos} />}
             <CtaSection seccion={secciones['general.cta']} />
 
             <TallerModal taller={seleccionado} onClose={() => setSeleccionado(null)} />

@@ -31,6 +31,7 @@ class BannerRequest extends FormRequest
             'boton_url' => ['nullable', 'string', 'max:255', 'regex:'.EnlaceRegla::PATRON],
             'boton2_texto' => ['nullable', 'string', 'max:60', 'required_with:boton2_url'],
             'boton2_url' => ['nullable', 'string', 'max:255', 'regex:'.EnlaceRegla::PATRON],
+            'video_url' => VideoRegla::reglas(),
             'orden' => ['required', 'integer', 'min:0'],
             'activo' => ['boolean'],
         ];
@@ -38,7 +39,7 @@ class BannerRequest extends FormRequest
 
     public function messages(): array
     {
-        return [...EnlaceRegla::mensajes('boton_url'), ...EnlaceRegla::mensajes('boton2_url')];
+        return [...EnlaceRegla::mensajes('boton_url'), ...EnlaceRegla::mensajes('boton2_url'), ...VideoRegla::mensajes('video_url')];
     }
 
     public function attributes(): array

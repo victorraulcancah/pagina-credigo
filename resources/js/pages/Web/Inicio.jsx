@@ -1,40 +1,26 @@
-import { ArrowRight, Calculator, Check, MessageCircle } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Button from '@/components/ui/Button';
 import Icono from '@/components/ui/Icono';
-import Revelar, { escalonar } from '@/components/ui/Revelar';
+import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import CtaSection from '@/components/web/CtaSection';
 import FaqSection from '@/components/web/FaqSection';
 import HeroBanner from '@/components/web/HeroBanner';
-import { useSitio } from '@/hooks/useSitio';
-import { FRECUENCIAS, formatoMoneda } from '@/lib/moneda';
+import ListaPlanes from '@/components/web/ListaPlanes';
+import Recorrido from '@/components/web/Recorrido';
+import TituloSeccion from '@/components/web/TituloSeccion';
 import { cn } from '@/lib/utils';
 
-// Cuota más baja con monto cargado (prefiere soles)
-function cuotaMasBaja(opciones) {
-    const conCuota = opciones.filter((o) => o.cuota !== null && o.cuota !== undefined);
-    if (!conCuota.length) return null;
-    const soles = conCuota.filter((o) => o.moneda === 'PEN');
-    const lista = soles.length ? soles : conCuota;
-    return lista.reduce((menor, o) => (Number(o.cuota) < Number(menor.cuota) ? o : menor));
-}
-
-const Titulo = ({ as: Tag = 'h2', className, children }) => (
-    <Tag className={cn('text-3xl leading-[1.08] font-bold tracking-[-0.03em] text-balance sm:text-4xl lg:text-5xl', className)}>{children}</Tag>
-);
-
-/** Planes como lista: cada fila dice qué es, qué incluye, desde cuánto y qué hacer. */
+/** Planes del inicio: encabezado con su botón y la lista de planes destacados. */
 function Planes({ encabezado, servicios }) {
-    const sitio = useSitio();
     if (!servicios.length) return null;
 
     return (
         <Section id="planes">
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
                 <Revelar>
-                    <Titulo className="max-w-3xl">{encabezado?.titulo || 'Nuestros planes'}</Titulo>
-                    {encabezado?.contenido && <p className="mt-4 max-w-2xl text-lg text-primary-700/80">{encabezado.contenido}</p>}
+                    <TituloSeccion titulo={encabezado?.titulo || 'Nuestros planes'} contenido={encabezado?.contenido} />
                 </Revelar>
                 {encabezado?.boton_texto && encabezado?.boton_url && (
                     <Button href={encabezado.boton_url} variant="outline" icon={ArrowRight} iconPosition="right" className="self-start lg:self-end">
@@ -42,111 +28,7 @@ function Planes({ encabezado, servicios }) {
                     </Button>
                 )}
             </div>
-
-            <ul className="mt-12 divide-y divide-primary-100 border-y border-primary-100">
-                {servicios.map((servicio, i) => {
-                    const menor = cuotaMasBaja(servicio.opciones ?? []);
-                    const asesor = sitio.whatsappUrl(`Hola, quiero información sobre el plan "${servicio.titulo}"`);
-                    const caracteristicas = (servicio.caracteristicas ?? []).slice(0, 3);
-
-                    return (
-                        <Revelar
-                            as="li"
-                            key={servicio.id}
-                            retraso={escalonar(i, 80)}
-                            className="grid gap-5 py-8 transition-colors lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)_13rem] lg:items-center lg:gap-10"
-                        >
-                            <div className="flex gap-4">
-                                <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary text-accent">
-                                    <Icono nombre={servicio.icono} className="size-6" />
-                                </span>
-                                <div className="min-w-0">
-                                    <h3 className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xl leading-snug font-bold sm:text-2xl">
-                                        {servicio.titulo}
-                                        {servicio.etiqueta && (
-                                            <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold text-primary">{servicio.etiqueta}</span>
-                                        )}
-                                    </h3>
-                                    {servicio.descripcion && <p className="mt-1.5 text-primary-700/80">{servicio.descripcion}</p>}
-                                </div>
-                            </div>
-
-                            {caracteristicas.length > 0 ? (
-                                <ul className="flex flex-col gap-2 text-sm text-primary-800 lg:pl-0">
-                                    {caracteristicas.map((caracteristica, k) => (
-                                        <li key={k} className="flex items-start gap-2">
-                                            <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-                                            {caracteristica}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <span className="hidden lg:block" />
-                            )}
-
-                            <div className="flex items-center justify-between gap-4 lg:flex-col lg:items-end lg:text-right">
-                                {menor ? (
-                                    <p className="leading-tight">
-                                        <span className="block text-xs font-semibold tracking-wide text-primary-500 uppercase">Cuota desde</span>
-                                        <span className="text-2xl font-bold tabular-nums">{formatoMoneda(menor.cuota, menor.moneda)}</span>
-                                        <span className="ml-1 text-sm text-primary-500">{FRECUENCIAS[menor.frecuencia]?.periodo}</span>
-                                    </p>
-                                ) : (
-                                    <span className="hidden lg:block" />
-                                )}
-                                {servicio.opciones_count > 0 ? (
-                                    <Button href={`/cotizador?plan=${servicio.id}`} variant="secondary" size="sm" icon={Calculator}>
-                                        Cotizar
-                                    </Button>
-                                ) : (
-                                    <Button href={asesor ?? '/soporte'} newTab={Boolean(asesor)} variant="outline" size="sm" icon={MessageCircle}>
-                                        Consultar
-                                    </Button>
-                                )}
-                            </div>
-                        </Revelar>
-                    );
-                })}
-            </ul>
-        </Section>
-    );
-}
-
-/** Cómo funciona como un recorrido: estaciones numeradas sobre una misma línea. */
-function Recorrido({ seccion }) {
-    const pasos = seccion?.items ?? [];
-    if (!seccion || !pasos.length) return null;
-
-    return (
-        <Section id="como-funciona" background="muted">
-            <Revelar>
-                <Titulo className="max-w-3xl">{seccion.titulo}</Titulo>
-                {seccion.contenido && <p className="mt-4 max-w-2xl text-lg text-primary-700/80">{seccion.contenido}</p>}
-            </Revelar>
-
-            <ol className="relative mt-14 grid gap-10 lg:grid-cols-4 lg:gap-8">
-                <span aria-hidden="true" className="absolute top-6 right-0 left-6 hidden h-px bg-primary-200 lg:block" />
-                <span aria-hidden="true" className="absolute top-6 bottom-6 left-6 w-px bg-primary-200 lg:hidden" />
-                {pasos.map((paso, i) => (
-                    <Revelar as="li" key={i} desde="izquierda" retraso={escalonar(i, 120)} className="relative flex gap-5 lg:flex-col lg:gap-6">
-                        <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-accent ring-8 ring-primary-50 tabular-nums">
-                            {i + 1}
-                        </span>
-                        <div>
-                            <h3 className="text-lg font-bold">{paso.titulo}</h3>
-                            {paso.descripcion && <p className="mt-2 text-primary-700/80">{paso.descripcion}</p>}
-                        </div>
-                    </Revelar>
-                ))}
-            </ol>
-
-            {seccion.boton_texto && seccion.boton_url && (
-                <div className="mt-12">
-                    <Button href={seccion.boton_url} variant="outline" icon={ArrowRight} iconPosition="right">
-                        {seccion.boton_texto}
-                    </Button>
-                </div>
-            )}
+            <ListaPlanes servicios={servicios} className="mt-12 divide-y divide-primary-100 border-y border-primary-100" />
         </Section>
     );
 }
@@ -163,8 +45,7 @@ function Niveles({ seccion }) {
         <Section>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
                 <Revelar>
-                    <Titulo className="max-w-3xl">{seccion.titulo}</Titulo>
-                    {seccion.contenido && <p className="mt-4 max-w-2xl text-lg text-primary-700/80">{seccion.contenido}</p>}
+                    <TituloSeccion titulo={seccion.titulo} contenido={seccion.contenido} />
                 </Revelar>
                 <Button href="/beneficios" variant="outline" icon={ArrowRight} iconPosition="right" className="self-start lg:self-end">
                     Ver beneficios
@@ -206,8 +87,7 @@ function Nosotros({ seccion }) {
         <Section background="dark">
             <div className={cn('grid items-center gap-10 lg:gap-16', conImagen && 'lg:grid-cols-2')}>
                 <Revelar desde="izquierda" className={cn(!conImagen && 'max-w-3xl')}>
-                    <Titulo className="text-white">{seccion.titulo}</Titulo>
-                    {seccion.contenido && <p className="mt-5 max-w-xl text-lg text-white/75">{seccion.contenido}</p>}
+                    <TituloSeccion titulo={seccion.titulo} contenido={seccion.contenido} claro />
                     {seccion.boton_texto && seccion.boton_url && (
                         <Button href={seccion.boton_url} variant="primary" icon={ArrowRight} iconPosition="right" className="mt-8">
                             {seccion.boton_texto}
@@ -232,7 +112,7 @@ export default function Inicio({ banners, secciones, servicios, preguntas }) {
         <PublicLayout>
             <HeroBanner banners={banners} cifras={secciones['general.cifras']?.items ?? []} />
             <Planes encabezado={secciones['inicio.servicios']} servicios={servicios} />
-            <Recorrido seccion={secciones['inicio.como_funciona']} />
+            <Recorrido id="como-funciona" seccion={secciones['inicio.como_funciona']} />
             <Niveles seccion={secciones['general.beneficios']} />
             <Nosotros seccion={secciones['inicio.nosotros']} />
             <FaqSection seccion={faq && { ...faq, subtitulo: null }} preguntas={preguntas} />

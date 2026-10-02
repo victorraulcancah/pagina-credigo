@@ -1,32 +1,32 @@
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
-import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import CtaSection from '@/components/web/CtaSection';
-import ServicioCard from '@/components/web/ServicioCard';
+import { DocumentosSection } from '@/components/web/Documentos';
+import ListaPlanes from '@/components/web/ListaPlanes';
 
-export default function Servicios({ secciones, servicios }) {
+/**
+ * Todos los planes visibles como lista (cada uno lleva a su página, donde están su ficha y su video).
+ * Debajo, las fichas en PDF que no son de un plan en particular.
+ */
+export default function Servicios({ secciones, servicios, documentos }) {
     const hero = secciones['servicios.hero'];
 
     return (
         <PublicLayout title="Servicios" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Servicios'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Servicios'} description={hero?.contenido} />
 
-            <Section background="muted">
+            <Section>
                 {servicios.length > 0 ? (
-                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {servicios.map((servicio, i) => (
-                            <Revelar key={servicio.id} retraso={escalonar(i)} className="h-full">
-                                <ServicioCard servicio={servicio} />
-                            </Revelar>
-                        ))}
-                    </div>
+                    <ListaPlanes servicios={servicios} className="divide-y divide-primary-100 border-b border-primary-100" />
                 ) : (
-                    <p className="text-center text-primary-700/80">Pronto publicaremos nuestros servicios.</p>
+                    <p className="text-lg text-primary-700/80">Pronto publicaremos nuestros servicios.</p>
                 )}
             </Section>
 
-            <CtaSection seccion={secciones['general.cta']} />
+            <DocumentosSection documentos={documentos} titulo="Fichas y documentos" background="muted" />
+
+            <CtaSection seccion={secciones['general.cta']} whatsappPrimero />
         </PublicLayout>
     );
 }

@@ -4,19 +4,18 @@ import { FaWhatsapp } from 'react-icons/fa6';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Button from '@/components/ui/Button';
-import FeatureCard from '@/components/ui/FeatureCard';
 import Icono from '@/components/ui/Icono';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
-import SectionHeading from '@/components/ui/SectionHeading';
 import CtaSection from '@/components/web/CtaSection';
-import PasosSection from '@/components/web/PasosSection';
+import { DocumentosBloque, DocumentosSection } from '@/components/web/Documentos';
+import FilasIcono from '@/components/web/FilasIcono';
+import Recorrido from '@/components/web/Recorrido';
+import TituloSeccion from '@/components/web/TituloSeccion';
+import Video from '@/components/web/Video';
 import { useSitio } from '@/hooks/useSitio';
 import { copiarTexto } from '@/lib/copiar';
-import { cn, columnasLg } from '@/lib/utils';
-
-// Con 5 o más medios, 3 columnas se ven más ordenadas que 4
-const columnasMedios = (cantidad) => (cantidad >= 5 ? 'lg:grid-cols-3' : columnasLg(cantidad));
+import { cn } from '@/lib/utils';
 
 /** Número copiable: "Cuenta: 193-..." muestra la etiqueta y copia solo el número. */
 function DatoCopiable({ linea }) {
@@ -75,15 +74,14 @@ function CuentaCard({ cuenta, titular }) {
     );
 }
 
-/** Página pública "Cómo pagar" (todo editable en Admin → Secciones → Cómo pagar). */
-export default function ComoPagar({ secciones }) {
+/** Página pública "Cómo pagar" (todo editable en Admin → Secciones → Cómo pagar, y sus guías en Documentos). */
+export default function ComoPagar({ secciones, documentos }) {
     const sitio = useSitio();
     const hero = secciones['pagos.hero'];
     const medios = secciones['pagos.medios'];
     const cuentas = secciones['pagos.cuentas'];
     const aviso = secciones['pagos.aviso'];
     const descuento = secciones['pagos.descuento'];
-    const listaMedios = medios?.items ?? [];
     const listaCuentas = cuentas?.items ?? [];
     const titular = sitio.empresa_razon_social || sitio.empresa_nombre;
     const whatsapp = sitio.whatsappUrl('Hola, quiero confirmar un pago');
@@ -97,34 +95,35 @@ export default function ComoPagar({ secciones }) {
 
     return (
         <PublicLayout title="Cómo pagar" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Cómo pagar'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Cómo pagar'} description={hero?.contenido} />
 
-            {medios && (
+            {/* Medios de pago: título a la izquierda; video, medios y guías en PDF a la derecha */}
+            {medios ? (
                 <Section>
-                    <Revelar>
-                        <SectionHeading eyebrow={medios.subtitulo} title={medios.titulo} description={medios.contenido} />
-                    </Revelar>
-                    {listaMedios.length > 0 && (
-                        <div className={cn('mt-12 grid gap-6 sm:grid-cols-2', columnasMedios(listaMedios.length))}>
-                            {listaMedios.map((medio, i) => (
-                                <Revelar key={i} retraso={escalonar(i)} className="h-full">
-                                    <FeatureCard
-                                        icon={(props) => <Icono nombre={medio.icono} fallback="Wallet" {...props} />}
-                                        title={medio.titulo}
-                                        description={medio.descripcion}
-                                    />
+                    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
+                        <Revelar className="lg:sticky lg:top-24 lg:self-start">
+                            <TituloSeccion titulo={medios.titulo} contenido={medios.contenido} />
+                        </Revelar>
+                        <div>
+                            {medios.video_url && (
+                                <Revelar desde="zoom" className="mb-10">
+                                    <Video url={medios.video_url} titulo={medios.titulo} />
                                 </Revelar>
-                            ))}
+                            )}
+                            <FilasIcono items={medios.items} fallback="Wallet" />
+                            <DocumentosBloque documentos={documentos} titulo="Guías para descargar" className="mt-12" />
                         </div>
-                    )}
+                    </div>
                 </Section>
+            ) : (
+                <DocumentosSection documentos={documentos} titulo="Guías para descargar" />
             )}
 
             {/* Sin cuentas cargadas en el panel no se muestra el bloque */}
             {cuentas && listaCuentas.length > 0 && (
                 <Section id="cuentas" background="muted">
                     <Revelar>
-                        <SectionHeading eyebrow={cuentas.subtitulo} title={cuentas.titulo} description={cuentas.contenido} />
+                        <TituloSeccion titulo={cuentas.titulo} contenido={cuentas.contenido} />
                     </Revelar>
                     <div className={cn('mt-12 grid gap-6 md:grid-cols-2', listaCuentas.length >= 3 && 'lg:grid-cols-3')}>
                         {listaCuentas.map((cuenta, i) => (
@@ -138,33 +137,32 @@ export default function ComoPagar({ secciones }) {
 
             {aviso && (
                 <Section background="dark">
-                    <div className={cn('grid items-center gap-10', canales.length > 0 && 'lg:grid-cols-2 lg:gap-16')}>
+                    <div className={cn('grid items-start gap-10', canales.length > 0 && 'lg:grid-cols-2 lg:gap-16')}>
                         <Revelar desde="izquierda">
-                            <span className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-accent text-primary">
-                                <ShieldAlert className="size-7" aria-hidden="true" />
-                            </span>
-                            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{aviso.titulo}</h2>
-                            {aviso.contenido && <p className="mt-4 text-base whitespace-pre-line text-white/80 sm:text-lg">{aviso.contenido}</p>}
-                            <p className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm">
-                                <Landmark className="size-4 text-accent" aria-hidden="true" />
-                                <span>
-                                    Titular: <strong>{titular}</strong>
-                                    {sitio.empresa_ruc && ` · RUC ${sitio.empresa_ruc}`}
-                                </span>
-                            </p>
+                            <TituloSeccion titulo={aviso.titulo} contenido={aviso.contenido} claro>
+                                <p className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm">
+                                    <Landmark className="size-4 text-accent" aria-hidden="true" />
+                                    <span>
+                                        Titular: <strong>{titular}</strong>
+                                        {sitio.empresa_ruc && ` · RUC ${sitio.empresa_ruc}`}
+                                    </span>
+                                </p>
+                            </TituloSeccion>
                         </Revelar>
 
                         {canales.length > 0 && (
-                            <Revelar desde="derecha" retraso={150} className="rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 sm:p-8">
-                                <p className="text-sm font-bold tracking-wider text-accent uppercase">Nuestros canales oficiales</p>
-                                <p className="mt-1 text-sm text-white/70">Si te escriben desde otro número o cuenta, no es CrediGo.</p>
-                                <ul className="mt-5 flex flex-col gap-2">
+                            <Revelar desde="derecha" retraso={150}>
+                                <h3 className="flex items-center gap-2 text-xl font-bold">
+                                    <ShieldAlert className="size-5 text-accent" aria-hidden="true" /> Nuestros canales oficiales
+                                </h3>
+                                <p className="mt-1 text-white/70">Si te escriben desde otro número o cuenta, no es CrediGo.</p>
+                                <ul className="mt-5 divide-y divide-white/15 border-y border-white/15">
                                     {canales.map((canal) => (
                                         <li key={canal.href}>
                                             <a
                                                 href={canal.href}
                                                 {...(canal.externo && { target: '_blank', rel: 'noopener noreferrer' })}
-                                                className="flex items-center gap-3 rounded-xl px-4 py-3 font-semibold transition hover:bg-white/10"
+                                                className="flex items-center gap-3 py-4 font-semibold transition hover:text-accent"
                                             >
                                                 <canal.icon className="size-5 shrink-0 text-accent" aria-hidden="true" />
                                                 <span className="min-w-0 break-all">{canal.texto}</span>
@@ -178,24 +176,18 @@ export default function ComoPagar({ secciones }) {
                 </Section>
             )}
 
-            <PasosSection seccion={secciones['pagos.despues']} background="white" />
+            <Recorrido seccion={secciones['pagos.despues']} background="white" />
 
+            {/* El descuento por viajes: el amarillo marca el beneficio */}
             {descuento && (
                 <Section background="muted">
-                    <Revelar
-                        desde="zoom"
-                        className="flex flex-col items-start gap-6 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-primary-100 sm:p-10 lg:flex-row lg:items-center"
-                    >
-                        <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-accent text-primary">
+                    <Revelar className="grid gap-8 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-10">
+                        <span className="flex size-16 items-center justify-center rounded-2xl bg-accent text-primary">
                             <BadgePercent className="size-8" aria-hidden="true" />
                         </span>
-                        <div className="flex-1">
-                            {descuento.subtitulo && <p className="text-xs font-bold tracking-wider text-primary-500 uppercase">{descuento.subtitulo}</p>}
-                            <h2 className="mt-1 text-2xl font-extrabold text-primary sm:text-3xl">{descuento.titulo}</h2>
-                            {descuento.contenido && <p className="mt-3 text-base text-primary-700/80 sm:text-lg">{descuento.contenido}</p>}
-                        </div>
+                        <TituloSeccion titulo={descuento.titulo} contenido={descuento.contenido} />
                         {descuento.boton_texto && descuento.boton_url && (
-                            <Button href={descuento.boton_url} variant="secondary" className="shrink-0">
+                            <Button href={descuento.boton_url} variant="secondary" size="lg" className="justify-self-start">
                                 {descuento.boton_texto}
                             </Button>
                         )}
@@ -203,7 +195,7 @@ export default function ComoPagar({ secciones }) {
                 </Section>
             )}
 
-            <CtaSection seccion={secciones['general.cta']} />
+            <CtaSection seccion={secciones['general.cta']} whatsappPrimero />
         </PublicLayout>
     );
 }

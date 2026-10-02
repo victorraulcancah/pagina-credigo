@@ -15,6 +15,8 @@ export const navLinks = [
  * Menú principal (Navbar). Las opciones con `items` abren un panel desplegable con
  * su `grupo` como título y una tarjeta `destacado` a la derecha
  * (`whatsapp: true` usa el WhatsApp configurado en el panel).
+ * `planes: true`: antes de sus opciones van los planes visibles (cada uno a su página).
+ * `exacto: true`: la opción se marca solo en esa página, no en sus subpáginas.
  */
 export const menuPrincipal = [
     { label: 'Inicio', href: '/' },
@@ -23,8 +25,9 @@ export const menuPrincipal = [
     {
         label: 'Planes',
         grupo: 'Nuestros planes',
+        planes: true,
         items: [
-            { label: 'Servicios y planes', href: '/servicios' },
+            { label: 'Todos los planes', href: '/servicios', exacto: true },
             { label: 'Cotizador', href: '/cotizador' },
             { label: 'Talleres aliados', href: '/talleres' },
         ],

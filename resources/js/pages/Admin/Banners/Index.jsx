@@ -4,6 +4,7 @@ import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import ImageUpload from '@/components/admin/ImageUpload';
 import PageHeader from '@/components/admin/PageHeader';
+import VideoInput from '@/components/admin/VideoInput';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
@@ -26,6 +27,7 @@ const VACIO = {
     boton_url: '',
     boton2_texto: '',
     boton2_url: '',
+    video_url: '',
     orden: 0,
     activo: true,
 };
@@ -219,6 +221,13 @@ export default function BannersIndex({ banners }) {
                             <FormField label="Enlace del segundo botón" htmlFor="boton2_url" error={errors.boton2_url} hint="Ej. /#como-funciona (baja a esa sección del inicio)">
                                 <Input id="boton2_url" value={data.boton2_url} onChange={(e) => setData('boton2_url', e.target.value)} error={errors.boton2_url} placeholder="/#como-funciona" />
                             </FormField>
+                            <VideoInput
+                                value={data.video_url}
+                                onChange={(valor) => setData('video_url', valor)}
+                                error={errors.video_url}
+                                hint='Opcional. Agrega un botón "Ver video" junto a los demás. Pega el enlace de YouTube, TikTok, Facebook o Vimeo.'
+                                className="sm:col-span-2"
+                            />
                         </>
                     )}
 

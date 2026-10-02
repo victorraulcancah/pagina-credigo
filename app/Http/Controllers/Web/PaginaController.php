@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
+use App\Models\Documento;
 use App\Models\MensajeContacto;
 use App\Models\OpcionPlan;
 use App\Models\PreguntaFrecuente;
@@ -71,8 +72,34 @@ class PaginaController extends Controller
 
         return Inertia::render('Web/Servicios', [
             'secciones' => $secciones,
-            'servicios' => Servicio::activo()->conOpcionesActivas()->ordenado()->get(),
+            // Con sus opciones visibles: la lista muestra "Cuota desde" de cada plan
+            'servicios' => Servicio::activo()->conOpcionesActivas()->ordenado()
+                ->with(['opciones' => fn ($q) => $q->activo()->ordenado()->select(['id', 'servicio_id', 'moneda', 'cuota', 'frecuencia'])])
+                ->get(),
+            // Fichas generales en PDF (las de un plan están en la página de ese plan)
+            'documentos' => Documento::publicos('planes')->whereNull('servicio_id')->values(),
             'seo' => $this->seo('Servicios', $secciones['servicios.hero'] ?? null),
+        ]);
+    }
+
+    /** Página de un plan: qué incluye, sus opciones del cotizador, detalle, ficha en PDF y video. */
+    public function plan(Servicio $servicio): Response
+    {
+        abort_unless($servicio->activo, 404);
+
+        $secciones = $this->contenido->secciones(['requisitos', 'general']);
+        $servicio->load(['opciones' => fn ($q) => $q->activo()->ordenado()->select(['id', 'servicio_id', 'nombre', 'nota', 'moneda', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia'])]);
+
+        return Inertia::render('Web/Plan', [
+            'secciones' => $secciones,
+            'servicio' => $servicio,
+            'documentos' => Documento::publicos('planes')->where('servicio_id', $servicio->id)->values(),
+            'otros' => Servicio::activo()->whereKeyNot($servicio->id)->ordenado()->get(['id', 'titulo', 'slug', 'etiqueta', 'descripcion', 'icono']),
+            'seo' => array_filter([
+                'titulo' => $servicio->titulo,
+                'descripcion' => $servicio->descripcion,
+                'imagen' => $servicio->imagen_url,
+            ]),
         ]);
     }
 
@@ -82,6 +109,7 @@ class PaginaController extends Controller
 
         return Inertia::render('Web/Requisitos', [
             'secciones' => $secciones,
+            'documentos' => Documento::publicos('requisitos'),
             'seo' => $this->seo('Requisitos', $secciones['requisitos.hero'] ?? null),
         ]);
     }
@@ -92,6 +120,7 @@ class PaginaController extends Controller
 
         return Inertia::render('Web/ComoPagar', [
             'secciones' => $secciones,
+            'documentos' => Documento::publicos('pagos'),
             'seo' => $this->seo('Cómo pagar', $secciones['pagos.hero'] ?? null),
         ]);
     }
@@ -103,6 +132,7 @@ class PaginaController extends Controller
         return Inertia::render('Web/Talleres', [
             'secciones' => $secciones,
             'talleres' => $talleres->items(),
+            'documentos' => Documento::publicos('talleres'),
             'seo' => $this->seo('Talleres aliados', $secciones['talleres.hero'] ?? null),
         ]);
     }
@@ -150,6 +180,7 @@ class PaginaController extends Controller
 
         return Inertia::render('Web/Legal', [
             'seccion' => $seccion,
+            'documentos' => Documento::publicos('legal'),
             'seo' => ['titulo' => $seccion->titulo],
         ]);
     }

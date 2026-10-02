@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowRight, ChevronDown, LayoutDashboard, LogIn, Menu, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import Logo from '@/components/layout/Logo';
 import Container from '@/components/ui/Container';
@@ -9,8 +9,6 @@ import { menuPrincipal } from '@/data/navegacion';
 import { useSitio } from '@/hooks/useSitio';
 import { cn } from '@/lib/utils';
 
-const simples = menuPrincipal.filter((item) => !item.items);
-const grupos = menuPrincipal.filter((item) => item.items);
 
 /** Enlace interno con Inertia; los que llevan ancla (#) o son externos van nativos. */
 function Enlace({ href, className, children, ...props }) {
@@ -68,12 +66,24 @@ export default function Navbar() {
     const temporizador = useRef(null);
     const fijado = useRef(false); // abierto con clic: no se cierra al sacar el mouse
 
+    // El grupo "Planes" suma los planes visibles del panel (cada uno lleva a su página)
+    const planes = props.planesMenu ?? [];
+    const menu = useMemo(
+        () =>
+            menuPrincipal.map((item) =>
+                item.planes ? { ...item, items: [...planes.map((plan) => ({ label: plan.titulo, href: `/servicios/${plan.slug}` })), ...item.items] } : item,
+            ),
+        [planes],
+    );
+    const simples = menu.filter((item) => !item.items);
+    const grupos = menu.filter((item) => item.items);
+
     const path = url.split(/[?#]/)[0];
-    const esActivo = (href) => {
+    const esActivo = (href, exacto = false) => {
         if (href.includes('#')) return false;
-        return href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
+        return href === '/' || exacto ? path === href : path === href || path.startsWith(`${href}/`);
     };
-    const grupoActivo = (grupo) => grupo.items.some((item) => esActivo(item.href));
+    const grupoActivo = (grupo) => grupo.items.some((item) => esActivo(item.href, item.exacto));
     const whatsapp = sitio.whatsappUrl();
     const destinoDestacado = (destacado) => (destacado.whatsapp ? (whatsapp ?? '/soporte') : destacado.href);
 
@@ -164,7 +174,7 @@ export default function Navbar() {
                     <Logo className="h-8 sm:h-10" />
 
                     <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
-                        {menuPrincipal.map((item) =>
+                        {menu.map((item) =>
                             item.items ? (
                                 <button
                                     key={item.label}
@@ -248,19 +258,23 @@ export default function Navbar() {
                                 <div className="grid gap-10 rounded-[2rem] bg-white p-10 text-primary shadow-2xl shadow-black/25 ring-1 ring-primary-100 lg:grid-cols-[1fr_340px] xl:p-12">
                                     <div>
                                         <p className="text-xs font-bold tracking-wider text-primary-400 uppercase">{contenido.grupo}</p>
-                                        <ul className="mt-6 grid w-max auto-cols-max grid-flow-col grid-rows-3 gap-x-20 gap-y-5">
+                                        {/* Columnas de 3 filas; con muchas opciones (planes) se limita a 2 columnas más altas */}
+                                        <ul
+                                            className="mt-6 grid w-max auto-cols-max grid-flow-col gap-x-20 gap-y-5"
+                                            style={{ gridTemplateRows: `repeat(${Math.max(3, Math.ceil(contenido.items.length / 2))}, auto)` }}
+                                        >
                                             {contenido.items.map((sub) => (
                                                 <li key={sub.href}>
                                                     <Enlace
                                                         href={sub.href}
                                                         onClick={cerrar}
-                                                        aria-current={esActivo(sub.href) ? 'page' : undefined}
+                                                        aria-current={esActivo(sub.href, sub.exacto) ? 'page' : undefined}
                                                         className={cn(
                                                             'group inline-flex items-center gap-2 text-xl transition hover:text-primary-500',
-                                                            esActivo(sub.href) ? 'font-bold' : 'font-medium',
+                                                            esActivo(sub.href, sub.exacto) ? 'font-bold' : 'font-medium',
                                                         )}
                                                     >
-                                                        {esActivo(sub.href) && <span className="size-2 rounded-full bg-accent ring-2 ring-primary" aria-hidden="true" />}
+                                                        {esActivo(sub.href, sub.exacto) && <span className="size-2 rounded-full bg-accent ring-2 ring-primary" aria-hidden="true" />}
                                                         {sub.label}
                                                         <ArrowRight
                                                             className="size-4 -translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100"
@@ -311,8 +325,8 @@ export default function Navbar() {
                                             <Enlace
                                                 href={sub.href}
                                                 onClick={() => setMovil(false)}
-                                                aria-current={esActivo(sub.href) ? 'page' : undefined}
-                                                className={claseMovil(esActivo(sub.href))}
+                                                aria-current={esActivo(sub.href, sub.exacto) ? 'page' : undefined}
+                                                className={claseMovil(esActivo(sub.href, sub.exacto))}
                                             >
                                                 {sub.label}
                                             </Enlace>

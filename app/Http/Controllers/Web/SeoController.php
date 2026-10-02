@@ -31,6 +31,11 @@ class SeoController extends Controller
             ['/politica-de-privacidad', 0.2, $ultimaEdicion(['legal'])],
         ];
 
+        // Página de cada plan visible
+        foreach (Servicio::activo()->ordenado()->get(['slug', 'updated_at']) as $plan) {
+            $paginas[] = [$plan->url(), 0.8, $plan->updated_at];
+        }
+
         $urls = collect($paginas)->map(function ($pagina) {
             [$ruta, $prioridad, $modificado] = $pagina;
             $lastmod = $modificado ? '<lastmod>'.Carbon::parse($modificado)->toDateString().'</lastmod>' : '';

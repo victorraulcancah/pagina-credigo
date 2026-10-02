@@ -69,7 +69,7 @@ export default function Cotizador({ secciones, planes }) {
 
     return (
         <PublicLayout title="Cotizador" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Cotizador'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Cotizador'} description={hero?.contenido} />
 
             <Section background="muted">
                 {!plan ? (

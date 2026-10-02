@@ -64,23 +64,20 @@ class ContenidoSeeder extends Seeder
                     ['titulo' => 'Recibes tu vehículo', 'descripcion' => 'y sigues pagando como adjudicado', 'icono' => null],
                 ],
             ]],
-            ['inicio', 'servicios', 'Inicio · Encabezado de planes', ['subtitulo', 'titulo', 'contenido', 'boton'], [
-                'subtitulo' => 'Planes',
+            ['inicio', 'servicios', 'Inicio · Encabezado de planes', ['titulo', 'contenido', 'boton'], [
                 'titulo' => 'Elige el camino que más te conviene',
                 'contenido' => 'Financiamiento vehicular, entrega inmediata con CrediYango, o financiamiento de lo que ya usas cada día.',
                 'boton_texto' => 'Ver todos los servicios',
                 'boton_url' => '/servicios',
             ]],
-            ['inicio', 'nosotros', 'Inicio · Resumen de nosotros', ['subtitulo', 'titulo', 'contenido', 'imagen', 'boton'], [
-                'subtitulo' => 'Sobre nosotros',
+            ['inicio', 'nosotros', 'Inicio · Resumen de nosotros', ['titulo', 'contenido', 'imagen', 'boton'], [
                 'titulo' => 'Impulsamos a los conductores de aplicativo',
                 'contenido' => 'En CrediGo acompañamos a los conductores de Yango e InDrive con financiamiento accesible y atención cercana.',
                 'boton_texto' => 'Conócenos',
                 'boton_url' => '/nosotros',
             ]],
-            ['inicio', 'como_funciona', 'Inicio · Cómo funciona', ['subtitulo', 'titulo', 'contenido', 'items', 'boton'], [
+            ['inicio', 'como_funciona', 'Inicio · Cómo funciona', ['titulo', 'contenido', 'items', 'boton', 'video'], [
                 ...self::BOTON_REQUISITOS,
-                'subtitulo' => 'Cómo funciona',
                 'titulo' => 'De asociado a propietario, un pago a la vez',
                 'contenido' => 'Nuestros grupos de ahorro (Credi Ahorros Autos, CrediGo Autos, Credi Motos y CrediGo InDriver) te acompañan desde la inscripción hasta la entrega de llaves.',
                 'items' => [
@@ -92,12 +89,11 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Nosotros ────────────────────────────────────────────
-            ['nosotros', 'hero', 'Nosotros · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
-                'subtitulo' => 'Sobre nosotros',
+            ['nosotros', 'hero', 'Nosotros · Encabezado', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Somos CrediGo',
                 'contenido' => 'Financiamiento para conductores de aplicativo, con atención cercana y condiciones claras.',
             ]],
-            ['nosotros', 'historia', 'Nosotros · Historia', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
+            ['nosotros', 'historia', 'Nosotros · Historia', ['subtitulo', 'titulo', 'contenido', 'imagen', 'video'], [
                 'subtitulo' => 'Nuestra historia',
                 'titulo' => 'Nacimos para impulsar a los conductores',
                 'contenido' => "CrediGo es una marca de Arequipa Go S.A.C. que ofrece financiamiento a conductores de plataformas como Yango e InDrive.\n\nSabemos que tu vehículo es tu herramienta de trabajo. Por eso creamos planes con cuotas semanales, productos para tu día a día y beneficios por tu productividad.",
@@ -123,20 +119,17 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Servicios ───────────────────────────────────────────
-            ['servicios', 'hero', 'Servicios · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
-                'subtitulo' => 'Nuestros servicios',
+            ['servicios', 'hero', 'Servicios · Encabezado', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Todo lo que necesitas para trabajar',
                 'contenido' => 'Financiamiento vehicular, celulares y productos en cuotas para conductores de aplicativo.',
             ]],
 
             // ── Requisitos ──────────────────────────────────────────
-            ['requisitos', 'hero', 'Requisitos · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
-                'subtitulo' => 'Requisitos',
+            ['requisitos', 'hero', 'Requisitos · Encabezado', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Qué necesitas para inscribirte',
                 'contenido' => 'Ten a la mano estos documentos y datos. Un asesor te acompaña en todo el proceso.',
             ]],
-            ['requisitos', 'documentos', 'Requisitos · Documentos', ['subtitulo', 'titulo', 'contenido', 'items'], [
-                'subtitulo' => 'Documentos',
+            ['requisitos', 'documentos', 'Requisitos · Documentos', ['titulo', 'contenido', 'items'], [
                 'titulo' => 'Documentos que te pediremos',
                 'contenido' => 'Envíalos en foto o PDF, legibles y vigentes (máximo 5 MB cada uno).',
                 'items' => [
@@ -146,8 +139,7 @@ class ContenidoSeeder extends Seeder
                     ['titulo' => 'Foto de perfil', 'descripcion' => 'Una selfie reciente, de frente y con buena luz.', 'icono' => 'Camera'],
                 ],
             ]],
-            ['requisitos', 'datos', 'Requisitos · Datos personales', ['subtitulo', 'titulo', 'contenido', 'items'], [
-                'subtitulo' => 'Tus datos',
+            ['requisitos', 'datos', 'Requisitos · Datos personales', ['titulo', 'contenido', 'items'], [
                 'titulo' => 'Datos que debes tener a la mano',
                 'contenido' => 'Los usamos para registrarte y coordinar contigo durante todo tu plan.',
                 'items' => [
@@ -158,8 +150,7 @@ class ContenidoSeeder extends Seeder
                     ['titulo' => 'Contacto de emergencia', 'descripcion' => 'Nombre, celular y parentesco de un familiar o persona de confianza.', 'icono' => 'HeartHandshake'],
                 ],
             ]],
-            ['requisitos', 'proceso', 'Requisitos · Qué pasa después', ['subtitulo', 'titulo', 'contenido', 'items'], [
-                'subtitulo' => 'Proceso',
+            ['requisitos', 'proceso', 'Requisitos · Qué pasa después', ['titulo', 'contenido', 'items', 'video'], [
                 'titulo' => 'Qué pasa después de enviar tus datos',
                 'items' => [
                     ['titulo' => 'Validamos tu identidad', 'descripcion' => 'Confirmamos tus datos con RENIEC y revisamos tus documentos.', 'icono' => 'Fingerprint'],
@@ -168,8 +159,7 @@ class ContenidoSeeder extends Seeder
                     ['titulo' => 'Verificación domiciliaria', 'descripcion' => 'Al recibir tu vehículo, moto o celular visitamos tu domicilio. Es válida por un año.', 'icono' => 'House'],
                 ],
             ]],
-            ['requisitos', 'empresas', 'Requisitos · Empresas con RUC', ['subtitulo', 'titulo', 'contenido', 'items'], [
-                'subtitulo' => 'Con RUC',
+            ['requisitos', 'empresas', 'Requisitos · Empresas con RUC', ['titulo', 'contenido', 'items'], [
                 'titulo' => '¿Te inscribes como empresa?',
                 'contenido' => 'Si te registras con RUC como persona jurídica, no necesitas licencia de conducir. Te pediremos:',
                 'items' => [
@@ -180,13 +170,11 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Cómo pagar ──────────────────────────────────────────
-            ['pagos', 'hero', 'Cómo pagar · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
-                'subtitulo' => 'Pagos',
+            ['pagos', 'hero', 'Cómo pagar · Encabezado', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Cómo pagar tus cuotas',
                 'contenido' => 'Elige el medio que te quede más cómodo y paga seguro en nuestras cuentas oficiales.',
             ]],
-            ['pagos', 'medios', 'Cómo pagar · Medios de pago', ['subtitulo', 'titulo', 'contenido', 'items'], [
-                'subtitulo' => 'Medios de pago',
+            ['pagos', 'medios', 'Cómo pagar · Medios de pago', ['titulo', 'contenido', 'items', 'video'], [
                 'titulo' => 'Paga como prefieras',
                 'contenido' => 'Después de pagar, guarda tu constancia o el número de operación.',
                 'items' => [
@@ -198,8 +186,7 @@ class ContenidoSeeder extends Seeder
                 ],
             ]],
             // Sin cuentas al inicio: se cargan desde el panel (el bloque no se muestra vacío)
-            ['pagos', 'cuentas', 'Cómo pagar · Cuentas oficiales', ['subtitulo', 'titulo', 'contenido', 'items'], [
-                'subtitulo' => 'Cuentas oficiales',
+            ['pagos', 'cuentas', 'Cómo pagar · Cuentas oficiales', ['titulo', 'contenido', 'items'], [
                 'titulo' => 'Nuestras cuentas',
                 'contenido' => 'Todas están a nombre de la empresa. Toca un número para copiarlo.',
                 'items' => [],
@@ -208,8 +195,7 @@ class ContenidoSeeder extends Seeder
                 'titulo' => 'Cuidado con las estafas',
                 'contenido' => 'Solo paga en las cuentas publicadas en esta página, a nombre de la empresa. Nunca te pediremos depósitos a cuentas personales ni desde números que no sean los oficiales. Si tienes dudas, escríbenos antes de pagar.',
             ]],
-            ['pagos', 'despues', 'Cómo pagar · Después de pagar', ['subtitulo', 'titulo', 'contenido', 'items'], [
-                'subtitulo' => 'Después de pagar',
+            ['pagos', 'despues', 'Cómo pagar · Después de pagar', ['titulo', 'contenido', 'items', 'video'], [
                 'titulo' => 'Así registramos tu pago',
                 'items' => [
                     ['titulo' => 'Guarda tu constancia', 'descripcion' => 'La captura o el número de operación de tu pago.', 'icono' => 'Receipt'],
@@ -217,8 +203,7 @@ class ContenidoSeeder extends Seeder
                     ['titulo' => 'Registramos tu pago', 'descripcion' => 'Te confirmamos cuando quede registrado en tu plan.', 'icono' => 'BadgeCheck'],
                 ],
             ]],
-            ['pagos', 'descuento', 'Cómo pagar · Descuento semanal por viajes', ['subtitulo', 'titulo', 'contenido', 'boton'], [
-                'subtitulo' => 'Beneficio',
+            ['pagos', 'descuento', 'Cómo pagar · Descuento semanal por viajes', ['titulo', 'contenido', 'boton'], [
                 'titulo' => 'Tu cuota baja si cumples tu meta de viajes',
                 'contenido' => 'Si trabajas con Yango o InDrive, cumples la meta de viajes de la semana y estás al día en tus pagos, tu cuota de la semana siguiente tiene descuento. Consulta con tu asesor la meta y el descuento de tu plan.',
                 'boton_texto' => 'Consultar con un asesor',
@@ -226,12 +211,11 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Talleres aliados (la lista viene del ERP) ────────────
-            ['talleres', 'hero', 'Talleres aliados · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
-                'subtitulo' => 'Talleres aliados',
+            ['talleres', 'hero', 'Talleres aliados · Encabezado', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Mantén tu vehículo y págalo en cuotas',
                 'contenido' => 'Mecánica, llantas, baterías, aceite y más en nuestra red de talleres aliados, con una inicial y el resto en cuotas.',
             ]],
-            ['talleres', 'como', 'Talleres aliados · Cómo funciona', ['subtitulo', 'titulo', 'contenido', 'items'], [
+            ['talleres', 'como', 'Talleres aliados · Cómo funciona', ['subtitulo', 'titulo', 'contenido', 'items', 'video'], [
                 'subtitulo' => 'Cómo funciona',
                 'titulo' => 'Financia tu servicio en 4 pasos',
                 'items' => [
@@ -243,8 +227,7 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Beneficios (puntaje y niveles según el ERP; comercios y cupones vienen del ERP) ──
-            ['beneficios', 'hero', 'Beneficios · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
-                'subtitulo' => 'Beneficios',
+            ['beneficios', 'hero', 'Beneficios · Encabezado', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Mientras más cumples, más ganas',
                 'contenido' => 'Tu puntaje y tu nivel te abren más opciones. Además, descuentos en comercios aliados.',
             ]],
@@ -300,15 +283,13 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Cotizador ───────────────────────────────────────────
-            ['cotizador', 'hero', 'Cotizador · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
-                'subtitulo' => 'Cotizador',
+            ['cotizador', 'hero', 'Cotizador · Encabezado', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Cotiza tu plan en segundos',
                 'contenido' => 'Elige el plan y la opción que te interesa, revisa las cuotas referenciales y un asesor te contacta.',
             ]],
 
             // ── Soporte (página /soporte; en la BD sigue siendo "contacto") ──
-            ['contacto', 'hero', 'Soporte · Encabezado', ['subtitulo', 'titulo', 'contenido', 'imagen'], [
-                'subtitulo' => 'Soporte',
+            ['contacto', 'hero', 'Soporte · Encabezado', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Hablemos',
                 'contenido' => 'Escríbenos y un asesor te responderá a la brevedad.',
             ]],

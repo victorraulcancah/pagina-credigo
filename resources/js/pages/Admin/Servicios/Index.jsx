@@ -1,4 +1,4 @@
-import { Briefcase, Plus, Save, Star } from 'lucide-react';
+import { Briefcase, ExternalLink, Plus, Save, Star } from 'lucide-react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
@@ -6,6 +6,7 @@ import IconPicker from '@/components/admin/IconPicker';
 import ImageUpload from '@/components/admin/ImageUpload';
 import ListaTextos from '@/components/admin/ListaTextos';
 import PageHeader from '@/components/admin/PageHeader';
+import VideoInput from '@/components/admin/VideoInput';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
@@ -18,12 +19,15 @@ import { useCrudModal } from '@/hooks/useCrudModal';
 
 const VACIO = {
     titulo: '',
+    slug: '',
     etiqueta: '',
     descripcion: '',
+    detalle: '',
     caracteristicas: [],
     icono: 'Sparkles',
     imagen: null,
     quitar_imagen: false,
+    video_url: '',
     destacado: false,
     orden: 0,
     activo: true,
@@ -36,10 +40,13 @@ export default function ServiciosIndex({ servicios }) {
         aFormulario: (s) => ({
             ...VACIO,
             ...s,
+            slug: s.slug ?? '',
             etiqueta: s.etiqueta ?? '',
+            detalle: s.detalle ?? '',
             caracteristicas: s.caracteristicas ?? [],
             icono: s.icono ?? 'Sparkles',
             imagen: null,
+            video_url: s.video_url ?? '',
         }),
     });
     const { form } = crud;
@@ -83,6 +90,16 @@ export default function ServiciosIndex({ servicios }) {
                                 )}
                                 <h3 className="font-bold text-gray-900">{servicio.titulo}</h3>
                                 <p className="line-clamp-2 text-sm text-gray-500">{servicio.descripcion}</p>
+                                {servicio.slug && (
+                                    <a
+                                        href={`/servicios/${servicio.slug}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                                    >
+                                        /servicios/{servicio.slug} <ExternalLink className="size-3" aria-hidden="true" />
+                                    </a>
+                                )}
                                 {servicio.caracteristicas?.length > 0 && (
                                     <p className="mt-1 text-xs text-gray-400">{servicio.caracteristicas.length} características</p>
                                 )}
@@ -116,8 +133,36 @@ export default function ServiciosIndex({ servicios }) {
                     <FormField label="Ícono" htmlFor="icono" error={errors.icono} className="sm:col-span-2">
                         <IconPicker id="icono" value={data.icono} onChange={(icono) => setData('icono', icono)} />
                     </FormField>
+                    <FormField
+                        label="Dirección en la web"
+                        htmlFor="slug"
+                        error={errors.slug}
+                        hint="Vacío = se arma con el nombre. Si la cambias, los enlaces que ya compartiste dejan de funcionar."
+                        className="sm:col-span-2"
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="shrink-0 text-sm text-gray-500">/servicios/</span>
+                            <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} error={errors.slug} placeholder="credi-motos" />
+                        </div>
+                    </FormField>
                     <FormField label="Descripción" htmlFor="descripcion" error={errors.descripcion} required className="sm:col-span-2">
                         <Textarea id="descripcion" rows={3} value={data.descripcion} onChange={(e) => setData('descripcion', e.target.value)} error={errors.descripcion} />
+                    </FormField>
+                    <FormField
+                        label="Detalle del plan (opcional)"
+                        htmlFor="detalle"
+                        error={errors.detalle}
+                        hint='Se muestra en la página del plan como "Cómo funciona este plan": adjudicación, condiciones, plazos. Formato: "## " al inicio de una línea = subtítulo · "- " = viñeta · línea en blanco = nuevo párrafo.'
+                        className="sm:col-span-2"
+                    >
+                        <Textarea
+                            id="detalle"
+                            rows={8}
+                            value={data.detalle}
+                            onChange={(e) => setData('detalle', e.target.value)}
+                            error={errors.detalle}
+                            className="font-mono text-sm"
+                        />
                     </FormField>
                     <FormField label="Características" error={errors.caracteristicas} hint="Cada una se muestra con un check en la tarjeta." className="sm:col-span-2">
                         <ListaTextos
@@ -141,6 +186,13 @@ export default function ServiciosIndex({ servicios }) {
                             hint="Se muestra arriba de la tarjeta. Recomendado 1280×720 px. JPG, PNG o WEBP, máx. 4 MB."
                         />
                     </div>
+                    <VideoInput
+                        value={data.video_url}
+                        onChange={(valor) => setData('video_url', valor)}
+                        error={errors.video_url}
+                        hint='Opcional. En la tarjeta del plan aparece "Ver video". Pega el enlace de YouTube, TikTok, Facebook o Vimeo.'
+                        className="sm:col-span-2"
+                    />
                     <FormField label="Orden" htmlFor="orden" error={errors.orden} hint="Menor número = aparece primero.">
                         <Input id="orden" type="number" min={0} value={data.orden} onChange={(e) => setData('orden', e.target.value)} error={errors.orden} />
                     </FormField>

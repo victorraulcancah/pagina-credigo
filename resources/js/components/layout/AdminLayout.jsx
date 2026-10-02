@@ -6,6 +6,7 @@ import {
     Calculator,
     CircleQuestionMark,
     ExternalLink,
+    FileText,
     Images,
     Inbox,
     LayoutDashboard,
@@ -33,6 +34,7 @@ const menu = [
             { label: 'Servicios', href: '/admin/servicios', icon: Briefcase },
             { label: 'Cotizador', href: '/admin/cotizador', icon: Calculator },
             { label: 'Preguntas frecuentes', href: '/admin/preguntas', icon: CircleQuestionMark },
+            { label: 'Documentos', href: '/admin/documentos', icon: FileText },
         ],
     },
     {

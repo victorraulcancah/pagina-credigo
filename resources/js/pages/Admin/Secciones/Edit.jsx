@@ -3,6 +3,7 @@ import { ArrowLeft, ExternalLink, Save } from 'lucide-react';
 import ImageUpload from '@/components/admin/ImageUpload';
 import ItemsRepeater from '@/components/admin/ItemsRepeater';
 import PageHeader from '@/components/admin/PageHeader';
+import VideoInput from '@/components/admin/VideoInput';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
@@ -50,6 +51,8 @@ export default function SeccionEdit({ seccion }) {
     const esPilar = seccion.pagina === 'nosotros' && ['mision', 'vision', 'objetivo'].includes(seccion.clave);
     const lista = LISTAS[seccion.clave] ?? LISTA_GENERAL;
     const tieneTextos = ['subtitulo', 'titulo', 'contenido'].some(usa);
+    // En las secciones de texto con imagen, el video reemplaza a la imagen
+    const esTextoConImagen = usa('imagen') && usa('video');
 
     const form = useForm({
         subtitulo: seccion.subtitulo ?? '',
@@ -59,6 +62,7 @@ export default function SeccionEdit({ seccion }) {
         quitar_imagen: false,
         boton_texto: seccion.boton_texto ?? '',
         boton_url: seccion.boton_url ?? '',
+        video_url: seccion.video_url ?? '',
         items: seccion.items ?? [],
         activo: seccion.activo,
     });
@@ -182,6 +186,12 @@ export default function SeccionEdit({ seccion }) {
                                 }
                                 aspect={esEncabezado ? 'aspect-[16/6]' : esPilar ? 'aspect-video' : 'aspect-[4/3]'}
                             />
+                        </Panel>
+                    )}
+
+                    {usa('video') && (
+                        <Panel title="Video" description={esTextoConImagen ? 'Si pones un video, se muestra en lugar de la imagen.' : 'Se muestra debajo del título de la sección.'}>
+                            <VideoInput value={data.video_url} onChange={(valor) => setData('video_url', valor)} error={errors.video_url} />
                         </Panel>
                     )}
 

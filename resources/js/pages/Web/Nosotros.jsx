@@ -53,7 +53,7 @@ export default function Nosotros({ secciones }) {
 
     return (
         <PublicLayout title="Nosotros" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Nosotros'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Nosotros'} description={hero?.contenido} />
 
             <TextoConImagen seccion={secciones['nosotros.historia']} />
 

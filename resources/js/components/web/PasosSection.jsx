@@ -4,10 +4,14 @@ import Icono from '@/components/ui/Icono';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
+import Video from '@/components/web/Video';
 import { cn, columnasLg } from '@/lib/utils';
 
-/** Lista numerada de pasos (sección con items: titulo, descripcion, icono) y botón opcional. */
-export default function PasosSection({ id, seccion, background = 'muted' }) {
+/**
+ * Lista numerada de pasos (sección con items: titulo, descripcion, icono) y botón opcional.
+ * Con video cargado en el panel, va entre el título y los pasos. `children`: contenido extra al pie (ej. documentos).
+ */
+export default function PasosSection({ id, seccion, background = 'muted', children }) {
     if (!seccion) return null;
     const pasos = seccion.items ?? [];
 
@@ -16,6 +20,11 @@ export default function PasosSection({ id, seccion, background = 'muted' }) {
             <Revelar>
                 <SectionHeading eyebrow={seccion.subtitulo} title={seccion.titulo} description={seccion.contenido} />
             </Revelar>
+            {seccion.video_url && (
+                <Revelar desde="zoom" className="mx-auto mt-12 max-w-4xl">
+                    <Video url={seccion.video_url} titulo={seccion.titulo} />
+                </Revelar>
+            )}
             {pasos.length > 0 && (
                 <ol className={cn('mt-14 grid gap-x-6 gap-y-10 sm:grid-cols-2', columnasLg(pasos.length))}>
                     {pasos.map((paso, i) => (
@@ -45,6 +54,7 @@ export default function PasosSection({ id, seccion, background = 'muted' }) {
                     </Button>
                 </Revelar>
             )}
+            {children}
         </Section>
     );
 }

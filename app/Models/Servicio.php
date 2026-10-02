@@ -7,6 +7,7 @@ use App\Models\Concerns\TieneImagen;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Servicio extends Model
 {
@@ -14,7 +15,7 @@ class Servicio extends Model
 
     protected $table = 'servicios';
 
-    protected $fillable = ['titulo', 'etiqueta', 'descripcion', 'caracteristicas', 'icono', 'imagen', 'destacado', 'orden', 'activo'];
+    protected $fillable = ['titulo', 'slug', 'etiqueta', 'descripcion', 'detalle', 'caracteristicas', 'icono', 'imagen', 'video_url', 'destacado', 'orden', 'activo'];
 
     protected function casts(): array
     {
@@ -24,6 +25,34 @@ class Servicio extends Model
             'orden' => 'integer',
             'activo' => 'boolean',
         ];
+    }
+
+    /** Sin dirección escrita en el panel, se arma con el nombre del plan ("Credi Motos" → credi-motos). */
+    protected static function booted(): void
+    {
+        static::saving(function (Servicio $servicio) {
+            if (blank($servicio->slug)) {
+                $servicio->slug = static::slugLibre($servicio->titulo, $servicio->id);
+            }
+        });
+    }
+
+    /** Dirección que no use otro plan: "credi-motos", "credi-motos-2"... */
+    public static function slugLibre(string $titulo, ?int $ignorarId = null): string
+    {
+        $base = Str::limit(Str::slug($titulo), 100, '') ?: 'plan';
+        $slug = $base;
+        for ($i = 2; static::where('slug', $slug)->when($ignorarId, fn ($q) => $q->whereKeyNot($ignorarId))->exists(); $i++) {
+            $slug = "{$base}-{$i}";
+        }
+
+        return $slug;
+    }
+
+    /** Página pública del plan. */
+    public function url(): string
+    {
+        return "/servicios/{$this->slug}";
     }
 
     public function scopeDestacado(Builder $query): Builder

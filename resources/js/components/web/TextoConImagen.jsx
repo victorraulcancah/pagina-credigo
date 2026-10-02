@@ -3,12 +3,14 @@ import Button from '@/components/ui/Button';
 import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
+import Video from '@/components/web/Video';
 import { useSitio } from '@/hooks/useSitio';
 import { cn } from '@/lib/utils';
 
 /**
  * Texto + imagen en dos columnas (historia, resumen de nosotros).
- * Sin imagen cargada muestra un panel con el logo.
+ * Con video cargado en el panel, el video ocupa el lugar de la imagen.
+ * Sin imagen ni video muestra un panel con el logo.
  */
 export default function TextoConImagen({ seccion, background = 'white', invertido = false }) {
     const sitio = useSitio();
@@ -31,7 +33,9 @@ export default function TextoConImagen({ seccion, background = 'white', invertid
 
                 {/* La imagen entra desde su lado */}
                 <Revelar desde={invertido ? 'izquierda' : 'derecha'} retraso={150}>
-                    {seccion.imagen_url ? (
+                    {seccion.video_url ? (
+                        <Video url={seccion.video_url} titulo={seccion.titulo} className="shadow-xl" />
+                    ) : seccion.imagen_url ? (
                         <img
                             src={seccion.imagen_url}
                             alt={seccion.titulo ?? ''}

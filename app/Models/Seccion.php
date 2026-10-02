@@ -15,7 +15,7 @@ class Seccion extends Model
 
     protected $fillable = [
         'pagina', 'clave', 'nombre', 'subtitulo', 'titulo', 'contenido', 'imagen',
-        'boton_texto', 'boton_url', 'items', 'campos', 'orden', 'activo',
+        'boton_texto', 'boton_url', 'video_url', 'items', 'campos', 'orden', 'activo',
     ];
 
     protected function casts(): array

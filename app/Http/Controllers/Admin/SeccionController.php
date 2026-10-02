@@ -54,6 +54,10 @@ class SeccionController extends Controller
             $datos['boton_url'] = $request->validated('boton_url');
         }
 
+        if ($seccion->usaCampo('video')) {
+            $datos['video_url'] = $request->validated('video_url');
+        }
+
         if ($seccion->usaCampo('items')) {
             // Si se borran todos los elementos, el campo no llega en el formulario
             $datos['items'] = array_values($request->validated('items') ?? []);

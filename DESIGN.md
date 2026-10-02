@@ -224,7 +224,13 @@ Seven equal columns inside a 16px-rounded box ringed in white/15, divided by whi
 Plans as rows between hairline rules, not cards: 48px blue icon tile with a yellow glyph, bold title with an optional yellow pill tag, up to three checked features, and a right column with "Cuota desde" + tabular price + period over a small action (Cotizar secondary, or Consultar outline when the plan has no quoter options).
 
 ### Numbered Track
-How-it-works as stations on one line: 48px round blue badges with yellow tabular numerals, ringed by the wash color, on a 1px rule-blue line (horizontal on lg, vertical below).
+How-it-works as stations on one line: 48px round blue badges with yellow tabular numerals, ringed by the section's ground color, on a 1px rule-blue line (horizontal on lg, vertical below). Shared component (`Recorrido`): home "Cómo funciona", Requisitos "Qué pasa después", Cómo pagar "Después de pagar".
+
+### Page Header
+Every inner page opens on the blue ground with a left-aligned 36→60px bold title and its lead in white/80; no label above the title and no glows. An image uploaded in the panel shows as the full background, as uploaded, with a soft text shadow.
+
+### Icon Rows
+Repeated items of a section (documents, data, payment methods, company requirements) are hairline-ruled rows with a 48px blue icon tile (yellow glyph; inverted on blue grounds), bold title and muted copy, not grids of same-size cards. On lg the section title sits left and sticks while the rows scroll on the right.
 
 ### Segmented Levels Bar
 Levels as one 16px-rounded panel split into equal tiers by hairlines; each tier has a round medal (wash-blue, rule-blue, then yellow for the top), its name and copy, and a bottom bar of segments filled up to that tier. The top tier inverts to the blue ground with yellow segments.

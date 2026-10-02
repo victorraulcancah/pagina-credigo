@@ -36,3 +36,12 @@ export function resumenOpcion(opcion) {
         total: tieneCuota && tieneNumero ? formatoMoneda(inicial + Number(opcion.cuota) * Number(opcion.numero_cuotas), opcion.moneda) : null,
     };
 }
+
+/** Opción con la cuota más baja (prefiere soles); null si ninguna tiene monto cargado. */
+export function cuotaMasBaja(opciones = []) {
+    const conCuota = opciones.filter((o) => o.cuota !== null && o.cuota !== undefined);
+    if (!conCuota.length) return null;
+    const soles = conCuota.filter((o) => o.moneda === 'PEN');
+    const lista = soles.length ? soles : conCuota;
+    return lista.reduce((menor, o) => (Number(o.cuota) < Number(menor.cuota) ? o : menor));
+}

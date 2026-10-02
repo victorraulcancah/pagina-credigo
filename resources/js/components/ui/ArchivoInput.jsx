@@ -1,8 +1,7 @@
 import { Paperclip, Plus, X } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { formatoTamano } from '@/lib/archivos';
 import { cn } from '@/lib/utils';
-
-const formatoTamano = (bytes) => (bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.ceil(bytes / 1024)} KB`);
 
 /** ¿El archivo coincide con `accept` ("image/png,.ico,video/mp4")? */
 const aceptaTipo = (archivo, accept) =>

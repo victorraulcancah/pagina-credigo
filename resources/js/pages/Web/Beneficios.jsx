@@ -214,7 +214,7 @@ export default function Beneficios({ secciones, cuotaSemanal, comercios, cupones
 
     return (
         <PublicLayout title="Beneficios" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Beneficios'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Beneficios'} description={hero?.contenido} />
 
             <SemanaSection seccion={secciones['beneficios.semana']} cuotaSemanal={cuotaSemanal} />
 

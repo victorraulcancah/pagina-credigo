@@ -5,8 +5,9 @@ import { cn } from '@/lib/utils';
  * - "## Título" → subtítulo
  * - "- texto"   → viñeta
  * - línea en blanco → nuevo párrafo
+ * `subtitulo`: etiqueta de los subtítulos (h3 si el texto va debajo de otro título h2).
  */
-export default function TextoFormateado({ texto = '', className }) {
+export default function TextoFormateado({ texto = '', subtitulo: Subtitulo = 'h2', className }) {
     const bloques = texto
         .replace(/\r\n/g, '\n')
         .split(/\n{2,}/)
@@ -22,9 +23,9 @@ export default function TextoFormateado({ texto = '', className }) {
                 // Un subtítulo puede venir pegado al párrafo que lo sigue
                 if (lineas[0].startsWith('## ')) {
                     elementos.push(
-                        <h2 key={`${i}-h`} className="mt-4 text-xl font-bold text-primary sm:text-2xl">
+                        <Subtitulo key={`${i}-h`} className="mt-4 text-xl font-bold text-primary sm:text-2xl">
                             {lineas.shift().slice(3)}
-                        </h2>,
+                        </Subtitulo>,
                     );
                 }
 

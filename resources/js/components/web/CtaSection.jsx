@@ -28,7 +28,7 @@ export default function CtaSection({ seccion, whatsappPrimero = false }) {
                             size="lg"
                             icon={ArrowRight}
                             iconPosition="right"
-                            className={whatsappPrimero && whatsapp ? 'sm:order-2' : undefined}
+                            className={whatsappPrimero && whatsapp ? 'order-2' : undefined}
                         >
                             {seccion.boton_texto}
                         </Button>

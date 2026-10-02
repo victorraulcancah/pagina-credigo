@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\ConfiguracionController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DocumentoController;
 use App\Http\Controllers\Admin\ErpController;
 use App\Http\Controllers\Admin\MensajeContactoController;
 use App\Http\Controllers\Admin\OpcionPlanController;
@@ -28,6 +29,7 @@ Route::controller(PaginaController::class)->group(function () {
     Route::get('/', 'inicio')->name('inicio');
     Route::get('/nosotros', 'nosotros')->name('nosotros');
     Route::get('/servicios', 'servicios')->name('servicios');
+    Route::get('/servicios/{servicio:slug}', 'plan')->name('plan');
     Route::get('/requisitos', 'requisitos')->name('requisitos');
     Route::get('/como-pagar', 'pagos')->name('pagos');
     Route::get('/talleres', 'talleres')->name('talleres');
@@ -103,6 +105,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('preguntas', PreguntaFrecuenteController::class)
         ->only(['index', 'store', 'update', 'destroy'])
         ->parameters(['preguntas' => 'pregunta']);
+
+    Route::resource('documentos', DocumentoController::class)
+        ->only(['index', 'store', 'update', 'destroy'])
+        ->parameters(['documentos' => 'documento']);
 
     Route::get('/mensajes', [MensajeContactoController::class, 'index'])->name('mensajes.index');
     Route::get('/mensajes/exportar', [MensajeContactoController::class, 'exportar'])->name('mensajes.exportar');

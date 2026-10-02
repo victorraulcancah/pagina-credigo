@@ -5,6 +5,7 @@ import { FaWhatsapp } from 'react-icons/fa6';
 import Badge from '@/components/ui/Badge';
 import Button, { usaEnlaceNativo } from '@/components/ui/Button';
 import Container from '@/components/ui/Container';
+import { BotonVideo } from '@/components/web/Video';
 import { useSitio } from '@/hooks/useSitio';
 import { cn, SOMBRA_TEXTO } from '@/lib/utils';
 
@@ -187,6 +188,7 @@ export default function HeroBanner({ banners = [], cifras = [] }) {
                                             </Button>
                                         )
                                     )}
+                                    {slide.video_url && <BotonVideo url={slide.video_url} titulo={slide.titulo} variant="outline-light" size="lg" />}
                                 </div>
                             </div>
                         );

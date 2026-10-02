@@ -16,7 +16,7 @@ class Banner extends Model
 
     protected $fillable = [
         'etiqueta', 'titulo', 'subtitulo', 'imagen', 'solo_imagen', 'imagen_movil',
-        'boton_texto', 'boton_url', 'boton2_texto', 'boton2_url', 'orden', 'activo',
+        'boton_texto', 'boton_url', 'boton2_texto', 'boton2_url', 'video_url', 'orden', 'activo',
     ];
 
     protected $appends = ['imagen_movil_url'];

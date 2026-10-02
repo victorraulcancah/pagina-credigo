@@ -64,16 +64,6 @@ class ContenidoSeeder extends Seeder
                     ['titulo' => 'Recibes tu vehículo', 'descripcion' => 'y sigues pagando como adjudicado', 'icono' => null],
                 ],
             ]],
-            ['inicio', 'semana', 'Inicio · Tu semana (franja de lunes a domingo)', ['titulo', 'contenido', 'items'], [
-                'titulo' => 'Tu semana con CrediGo',
-                'contenido' => 'Montos referenciales. El descuento por viajes depende de tu plan y de tu plataforma.',
-                // 1.º = lunes, 2.º = martes a sábado, 3.º = domingo
-                'items' => [
-                    ['titulo' => 'Pagas tu cuota', 'descripcion' => 'Una sola cuota a la semana, según el plan que elijas.', 'icono' => 'Wallet'],
-                    ['titulo' => 'Manejas y sumas viajes', 'descripcion' => 'Trabajas en Yango o InDrive como siempre.', 'icono' => 'CarFront'],
-                    ['titulo' => 'Tu próxima cuota baja', 'descripcion' => 'Si cumpliste tu meta de viajes y estás al día.', 'icono' => 'BadgePercent'],
-                ],
-            ]],
             ['inicio', 'servicios', 'Inicio · Encabezado de planes', ['subtitulo', 'titulo', 'contenido', 'boton'], [
                 'subtitulo' => 'Planes',
                 'titulo' => 'Elige el camino que más te conviene',
@@ -257,6 +247,16 @@ class ContenidoSeeder extends Seeder
                 'subtitulo' => 'Beneficios',
                 'titulo' => 'Mientras más cumples, más ganas',
                 'contenido' => 'Tu puntaje y tu nivel te abren más opciones. Además, descuentos en comercios aliados.',
+            ]],
+            ['beneficios', 'semana', 'Beneficios · Tu semana (franja de lunes a domingo)', ['titulo', 'contenido', 'items'], [
+                'titulo' => 'Tu semana con CrediGo',
+                'contenido' => 'Montos referenciales. El descuento por viajes depende de tu plan y de tu plataforma.',
+                // 1.º = lunes, 2.º = martes a sábado, 3.º = domingo
+                'items' => [
+                    ['titulo' => 'Pagas tu cuota', 'descripcion' => 'Una sola cuota a la semana, según el plan que elijas.', 'icono' => 'Wallet'],
+                    ['titulo' => 'Manejas y sumas viajes', 'descripcion' => 'Trabajas en Yango o InDrive como siempre.', 'icono' => 'CarFront'],
+                    ['titulo' => 'Tu próxima cuota baja', 'descripcion' => 'Si cumpliste tu meta de viajes y estás al día.', 'icono' => 'BadgePercent'],
+                ],
             ]],
             ['beneficios', 'puntaje', 'Beneficios · Puntaje CrediGo', ['subtitulo', 'titulo', 'contenido', 'items'], [
                 'subtitulo' => 'Puntaje CrediGo',

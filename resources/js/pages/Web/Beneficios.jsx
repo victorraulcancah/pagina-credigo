@@ -10,6 +10,7 @@ import SectionHeading from '@/components/ui/SectionHeading';
 import { ContactoAliado, DatosAliado, LogoAliado } from '@/components/web/Aliados';
 import CtaSection from '@/components/web/CtaSection';
 import NivelesSection from '@/components/web/NivelesSection';
+import Semana from '@/components/web/Semana';
 import { formatoFecha } from '@/lib/fechas';
 import { formatoMoneda } from '@/lib/moneda';
 import { cn, columnasLg } from '@/lib/utils';
@@ -189,14 +190,33 @@ function ComerciosSection({ seccion, comercios }) {
     );
 }
 
-/** Beneficios: puntaje y niveles (textos del panel) + cupones y Comercios GO (vienen del ERP). */
-export default function Beneficios({ secciones, comercios, cupones }) {
+/** La semana del conductor sobre el azul de marca: cómo la cuota baja si cumple su meta de viajes. */
+function SemanaSection({ seccion, cuotaSemanal }) {
+    if (!seccion?.items?.length) return null;
+
+    return (
+        // Sigue al encabezado azul: una línea fina los separa
+        <Section background="dark" className="border-t border-white/10">
+            <Revelar>
+                <SectionHeading title={seccion.titulo} align="left" light />
+            </Revelar>
+            <div className="mt-10">
+                <Semana seccion={seccion} cuota={cuotaSemanal && formatoMoneda(cuotaSemanal.cuota, cuotaSemanal.moneda)} />
+            </div>
+        </Section>
+    );
+}
+
+/** Beneficios: la semana con descuento por viajes, puntaje y niveles (textos del panel) + cupones y Comercios GO (vienen del ERP). */
+export default function Beneficios({ secciones, cuotaSemanal, comercios, cupones }) {
     const hero = secciones['beneficios.hero'];
     const seccionCupones = secciones['beneficios.cupones'];
 
     return (
         <PublicLayout title="Beneficios" description={hero?.contenido}>
             <PageHero imagen={hero?.imagen_url} eyebrow={hero?.subtitulo} title={hero?.titulo || 'Beneficios'} description={hero?.contenido} />
+
+            <SemanaSection seccion={secciones['beneficios.semana']} cuotaSemanal={cuotaSemanal} />
 
             <PuntajeSection reglas={secciones['beneficios.puntaje']} rangos={secciones['beneficios.rangos']} />
 

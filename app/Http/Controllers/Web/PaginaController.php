@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\MensajeContacto;
+use App\Models\OpcionPlan;
 use App\Models\PreguntaFrecuente;
 use App\Models\Seccion;
 use App\Models\Servicio;
@@ -112,6 +113,8 @@ class PaginaController extends Controller
 
         return Inertia::render('Web/Beneficios', [
             'secciones' => $secciones,
+            // Franja "Tu semana": el lunes muestra "cuota desde" con el monto real más bajo
+            'cuotaSemanal' => $this->cuotaSemanalMasBaja(),
             'comercios' => $comercios->items(),
             'cupones' => $cupones->vigentes(),
             'seo' => $this->seo('Beneficios', $secciones['beneficios.hero'] ?? null),
@@ -149,6 +152,20 @@ class PaginaController extends Controller
             'seccion' => $seccion,
             'seo' => ['titulo' => $seccion->titulo],
         ]);
+    }
+
+    /** Cuota semanal más baja de las opciones visibles del cotizador (prefiere soles); null si no hay montos. */
+    private function cuotaSemanalMasBaja(): ?array
+    {
+        $opcion = OpcionPlan::activo()
+            ->where('frecuencia', 'semanal')
+            ->whereNotNull('cuota')
+            ->whereHas('servicio', fn ($q) => $q->activo())
+            ->orderByRaw("moneda = 'PEN' desc")
+            ->orderBy('cuota')
+            ->first(['cuota', 'moneda']);
+
+        return $opcion ? ['cuota' => $opcion->cuota, 'moneda' => $opcion->moneda] : null;
     }
 
     /** Título, descripción e imagen de una página a partir de su encabezado (sección hero). */

@@ -1,135 +1,28 @@
 import { ArrowRight, Calculator, Check, MessageCircle } from 'lucide-react';
-import { FaWhatsapp } from 'react-icons/fa6';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Button from '@/components/ui/Button';
-import Container from '@/components/ui/Container';
 import Icono from '@/components/ui/Icono';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import CtaSection from '@/components/web/CtaSection';
 import FaqSection from '@/components/web/FaqSection';
-import Semana from '@/components/web/inicio/Semana';
+import HeroBanner from '@/components/web/HeroBanner';
 import { useSitio } from '@/hooks/useSitio';
 import { FRECUENCIAS, formatoMoneda } from '@/lib/moneda';
 import { cn } from '@/lib/utils';
 
-// Cuota más baja con monto cargado (prefiere soles); `soloSemanal` para la franja de la semana
-function cuotaMasBaja(opciones, soloSemanal = false) {
-    const conCuota = opciones.filter((o) => o.cuota !== null && o.cuota !== undefined && (!soloSemanal || o.frecuencia === 'semanal'));
+// Cuota más baja con monto cargado (prefiere soles)
+function cuotaMasBaja(opciones) {
+    const conCuota = opciones.filter((o) => o.cuota !== null && o.cuota !== undefined);
     if (!conCuota.length) return null;
     const soles = conCuota.filter((o) => o.moneda === 'PEN');
     const lista = soles.length ? soles : conCuota;
     return lista.reduce((menor, o) => (Number(o.cuota) < Number(menor.cuota) ? o : menor));
 }
 
-const esWhatsapp = (url) => /wa\.me|whatsapp/i.test(url ?? '');
-
 const Titulo = ({ as: Tag = 'h2', className, children }) => (
     <Tag className={cn('text-3xl leading-[1.08] font-bold tracking-[-0.03em] text-balance sm:text-4xl lg:text-5xl', className)}>{children}</Tag>
 );
-
-/** Cifras reales en una sola línea (no como tablero de métricas) + la etiqueta del banner. */
-function LineaCifras({ cifras, etiqueta, className }) {
-    if (!cifras.length && !etiqueta) return null;
-
-    return (
-        <p className={cn('flex flex-wrap items-baseline gap-x-6 gap-y-1.5 text-sm text-white/70 sm:text-base', className)}>
-            {cifras.map((cifra, i) => (
-                <span key={i}>
-                    <strong className="font-bold text-white tabular-nums">{cifra.titulo}</strong> {cifra.descripcion}
-                </span>
-            ))}
-            {etiqueta && <span className="font-semibold text-white/80">{etiqueta}</span>}
-        </p>
-    );
-}
-
-/** Primer pantallazo: titular del primer banner + la semana del conductor + línea de cifras. */
-function Portada({ banner, semana, cuota, cifras }) {
-    const sitio = useSitio();
-    const whatsapp = sitio.whatsappUrl();
-    const titulo = banner?.titulo || sitio.empresa_eslogan || sitio.empresa_nombre;
-    const subtitulo = banner?.subtitulo || sitio.empresa_descripcion;
-    const principal = banner?.boton_texto && banner?.boton_url ? { texto: banner.boton_texto, url: banner.boton_url } : whatsapp && { texto: 'Escríbenos por WhatsApp', url: whatsapp };
-    const secundario = banner?.boton2_texto && banner?.boton2_url ? { texto: banner.boton2_texto, url: banner.boton2_url } : { texto: 'Cotiza tu plan', url: '/cotizador' };
-
-    return (
-        <section className="relative overflow-clip bg-primary text-white">
-            <Container className="relative py-10 sm:py-12 lg:pt-12 lg:pb-14">
-                <h1 className="max-w-5xl text-[2.6rem] leading-[1.02] font-bold tracking-[-0.035em] text-balance sm:text-6xl lg:text-[4.5rem] xl:text-[4.75rem]">{titulo}</h1>
-                {subtitulo && <p className="mt-5 max-w-2xl text-lg text-pretty text-white/75 sm:text-xl">{subtitulo}</p>}
-
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                    {principal && (
-                        <Button
-                            href={principal.url}
-                            newTab={esWhatsapp(principal.url)}
-                            size="lg"
-                            icon={esWhatsapp(principal.url) ? FaWhatsapp : ArrowRight}
-                            iconPosition={esWhatsapp(principal.url) ? 'left' : 'right'}
-                        >
-                            {principal.texto}
-                        </Button>
-                    )}
-                    <Button href={secundario.url} variant="outline-light" size="lg">
-                        {secundario.texto}
-                    </Button>
-                </div>
-
-                {/* Celular: la prueba va antes de la semana para que entre en la primera pantalla */}
-                <LineaCifras cifras={cifras} etiqueta={banner?.etiqueta} className="mt-6 md:hidden" />
-
-                <div className="mt-8">
-                    <Semana seccion={semana} cuota={cuota} />
-                </div>
-
-                <LineaCifras cifras={cifras} etiqueta={banner?.etiqueta} className="mt-6 hidden border-t border-white/15 pt-5 md:flex" />
-            </Container>
-        </section>
-    );
-}
-
-/** Los demás banners del panel, como una fila de novedades después de los planes. */
-function Novedades({ banners }) {
-    if (!banners.length) return null;
-
-    return (
-        <section aria-label="Novedades" className="border-t border-white/10 bg-primary-950 text-white">
-            <Container className="flex flex-col divide-y divide-white/10 sm:flex-row sm:divide-x sm:divide-y-0">
-                {banners.map((banner) => {
-                    const contenido = (
-                        <>
-                            <span className="min-w-0">
-                                <span className="block font-bold">{banner.titulo}</span>
-                                {banner.subtitulo && <span className="mt-0.5 block text-sm text-white/65">{banner.subtitulo}</span>}
-                            </span>
-                            {banner.boton_url && <ArrowRight className="size-5 shrink-0 text-accent transition group-hover:translate-x-1" aria-hidden="true" />}
-                        </>
-                    );
-                    const clase = 'group flex flex-1 items-center justify-between gap-4 py-5 sm:px-6 sm:first:pl-0 sm:last:pr-0';
-
-                    if (banner.solo_imagen && banner.imagen_url) {
-                        return (
-                            <a key={banner.id} href={banner.boton_url || undefined} className={clase}>
-                                <img src={banner.imagen_url} alt={banner.titulo || 'Novedad'} className="h-16 w-auto rounded-lg object-cover" />
-                            </a>
-                        );
-                    }
-
-                    return banner.boton_url ? (
-                        <a key={banner.id} href={banner.boton_url} className={clase}>
-                            {contenido}
-                        </a>
-                    ) : (
-                        <div key={banner.id} className={clase}>
-                            {contenido}
-                        </div>
-                    );
-                })}
-            </Container>
-        </section>
-    );
-}
 
 /** Planes como lista: cada fila dice qué es, qué incluye, desde cuánto y qué hacer. */
 function Planes({ encabezado, servicios }) {
@@ -331,24 +224,14 @@ function Nosotros({ seccion }) {
     );
 }
 
-/** Inicio: la semana del conductor (ver .impeccable/surfaces). Todo el contenido viene del panel. */
+/** Inicio: carrusel de banners del panel arriba y luego planes, recorrido, niveles y cierre. Todo el contenido viene del panel. */
 export default function Inicio({ banners, secciones, servicios, preguntas }) {
-    const principal = banners.find((b) => b.titulo && !b.solo_imagen) ?? null;
-    const otros = banners.filter((b) => b !== principal);
-    const menorSemanal = cuotaMasBaja(servicios.flatMap((s) => s.opciones ?? []), true);
     const faq = secciones['general.faq'];
 
     return (
         <PublicLayout>
-            <Portada
-                banner={principal}
-                semana={secciones['inicio.semana']}
-                cuota={menorSemanal && formatoMoneda(menorSemanal.cuota, menorSemanal.moneda)}
-                cifras={secciones['general.cifras']?.items ?? []}
-            />
+            <HeroBanner banners={banners} cifras={secciones['general.cifras']?.items ?? []} />
             <Planes encabezado={secciones['inicio.servicios']} servicios={servicios} />
-            {/* Los demás banners, como promoción después de ver los planes */}
-            <Novedades banners={otros} />
             <Recorrido seccion={secciones['inicio.como_funciona']} />
             <Niveles seccion={secciones['general.beneficios']} />
             <Nosotros seccion={secciones['inicio.nosotros']} />

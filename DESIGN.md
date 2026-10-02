@@ -118,7 +118,7 @@ components:
 
 **Creative North Star: "La semana del conductor"**
 
-CrediGo's public site is a deep-blue field with one yellow voice. The blue is the brand's own ground: it owns the sticky bar, the first viewport, the "Nosotros" band and the footer, and it is never softened with photography or decorative gradients on the home surface. Yellow is reserved for what the driver acts on or is paid by: the main action, the weekly cuota, today, the discount, the top level. Everything else is white paper, blue ink and blue-tinted rules.
+CrediGo's public site is a deep-blue field with one yellow voice. The blue is the brand's own ground: it owns the sticky bar, the first viewport, the "Nosotros" band and the footer, and outside the home's banner carousel (which shows the images uploaded in the panel) it is never softened with photography or decorative gradients. Yellow is reserved for what the driver acts on or is paid by: the main action, the weekly cuota, today, the discount, the top level. Everything else is white paper, blue ink and blue-tinted rules.
 
 Type does the heavy lifting. One family, Instrument Sans, at extreme ends: huge, tight day letters and headlines; large tabular money figures; small uppercase labels attached to data. Structure comes from thin rules and segmented ticks (the visual language of trips counted in a week) rather than from cards and shadows. Density is calm on the page and tight inside the data pieces.
 
@@ -137,7 +137,7 @@ Two runtime-editable brand bases, with every tint mixed from them in OKLab again
 
 ### Primary
 - **Noche CrediGo** (#0f1037): the brand field (nav bar, first viewport, dark sections, footer), body ink on white, the numbered track stations, plan icon tiles, the highest level panel.
-- **Noche Profunda** (primary-deep): the band directly under the first viewport (news row) and other one-step-deeper blue grounds. Canonical value is `color-mix(in oklab, primary 65%, black)`.
+- **Noche Profunda** (primary-deep): one-step-deeper blue grounds. Canonical value is `color-mix(in oklab, primary 65%, black)`.
 
 ### Secondary
 - **Amarillo Señal** (#f8ec34): the primary button, the Monday cuota cell, the "Hoy" pill, filled trip ticks, the discount line, the top level medal and bar, active nav pill, text selection, the closing CTA band.
@@ -181,7 +181,7 @@ Two runtime-editable brand bases, with every tint mixed from them in OKLab again
 
 ## Layout
 
-One container for the whole site: max 80rem (1280px) with 16 / 24 / 32px side gutters at base / sm / lg. Sections stack full-bleed with vertical padding of 64 / 80 / 96px (sm / lg breakpoints); the first viewport is tighter (40–56px) so the headline, both actions, the week strip and the proof row land together. Section heads are left-aligned in a two-column grid on lg (title and lead on the left, an outline action bottom-right). Lists go full container width with 32px row padding. Breakpoints are Tailwind's defaults (640 / 768 / 1024 / 1280px); the week strip and proof row switch layout at md (768px), multi-column lists at lg. The sticky nav is 56px (64px from sm) and anchored sections carry an 80px scroll margin.
+One container for the whole site: max 80rem (1280px) with 16 / 24 / 32px side gutters at base / sm / lg. Sections stack full-bleed with vertical padding of 64 / 80 / 96px (sm / lg breakpoints); the home's first viewport is the banner carousel from the panel (full-height, with the banner image, its two actions and the proof figures at its foot). Section heads are left-aligned in a two-column grid on lg (title and lead on the left, an outline action bottom-right). Lists go full container width with 32px row padding. Breakpoints are Tailwind's defaults (640 / 768 / 1024 / 1280px); the week strip and proof row switch layout at md (768px), multi-column lists at lg. The sticky nav is 56px (64px from sm) and anchored sections carry an 80px scroll margin.
 
 ## Elevation & Depth
 
@@ -218,7 +218,7 @@ Confident pills, color-swap on hover, no lift.
 Full-width blue sticky bar, logo left, semibold 14px items as pills: inactive at white 85% with a white/10 hover, active filled yellow with blue text. A yellow "Cotiza tu plan" pill sits right. Desktop groups open a white 32px-radius panel with a pointer arrow and a blue promo tile; under lg everything collapses into a white 24px-radius sheet with 12px-radius rows.
 
 ### Week Strip (signature)
-Seven equal columns inside a 16px-rounded box ringed in white/15, divided by white/15 rules. Monday is the yellow cell carrying "cuota desde" and the lowest real weekly amount; Tuesday–Saturday carry five trip ticks that fill progressively in yellow; Sunday is the brighter cell with the yellow "cuota baja" line; today wears the "Hoy" pill. Below, a three-part legend (pay / drive / discount) on the same 7-column grid. On load the days light from 35% to full opacity one every 140ms. Under md it becomes a vertical ruled list, one row per day, with the item title leading and the day name beside it.
+Seven equal columns inside a 16px-rounded box ringed in white/15, divided by white/15 rules. Monday is the yellow cell carrying "cuota desde" and the lowest real weekly amount; Tuesday–Saturday carry five trip ticks that fill progressively in yellow; Sunday is the brighter cell with the yellow "cuota baja" line; today wears the "Hoy" pill. Below, a three-part legend (pay / drive / discount) on the same 7-column grid. It lives on /beneficios, right under the page header, as the explanation of the trip discount. When it enters the viewport the days light from 35% to full opacity one every 140ms. Under md it becomes a vertical ruled list, one row per day, with the item title leading and the day name beside it.
 
 ### Ruled Plan List
 Plans as rows between hairline rules, not cards: 48px blue icon tile with a yellow glyph, bold title with an optional yellow pill tag, up to three checked features, and a right column with "Cuota desde" + tabular price + period over a small action (Cotizar secondary, or Consultar outline when the plan has no quoter options).

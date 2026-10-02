@@ -96,6 +96,30 @@ it('muestra puntaje, niveles, cupones públicos vigentes y comercios sin datos p
     Http::assertNotSent(fn (Request $request) => str_contains($request->url(), 'cliente_conductor_id'));
 });
 
+it('muestra la semana del conductor con la cuota semanal más baja en soles', function () {
+    $precios = ['cuota' => 130.0];
+    simularCatalogosErp($precios);
+    OpcionPlan::query()->delete();
+    $activo = Servicio::create(['titulo' => 'Credi Motos', 'descripcion' => 'Moto propia', 'activo' => true]);
+    $inactivo = Servicio::create(['titulo' => 'Oculto', 'descripcion' => 'No visible', 'activo' => false]);
+    $opcion = fn (Servicio $servicio, array $datos) => $servicio->opciones()->create(['nombre' => 'Opción', 'moneda' => 'PEN', 'frecuencia' => 'semanal', 'activo' => true, ...$datos]);
+    $opcion($activo, ['cuota' => 120]);
+    $opcion($activo, ['cuota' => 95]);
+    $opcion($activo, ['cuota' => 40, 'moneda' => 'USD']);
+    $opcion($activo, ['cuota' => 50, 'frecuencia' => 'mensual']);
+    $opcion($activo, ['cuota' => 60, 'activo' => false]);
+    $opcion($inactivo, ['cuota' => 70]);
+
+    $this->get('/beneficios')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->where('secciones', fn ($s) => collect($s)['beneficios.semana']['titulo'] === 'Tu semana con CrediGo')
+        ->where('cuotaSemanal.cuota', fn ($cuota) => (float) $cuota === 95.0)
+        ->where('cuotaSemanal.moneda', 'PEN'));
+
+    // Ya no forma parte del inicio
+    $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->where('secciones', fn ($s) => ! collect($s)->has('inicio.semana')));
+});
+
 it('el panel agrega una opción con los precios del ERP y la mantiene actualizada', function () {
     $precios = ['cuota' => 130.0];
     simularCatalogosErp($precios);

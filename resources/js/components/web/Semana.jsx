@@ -1,5 +1,5 @@
 import { TrendingDown } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 const DIAS = [
@@ -17,21 +17,36 @@ const META = 5; // ticks de viajes entre martes y sábado
 // Curva exponencial: arranca rápido y se asienta suave
 const SUAVE = 'ease-[cubic-bezier(0.16,1,0.3,1)]';
 
-/** Cuántos días están encendidos: suben de 0 a 7 al cargar (todos desde el inicio si se pide reducir movimiento). */
-function useEncendido() {
-    const [quieto] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+/**
+ * Cuántos días están encendidos: suben de 0 a 7 cuando la franja entra en pantalla
+ * (todos desde el inicio si se pide reducir movimiento).
+ */
+function useEncendido(ref) {
+    const [quieto] = useState(() => !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     const [encendidos, setEncendidos] = useState(quieto ? DIAS.length : 0);
 
     useEffect(() => {
-        if (quieto) return;
-        let actual = 0;
-        const intervalo = setInterval(() => {
-            actual += 1;
-            setEncendidos(actual);
-            if (actual >= DIAS.length) clearInterval(intervalo);
-        }, 140);
-        return () => clearInterval(intervalo);
-    }, [quieto]);
+        if (quieto || !ref.current) return;
+        let intervalo;
+        const observador = new IntersectionObserver(
+            ([entrada]) => {
+                if (!entrada.isIntersecting) return;
+                observador.disconnect();
+                let actual = 0;
+                intervalo = setInterval(() => {
+                    actual += 1;
+                    setEncendidos(actual);
+                    if (actual >= DIAS.length) clearInterval(intervalo);
+                }, 140);
+            },
+            { threshold: 0.3 },
+        );
+        observador.observe(ref.current);
+        return () => {
+            observador.disconnect();
+            clearInterval(intervalo);
+        };
+    }, [quieto, ref]);
 
     return encendidos;
 }
@@ -59,18 +74,19 @@ const tramo = (i) => (i === 0 ? 'pago' : i === DIAS.length - 1 ? 'descuento' : '
 
 /**
  * La semana del conductor: lunes paga su cuota, de martes a sábado suma viajes,
- * el domingo su próxima cuota baja. Textos: sección inicio.semana (1.º lunes,
+ * el domingo su próxima cuota baja. Textos: sección beneficios.semana (1.º lunes,
  * 2.º martes a sábado, 3.º domingo). `cuota`: monto real más bajo ya formateado.
  */
 export default function Semana({ seccion, cuota }) {
-    const encendidos = useEncendido();
+    const figura = useRef(null);
+    const encendidos = useEncendido(figura);
     const hoy = (new Date().getDay() + 6) % 7; // 0 = lunes
     const [pago, viajes, descuento] = seccion?.items ?? [];
 
     if (!pago) return null;
 
     return (
-        <figure aria-label={seccion.titulo || 'Tu semana'} className="m-0">
+        <figure ref={figura} aria-label={seccion.titulo || 'Tu semana'} className="m-0">
             {/* Computadora y tablet: siete columnas con la letra del día a gran escala */}
             <div className="hidden md:block">
                 <div className="grid grid-cols-7 overflow-hidden rounded-2xl ring-1 ring-white/15">

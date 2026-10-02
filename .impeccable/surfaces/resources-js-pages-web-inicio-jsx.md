@@ -1,3 +1,5 @@
+> **Cambio del 2026-10-02 (pedido del usuario):** la portada vuelve a ser el carrusel de banners del panel con sus imágenes (los banners son promociones de productos, no una portada general). La franja de la semana y su sección pasaron a /beneficios (`beneficios.semana`). La fila de novedades se quitó. El resto del inicio (planes, recorrido, niveles, nosotros, preguntas, cierre) se mantiene.
+
 ---
 version: 1
 slug: "resources-js-pages-web-inicio-jsx"

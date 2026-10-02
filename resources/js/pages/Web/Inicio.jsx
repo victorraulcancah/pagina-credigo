@@ -25,8 +25,24 @@ function cuotaMasBaja(opciones, soloSemanal = false) {
 const esWhatsapp = (url) => /wa\.me|whatsapp/i.test(url ?? '');
 
 const Titulo = ({ as: Tag = 'h2', className, children }) => (
-    <Tag className={cn('text-3xl leading-[1.08] font-extrabold tracking-[-0.03em] text-balance sm:text-4xl lg:text-5xl', className)}>{children}</Tag>
+    <Tag className={cn('text-3xl leading-[1.08] font-bold tracking-[-0.03em] text-balance sm:text-4xl lg:text-5xl', className)}>{children}</Tag>
 );
+
+/** Cifras reales en una sola línea (no como tablero de métricas) + la etiqueta del banner. */
+function LineaCifras({ cifras, etiqueta, className }) {
+    if (!cifras.length && !etiqueta) return null;
+
+    return (
+        <p className={cn('flex flex-wrap items-baseline gap-x-6 gap-y-1.5 text-sm text-white/70 sm:text-base', className)}>
+            {cifras.map((cifra, i) => (
+                <span key={i}>
+                    <strong className="font-bold text-white tabular-nums">{cifra.titulo}</strong> {cifra.descripcion}
+                </span>
+            ))}
+            {etiqueta && <span className="font-semibold text-white/80">{etiqueta}</span>}
+        </p>
+    );
+}
 
 /** Primer pantallazo: titular del primer banner + la semana del conductor + línea de cifras. */
 function Portada({ banner, semana, cuota, cifras }) {
@@ -39,8 +55,8 @@ function Portada({ banner, semana, cuota, cifras }) {
 
     return (
         <section className="relative overflow-clip bg-primary text-white">
-            <Container className="relative py-12 sm:py-16 lg:py-20">
-                <h1 className="max-w-5xl text-[2.6rem] leading-[1.02] font-extrabold tracking-[-0.035em] text-balance sm:text-6xl lg:text-[4.5rem] xl:text-[4.75rem]">{titulo}</h1>
+            <Container className="relative py-10 sm:py-12 lg:pt-12 lg:pb-14">
+                <h1 className="max-w-5xl text-[2.6rem] leading-[1.02] font-bold tracking-[-0.035em] text-balance sm:text-6xl lg:text-[4.5rem] xl:text-[4.75rem]">{titulo}</h1>
                 {subtitulo && <p className="mt-5 max-w-2xl text-lg text-pretty text-white/75 sm:text-xl">{subtitulo}</p>}
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -60,26 +76,20 @@ function Portada({ banner, semana, cuota, cifras }) {
                     </Button>
                 </div>
 
-                <div className="mt-12 lg:mt-14">
+                {/* Celular: la prueba va antes de la semana para que entre en la primera pantalla */}
+                <LineaCifras cifras={cifras} etiqueta={banner?.etiqueta} className="mt-6 md:hidden" />
+
+                <div className="mt-8">
                     <Semana seccion={semana} cuota={cuota} />
                 </div>
 
-                {(cifras.length > 0 || banner?.etiqueta) && (
-                    <p className="mt-10 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-white/15 pt-6 text-sm text-white/70 sm:text-base">
-                        {cifras.map((cifra, i) => (
-                            <span key={i}>
-                                <strong className="font-extrabold text-white tabular-nums">{cifra.titulo}</strong> {cifra.descripcion}
-                            </span>
-                        ))}
-                        {banner?.etiqueta && <span className="font-semibold text-accent">{banner.etiqueta}</span>}
-                    </p>
-                )}
+                <LineaCifras cifras={cifras} etiqueta={banner?.etiqueta} className="mt-6 hidden border-t border-white/15 pt-5 md:flex" />
             </Container>
         </section>
     );
 }
 
-/** Los demás banners del panel, como una fila de novedades bajo la portada. */
+/** Los demás banners del panel, como una fila de novedades después de los planes. */
 function Novedades({ banners }) {
     if (!banners.length) return null;
 
@@ -185,7 +195,7 @@ function Planes({ encabezado, servicios }) {
                                 {menor ? (
                                     <p className="leading-tight">
                                         <span className="block text-xs font-semibold tracking-wide text-primary-500 uppercase">Cuota desde</span>
-                                        <span className="text-2xl font-extrabold tabular-nums">{formatoMoneda(menor.cuota, menor.moneda)}</span>
+                                        <span className="text-2xl font-bold tabular-nums">{formatoMoneda(menor.cuota, menor.moneda)}</span>
                                         <span className="ml-1 text-sm text-primary-500">{FRECUENCIAS[menor.frecuencia]?.periodo}</span>
                                     </p>
                                 ) : (
@@ -226,14 +236,11 @@ function Recorrido({ seccion }) {
                 <span aria-hidden="true" className="absolute top-6 bottom-6 left-6 w-px bg-primary-200 lg:hidden" />
                 {pasos.map((paso, i) => (
                     <Revelar as="li" key={i} desde="izquierda" retraso={escalonar(i, 120)} className="relative flex gap-5 lg:flex-col lg:gap-6">
-                        <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-black text-accent ring-8 ring-primary-50 tabular-nums">
+                        <span className="relative z-10 flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-accent ring-8 ring-primary-50 tabular-nums">
                             {i + 1}
                         </span>
                         <div>
-                            <h3 className="flex items-center gap-2 text-lg font-bold">
-                                <Icono nombre={paso.icono} className="size-5 text-primary-500" />
-                                {paso.titulo}
-                            </h3>
+                            <h3 className="text-lg font-bold">{paso.titulo}</h3>
                             {paso.descripcion && <p className="mt-2 text-primary-700/80">{paso.descripcion}</p>}
                         </div>
                     </Revelar>
@@ -251,8 +258,8 @@ function Recorrido({ seccion }) {
     );
 }
 
-// Bronce, plata, oro
-const MEDALLAS = ['bg-[#cd7f32] text-white', 'bg-[#b8bcc6] text-primary', 'bg-[#e0b62c] text-primary'];
+// Escala de la marca para los niveles: azul claro, azul medio, y amarillo solo para el más alto
+const MEDALLAS = ['bg-primary-100 text-primary', 'bg-primary-200 text-primary', 'bg-accent text-primary'];
 
 /** Niveles como una sola barra de progreso dividida en tramos. */
 function Niveles({ seccion }) {
@@ -280,7 +287,7 @@ function Niveles({ seccion }) {
                                 <span className={cn('mb-5 flex size-12 items-center justify-center rounded-full', MEDALLAS[i] ?? 'bg-accent text-primary')}>
                                     <Icono nombre={nivel.icono} fallback="Medal" className="size-6" />
                                 </span>
-                                <h3 className="text-2xl font-extrabold">{nivel.titulo}</h3>
+                                <h3 className="text-2xl font-bold">{nivel.titulo}</h3>
                                 {nivel.descripcion && <p className={cn('mt-2 text-sm sm:text-base', ultimo ? 'text-white/75' : 'text-primary-700/80')}>{nivel.descripcion}</p>}
                                 {/* Tramo de la barra: se llena hasta este nivel */}
                                 <span aria-hidden="true" className="mt-auto flex gap-1 pt-6">
@@ -297,15 +304,15 @@ function Niveles({ seccion }) {
     );
 }
 
-/** Resumen de Nosotros sobre el azul de marca: el logo blanco luce aquí. */
+/** Resumen de Nosotros sobre el azul de marca. Con imagen del panel, a dos columnas; sin imagen, solo texto. */
 function Nosotros({ seccion }) {
-    const sitio = useSitio();
     if (!seccion) return null;
+    const conImagen = Boolean(seccion.imagen_url);
 
     return (
         <Section background="dark">
-            <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-                <Revelar desde="izquierda">
+            <div className={cn('grid items-center gap-10 lg:gap-16', conImagen && 'lg:grid-cols-2')}>
+                <Revelar desde="izquierda" className={cn(!conImagen && 'max-w-3xl')}>
                     <Titulo className="text-white">{seccion.titulo}</Titulo>
                     {seccion.contenido && <p className="mt-5 max-w-xl text-lg text-white/75">{seccion.contenido}</p>}
                     {seccion.boton_texto && seccion.boton_url && (
@@ -314,15 +321,11 @@ function Nosotros({ seccion }) {
                         </Button>
                     )}
                 </Revelar>
-                <Revelar desde="derecha" retraso={150}>
-                    {seccion.imagen_url ? (
+                {conImagen && (
+                    <Revelar desde="derecha" retraso={150}>
                         <img src={seccion.imagen_url} alt="" loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
-                    ) : (
-                        <div className="flex aspect-[4/3] items-center justify-center rounded-2xl ring-1 ring-white/15">
-                            <img src={sitio.logo} alt={sitio.empresa_nombre} className="w-1/2 max-w-xs object-contain" />
-                        </div>
-                    )}
-                </Revelar>
+                    </Revelar>
+                )}
             </div>
         </Section>
     );
@@ -343,13 +346,14 @@ export default function Inicio({ banners, secciones, servicios, preguntas }) {
                 cuota={menorSemanal && formatoMoneda(menorSemanal.cuota, menorSemanal.moneda)}
                 cifras={secciones['general.cifras']?.items ?? []}
             />
-            <Novedades banners={otros} />
             <Planes encabezado={secciones['inicio.servicios']} servicios={servicios} />
+            {/* Los demás banners, como promoción después de ver los planes */}
+            <Novedades banners={otros} />
             <Recorrido seccion={secciones['inicio.como_funciona']} />
             <Niveles seccion={secciones['general.beneficios']} />
             <Nosotros seccion={secciones['inicio.nosotros']} />
             <FaqSection seccion={faq && { ...faq, subtitulo: null }} preguntas={preguntas} />
-            <CtaSection seccion={secciones['general.cta']} />
+            <CtaSection seccion={secciones['general.cta']} whatsappPrimero />
         </PublicLayout>
     );
 }

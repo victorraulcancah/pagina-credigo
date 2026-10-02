@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-02T00:00:00Z",
+  "title": "Design System: CrediGo",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Noche CrediGo", "canonical": "var(--color-primary) /* default #0f1037, overridden from the panel */", "tonalRamp": ["#04051a", "#0f1037", "#21254a", "#313659", "#4b5070", "#6e738d", "#c2c5d0", "#f1f2f4"] },
+      "primary-deep": { "role": "primary", "displayName": "Noche Profunda", "canonical": "color-mix(in oklab, var(--color-primary) 65%, black)" },
+      "accent": { "role": "secondary", "displayName": "Amarillo Señal", "canonical": "var(--color-accent) /* default #f8ec34, overridden from the panel */", "tonalRamp": ["#191801", "#3b3805", "#827c16", "#b8af24", "#e4d92f", "#f8ec34", "#f9f388", "#fdfce0"] },
+      "accent-soft": { "role": "secondary", "displayName": "Amarillo Suave", "canonical": "color-mix(in oklab, var(--color-accent) 70%, white)" },
+      "primary-ink-soft": { "role": "neutral", "displayName": "Tinta Suave", "canonical": "color-mix(in oklab, var(--color-primary) 90%, white)" },
+      "primary-mute": { "role": "neutral", "displayName": "Gris Azulado", "canonical": "color-mix(in oklab, var(--color-primary) 70%, white)" },
+      "primary-rule": { "role": "neutral", "displayName": "Regla", "canonical": "color-mix(in oklab, var(--color-primary) 22%, white)" },
+      "primary-hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "color-mix(in oklab, var(--color-primary) 10%, white)" },
+      "primary-wash": { "role": "neutral", "displayName": "Lavado", "canonical": "color-mix(in oklab, var(--color-primary) 5%, white)" },
+      "paper": { "role": "neutral", "displayName": "Papel", "canonical": "#ffffff" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "First-viewport headline only; max two lines, balanced." },
+      "day-letter": { "displayName": "Day letter", "purpose": "L M M J V S D in the week strip (2.5rem on mobile rows)." },
+      "headline": { "displayName": "Headline", "purpose": "Left-aligned section titles; 1.875rem base, 2.25rem sm, 3rem lg." },
+      "figure": { "displayName": "Figure", "purpose": "Money amounts and proof numbers, tabular." },
+      "title": { "displayName": "Title", "purpose": "Plan, step and level names." },
+      "body": { "displayName": "Body", "purpose": "Descriptions and section lead-ins (lead-ins at 1.125rem, max ~42rem)." },
+      "label": { "displayName": "Label", "purpose": "Uppercase text attached to a datum: day names, 'Cuota desde', the 'Hoy' pill. Never a section kicker." }
+    },
+    "shadows": [
+      { "name": "nav-lift", "value": "0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3)", "purpose": "Sticky nav after 8px of scroll or with a menu open." },
+      { "name": "menu-float", "value": "0 25px 50px -12px rgb(0 0 0 / 0.25)", "purpose": "Desktop dropdown and mobile menu panels." }
+    ],
+    "motion": [
+      { "name": "reveal", "value": "opacity, translate, scale 700ms ease-out; from translateY(40px) / translateX(±40-80px) / scale(0.9)", "purpose": "Reveal-on-scroll when the element top passes 88% of the viewport; disabled under reduced motion." },
+      { "name": "reveal-stagger", "value": "80-120ms per item, capped at 5 steps", "purpose": "Sequencing lists, tracks and FAQ items." },
+      { "name": "ease-settle", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Week strip day light-up (700ms) and tick fill." },
+      { "name": "week-light-up", "value": "one day every 140ms, opacity 0.35 to 1", "purpose": "Signature load sequence Monday to Sunday; all days lit immediately under reduced motion." },
+      { "name": "color-swap", "value": "color, background-color 200ms", "purpose": "Button and nav hover states." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one main action per view (WhatsApp first on the home).",
+      "html": "<a class=\"ds-btn ds-btn-primary\" href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/></svg>Escríbenos por WhatsApp</a>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 24px; border-radius: 9999px; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-weight: 600; font-size: 16px; white-space: nowrap; text-decoration: none; border: 0; transition: color 200ms, background-color 200ms; } .ds-btn-primary { background: var(--color-accent, #f8ec34); color: var(--color-primary, #0f1037); } .ds-btn-primary:hover { background: color-mix(in oklab, var(--color-accent, #f8ec34) 70%, white); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-accent, #f8ec34); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Blue filled action on white or yellow grounds (Cotizar, WhatsApp on the CTA band).",
+      "html": "<a class=\"ds-btn-secondary\" href=\"#\">Cotizar</a>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 24px; border-radius: 9999px; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-weight: 600; font-size: 16px; text-decoration: none; background: var(--color-primary, #0f1037); color: #fff; transition: background-color 200ms; } .ds-btn-secondary:hover { background: color-mix(in oklab, var(--color-primary, #0f1037) 90%, white); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-primary, #0f1037); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary navigation action beside section heads (Ver beneficios).",
+      "html": "<a class=\"ds-btn-outline\" href=\"#\">Ver beneficios<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></a>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 24px; border-radius: 9999px; border: 2px solid var(--color-primary, #0f1037); color: var(--color-primary, #0f1037); background: transparent; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-weight: 600; font-size: 16px; text-decoration: none; transition: color 200ms, background-color 200ms; } .ds-btn-outline:hover { background: var(--color-primary, #0f1037); color: #fff; } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-primary, #0f1037); }"
+    },
+    {
+      "name": "Outline Light Button",
+      "kind": "button",
+      "refersTo": "button-outline-light",
+      "description": "Secondary action on the blue first viewport.",
+      "html": "<div class=\"ds-on-blue\"><a class=\"ds-btn-outline-light\" href=\"#\">Ver cómo funciona</a></div>",
+      "css": ".ds-on-blue { background: var(--color-primary, #0f1037); padding: 24px; } .ds-btn-outline-light { display: inline-flex; align-items: center; height: 56px; padding: 0 32px; border-radius: 9999px; border: 2px solid rgb(255 255 255 / 0.7); color: #fff; background: transparent; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-weight: 600; font-size: 18px; text-decoration: none; transition: color 200ms, background-color 200ms; } .ds-btn-outline-light:hover { background: #fff; color: var(--color-primary, #0f1037); } .ds-btn-outline-light:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-primary, #0f1037), 0 0 0 4px #fff; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Form field used by Soporte, cotizador and Libro de Reclamaciones.",
+      "html": "<input class=\"ds-input\" placeholder=\"Número de DNI\" />",
+      "css": ".ds-input { width: 280px; height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid color-mix(in oklab, var(--color-primary, #0f1037) 22%, white); background: #fff; color: var(--color-primary, #0f1037); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; font-size: 16px; transition: border-color 150ms, box-shadow 150ms; } .ds-input::placeholder { color: color-mix(in oklab, var(--color-primary, #0f1037) 38%, white); } .ds-input:focus { outline: none; border-color: var(--color-primary, #0f1037); box-shadow: 0 0 0 2px var(--color-accent, #f8ec34); }"
+    },
+    {
+      "name": "Navigation Bar",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "Full-width sticky blue bar with pill items; active item filled yellow.",
+      "html": "<nav class=\"ds-nav\"><strong class=\"ds-nav-logo\">CrediGo</strong><span class=\"ds-nav-items\"><a class=\"ds-nav-item ds-nav-active\" href=\"#\">Inicio</a><a class=\"ds-nav-item\" href=\"#\">Nosotros</a><a class=\"ds-nav-item\" href=\"#\">Beneficios</a></span><a class=\"ds-nav-cta\" href=\"#\">Cotiza tu plan</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 64px; padding: 0 32px; background: var(--color-primary, #0f1037); color: #fff; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; } .ds-nav-logo { font-size: 20px; } .ds-nav-items { display: flex; gap: 4px; } .ds-nav-item { padding: 8px 16px; border-radius: 9999px; font-size: 14px; font-weight: 600; color: rgb(255 255 255 / 0.85); text-decoration: none; transition: color 150ms, background-color 150ms; } .ds-nav-item:hover { background: rgb(255 255 255 / 0.1); color: #fff; } .ds-nav-item:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; } .ds-nav-active, .ds-nav-active:hover { background: var(--color-accent, #f8ec34); color: var(--color-primary, #0f1037); } .ds-nav-cta { display: inline-flex; align-items: center; height: 40px; padding: 0 20px; border-radius: 9999px; background: var(--color-accent, #f8ec34); color: var(--color-primary, #0f1037); font-size: 14px; font-weight: 700; text-decoration: none; } .ds-nav-cta:hover { filter: brightness(0.95); }"
+    },
+    {
+      "name": "Week Strip",
+      "kind": "custom",
+      "refersTo": "week-strip",
+      "description": "Signature first-viewport piece: seven day columns, yellow Monday cuota, trip ticks Tuesday to Saturday, discount Sunday, today pill.",
+      "html": "<div class=\"ds-week\"><div class=\"ds-day ds-day-pay\"><span class=\"ds-letter\">L</span><span><span class=\"ds-dlabel\">cuota desde</span><span class=\"ds-fig\">S/ 100</span></span></div><div class=\"ds-day\"><span class=\"ds-letter\">M</span><span><span class=\"ds-dlabel\">martes</span><span class=\"ds-ticks\"><i class=\"on\"></i><i></i><i></i><i></i><i></i></span></span></div><div class=\"ds-day\"><span class=\"ds-letter\">M</span><span><span class=\"ds-dlabel\">miércoles</span><span class=\"ds-ticks\"><i class=\"on\"></i><i class=\"on\"></i><i></i><i></i><i></i></span></span></div><div class=\"ds-day\"><span class=\"ds-top\"><span class=\"ds-letter\">J</span><span class=\"ds-hoy\">Hoy</span></span><span><span class=\"ds-dlabel\">jueves</span><span class=\"ds-ticks\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i></i><i></i></span></span></div><div class=\"ds-day ds-day-off\"><span class=\"ds-letter\">D</span><span><span class=\"ds-dlabel\">domingo</span><span class=\"ds-down\">cuota baja</span></span></div></div>",
+      "css": ".ds-week { display: grid; grid-template-columns: repeat(5, 1fr); overflow: hidden; border-radius: 16px; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.15); background: var(--color-primary, #0f1037); color: #fff; font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; } .ds-day { display: flex; flex-direction: column; justify-content: space-between; min-height: 176px; padding: 16px; background: rgb(255 255 255 / 0.03); border-left: 1px solid rgb(255 255 255 / 0.15); transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-day:first-child { border-left: 0; } .ds-day-pay { background: var(--color-accent, #f8ec34); color: var(--color-primary, #0f1037); } .ds-day-off { background: rgb(255 255 255 / 0.09); } .ds-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; } .ds-letter { font-size: 72px; line-height: 0.8; font-weight: 700; letter-spacing: -0.04em; } .ds-dlabel { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.025em; text-transform: uppercase; color: rgb(255 255 255 / 0.6); } .ds-day-pay .ds-dlabel { color: color-mix(in oklab, var(--color-primary, #0f1037) 70%, transparent); } .ds-fig { display: block; margin-top: 4px; font-size: 28px; line-height: 1; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; } .ds-ticks { display: flex; gap: 4px; margin-top: 10px; } .ds-ticks i { flex: 1; height: 6px; border-radius: 9999px; background: rgb(255 255 255 / 0.2); } .ds-ticks i.on { background: var(--color-accent, #f8ec34); } .ds-hoy { padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 700; letter-spacing: 0.025em; text-transform: uppercase; background: var(--color-accent, #f8ec34); color: var(--color-primary, #0f1037); } .ds-down { display: block; margin-top: 4px; font-size: 14px; font-weight: 700; color: var(--color-accent, #f8ec34); }"
+    },
+    {
+      "name": "Ruled Plan Row",
+      "kind": "custom",
+      "description": "Plan as a ruled list row: icon tile, title with optional yellow tag, price block and small action.",
+      "html": "<ul class=\"ds-plans\"><li class=\"ds-plan\"><span class=\"ds-tile\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2.7-3.6A2 2 0 0 0 13.7 6H6.3a2 2 0 0 0-1.6.9L2 10.6V16c0 .6.4 1 1 1h2\"/><circle cx=\"7\" cy=\"17\" r=\"2\"/><circle cx=\"17\" cy=\"17\" r=\"2\"/></svg></span><span class=\"ds-plan-main\"><strong class=\"ds-plan-title\">CrediYango <span class=\"ds-tag\">Entrega más rápida</span></strong><span class=\"ds-plan-desc\">Inicial y cuotas fijas, con entrega directa.</span></span><span class=\"ds-price\"><span class=\"ds-price-label\">Cuota desde</span><span class=\"ds-price-fig\">S/ 100</span> <span class=\"ds-price-per\">por semana</span></span></li></ul>",
+      "css": ".ds-plans { list-style: none; margin: 0; padding: 0; border-top: 1px solid color-mix(in oklab, var(--color-primary, #0f1037) 10%, white); border-bottom: 1px solid color-mix(in oklab, var(--color-primary, #0f1037) 10%, white); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; color: var(--color-primary, #0f1037); } .ds-plan { display: grid; grid-template-columns: 48px 1fr auto; gap: 16px; align-items: center; padding: 32px 0; } .ds-tile { display: flex; width: 48px; height: 48px; align-items: center; justify-content: center; border-radius: 12px; background: var(--color-primary, #0f1037); color: var(--color-accent, #f8ec34); } .ds-plan-title { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 24px; font-weight: 700; } .ds-tag { padding: 2px 10px; border-radius: 9999px; background: var(--color-accent, #f8ec34); font-size: 12px; font-weight: 700; } .ds-plan-desc { display: block; margin-top: 6px; color: color-mix(in oklab, color-mix(in oklab, var(--color-primary, #0f1037) 90%, white) 80%, transparent); } .ds-price { text-align: right; line-height: 1.25; } .ds-price-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.025em; text-transform: uppercase; color: color-mix(in oklab, var(--color-primary, #0f1037) 70%, white); } .ds-price-fig { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; } .ds-price-per { font-size: 14px; color: color-mix(in oklab, var(--color-primary, #0f1037) 70%, white); }"
+    },
+    {
+      "name": "Segmented Levels Bar",
+      "kind": "custom",
+      "description": "Levels as one rounded panel split into tiers, each with a segmented bar filled up to that tier; top tier inverts to blue with yellow.",
+      "html": "<div class=\"ds-levels\"><div class=\"ds-level\"><strong>Bronce</strong><span class=\"ds-seg\"><i class=\"on\"></i><i></i><i></i></span></div><div class=\"ds-level\"><strong>Plata</strong><span class=\"ds-seg\"><i class=\"on\"></i><i class=\"on\"></i><i></i></span></div><div class=\"ds-level ds-level-top\"><strong>Oro</strong><span class=\"ds-seg\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i></span></div></div>",
+      "css": ".ds-levels { display: grid; grid-template-columns: repeat(3, 1fr); overflow: hidden; border-radius: 16px; box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-primary, #0f1037) 10%, white); font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif; color: var(--color-primary, #0f1037); } .ds-level { display: flex; flex-direction: column; gap: 24px; padding: 32px; background: #fff; border-left: 1px solid color-mix(in oklab, var(--color-primary, #0f1037) 10%, white); } .ds-level:first-child { border-left: 0; } .ds-level strong { font-size: 24px; font-weight: 700; } .ds-level-top { background: var(--color-primary, #0f1037); color: #fff; } .ds-seg { display: flex; gap: 4px; } .ds-seg i { flex: 1; height: 6px; border-radius: 9999px; background: color-mix(in oklab, var(--color-primary, #0f1037) 10%, white); } .ds-seg i.on { background: var(--color-primary, #0f1037); } .ds-level-top .ds-seg i { background: rgb(255 255 255 / 0.2); } .ds-level-top .ds-seg i.on { background: var(--color-accent, #f8ec34); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La semana del conductor",
+    "overview": "CrediGo's public site is a deep-blue field with one yellow voice. The blue is the brand's own ground: it owns the sticky bar, the first viewport, the \"Nosotros\" band and the footer, and it is never softened with photography or decorative gradients on the home surface. Yellow is reserved for what the driver acts on or is paid by: the main action, the weekly cuota, today, the discount, the top level. Everything else is white paper, blue ink and blue-tinted rules.\n\nType does the heavy lifting. One family, Instrument Sans, at extreme ends: huge, tight day letters and headlines; large tabular money figures; small uppercase labels attached to data. Structure comes from thin rules and segmented ticks (the visual language of trips counted in a week) rather than from cards and shadows. Density is calm on the page and tight inside the data pieces.\n\nBoth brand colors are owned by the business, not the code: the values below are the shipped defaults, and the panel (Admin → Apariencia) overrides `--color-primary` and `--color-accent` at runtime. Every tint is derived from those two bases, so no surface may hardcode a brand hex.",
+    "keyCharacteristics": [
+      "Deep-blue brand field; yellow only as signal.",
+      "Instrument Sans in extreme weights and sizes, tabular figures for money.",
+      "Ruled lists and segmented progress instead of card grids.",
+      "Pill-shaped actions, 16px-rounded data pieces, no ornamental shadows.",
+      "Reveal-on-scroll motion with an exponential settle, fully disabled under reduced motion."
+    ],
+    "rules": [
+      { "name": "The Signal Rule", "body": "Yellow marks only what the driver acts on or earns: the action, the cuota, today, the discount, the top tier. It is never a decorative fill, a section-title color or a background for neutral content (the closing CTA band is itself an action).", "section": "colors" },
+      { "name": "The Panel Owns the Hex Rule", "body": "Use `primary`/`accent` and their derived steps via the theme variables; never hardcode a brand hex in a component, because the business changes them from the panel.", "section": "colors" },
+      { "name": "The Label-Belongs-to-Data Rule", "body": "Small uppercase text labels a value it sits next to (a day, a price, today). It never floats above a headline as a section kicker.", "section": "typography" },
+      { "name": "The Tabular Money Rule", "body": "Every amount and count uses tabular numerals at bold weight; the period (\"por semana\") follows in small muted text.", "section": "typography" },
+      { "name": "The Ruled-Not-Raised Rule", "body": "Group content with hairline rules and 1px rings; shadows belong only to things that float over the page.", "section": "elevation" }
+    ],
+    "dos": [
+      "**Do** let the deep blue own the first viewport and the nav; put yellow only on the action, the cuota, today, the discount and the top tier.",
+      "**Do** read brand colors from the theme variables so the panel's Apariencia settings keep working.",
+      "**Do** set money and counts in bold tabular numerals, with the period in small muted text after.",
+      "**Do** group repeated content as ruled rows (hairline dividers) or segmented bars before reaching for cards.",
+      "**Do** keep pill-shaped actions with color-swap hovers and the 2px focus ring.",
+      "**Do** honor reduced motion in every animated piece by rendering the final state immediately.",
+      "**Do** keep the branded browser surfaces: yellow-on-blue selection, blue-tinted scrollbar, 0.22em link underline offset."
+    ],
+    "donts": [
+      "**Don't** put a small uppercase label or badge above a section headline as a kicker.",
+      "**Don't** use yellow as a decorative fill, a headline color or a neutral-content background.",
+      "**Don't** hardcode `#0f1037` or `#f8ec34` in components.",
+      "**Don't** show figures as a dashboard of stat tiles; keep proof to one line of text.",
+      "**Don't** add shadows to content at rest; shadows are for floating overlays only.",
+      "**Don't** request weights above bold (extrabold/black): no heavier face is shipped."
+    ]
+  }
+}

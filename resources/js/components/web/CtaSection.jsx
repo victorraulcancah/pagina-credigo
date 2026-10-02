@@ -5,8 +5,11 @@ import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import { useSitio } from '@/hooks/useSitio';
 
-/** Llamada a la acción en franja amarilla (sección general.cta). */
-export default function CtaSection({ seccion }) {
+/**
+ * Llamada a la acción en franja amarilla (sección general.cta).
+ * `whatsappPrimero`: WhatsApp como botón lleno (acción principal) y el botón de la sección con contorno.
+ */
+export default function CtaSection({ seccion, whatsappPrimero = false }) {
     const whatsapp = useSitio().whatsappUrl();
     if (!seccion) return null;
 
@@ -19,12 +22,19 @@ export default function CtaSection({ seccion }) {
                 </div>
                 <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                     {seccion.boton_texto && seccion.boton_url && (
-                        <Button href={seccion.boton_url} variant="secondary" size="lg" icon={ArrowRight} iconPosition="right">
+                        <Button
+                            href={seccion.boton_url}
+                            variant={whatsappPrimero && whatsapp ? 'outline' : 'secondary'}
+                            size="lg"
+                            icon={ArrowRight}
+                            iconPosition="right"
+                            className={whatsappPrimero && whatsapp ? 'sm:order-2' : undefined}
+                        >
                             {seccion.boton_texto}
                         </Button>
                     )}
                     {whatsapp && (
-                        <Button href={whatsapp} newTab variant="outline" size="lg" icon={FaWhatsapp}>
+                        <Button href={whatsapp} newTab variant={whatsappPrimero ? 'secondary' : 'outline'} size="lg" icon={FaWhatsapp}>
                             WhatsApp
                         </Button>
                     )}

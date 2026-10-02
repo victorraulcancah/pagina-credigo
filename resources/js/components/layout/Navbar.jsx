@@ -6,6 +6,7 @@ import Logo from '@/components/layout/Logo';
 import Container from '@/components/ui/Container';
 import { usaEnlaceNativo } from '@/components/ui/Button';
 import { menuPrincipal } from '@/data/navegacion';
+import { useCompartido, useUsuario } from '@/hooks/useCompartido';
 import { useSitio } from '@/hooks/useSitio';
 import { cn } from '@/lib/utils';
 
@@ -53,9 +54,9 @@ function Destacado({ destacado, href, onClick }) {
  * todo va en un panel blanco que se abre con el botón de menú.
  */
 export default function Navbar() {
-    const { url, props } = usePage();
+    const { url } = usePage();
     const sitio = useSitio();
-    const usuario = props.auth?.user;
+    const usuario = useUsuario();
     const [abierto, setAbierto] = useState(null); // grupo desplegado (label) o null
     const [contenido, setContenido] = useState(null); // se conserva durante la animación de cierre
     const [flecha, setFlecha] = useState(0);
@@ -67,7 +68,7 @@ export default function Navbar() {
     const fijado = useRef(false); // abierto con clic: no se cierra al sacar el mouse
 
     // El grupo "Planes" suma los planes visibles del panel (cada uno lleva a su página)
-    const planes = props.planesMenu ?? [];
+    const planes = useCompartido('/menu')?.planes ?? [];
     const menu = useMemo(
         () =>
             menuPrincipal.map((item) =>

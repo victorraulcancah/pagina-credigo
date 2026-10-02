@@ -1,4 +1,3 @@
-import { router } from '@inertiajs/react';
 import { BookOpenText, FileText, Paperclip, Search, Send, Video } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Cargando from '@/components/admin/Cargando';
@@ -11,6 +10,7 @@ import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
 import Textarea from '@/components/ui/Textarea';
+import { refrescarCompartido } from '@/hooks/useCompartido';
 import { useFormApi } from '@/hooks/useFormApi';
 import { useListaFiltrada } from '@/hooks/useListaFiltrada';
 import { formatoFecha } from '@/lib/fechas';
@@ -70,7 +70,7 @@ export default function ReclamacionesIndex() {
     // Tras responder: la lista y el contador de pendientes del menú
     const actualizar = () => {
         lista.recargar();
-        router.reload({ only: ['reclamacionesPendientes'] });
+        refrescarCompartido('/admin/contadores');
     };
 
     useEffect(() => {

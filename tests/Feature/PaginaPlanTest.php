@@ -76,9 +76,8 @@ it('lleva los planes visibles al menú, a las tarjetas y al sitemap', function (
     $plan = planConOpciones();
     Servicio::create(['titulo' => 'Oculto', 'descripcion' => 'x', 'activo' => false]);
 
-    // El menú llega con cada página; la lista de planes, de la API
-    $this->get('/servicios')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->where('planesMenu', fn ($planes) => collect($planes)->pluck('slug')->all() === ['credi-motos']));
+    // El menú y la lista de planes llegan de la API
+    $this->getJson('/api/menu')->assertOk()->assertJsonPath('data.planes', fn ($planes) => collect($planes)->pluck('slug')->all() === ['credi-motos']);
     paginaApi('servicios', fn (AssertableJson $page) => $page->where('servicios.0.slug', 'credi-motos'));
 
     $this->get('/sitemap.xml')->assertOk()->assertSee(url('/servicios/credi-motos'), false)->assertDontSee('/servicios/oculto', false);

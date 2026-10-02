@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
+import { fijarCompartido } from '@/hooks/useCompartido';
 import { useFormApi } from '@/hooks/useFormApi';
 import { useSitio, useTemaColores } from '@/hooks/useSitio';
 
@@ -16,9 +17,15 @@ export default function Login() {
     const enviar = (e) => {
         e.preventDefault();
         // POST /api/login: si los datos son correctos inicia la sesión y dice a dónde ir
-        post('/login', { recargar: false, avisar: false, onSuccess: (respuesta) => router.visit(respuesta.redirect ?? '/admin') }).then(
-            ({ success }) => !success && reset('password'),
-        );
+        post('/login', {
+            recargar: false,
+            avisar: false,
+            onSuccess: (respuesta) => {
+                // El menú del panel ya sabe quién entró (sin pedirlo otra vez)
+                fijarCompartido('/sesion', { usuario: respuesta.data });
+                router.visit(respuesta.redirect ?? '/admin');
+            },
+        }).then(({ success }) => !success && reset('password'));
     };
 
     return (

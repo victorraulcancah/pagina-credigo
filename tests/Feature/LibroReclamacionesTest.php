@@ -179,10 +179,11 @@ it('lista las reclamaciones en el panel', function () {
 
     $this->actingAs(User::factory()->create());
 
-    // La pantalla muestra el contador del menú; la lista la pide a la API
+    // La pantalla solo se abre; el contador del menú y la lista se piden a la API
     $this->get('/admin/reclamaciones?estado=pendiente')->assertOk()->assertInertia(fn (Assert $page) => $page
         ->component('Admin/Reclamaciones/Index')
-        ->where('reclamacionesPendientes', 1));
+        ->missing('reclamacionesPendientes'));
+    $this->getJson('/api/admin/contadores')->assertOk()->assertJsonPath('data.reclamaciones_pendientes', 1);
 
     $this->getJson('/api/admin/reclamaciones?estado=pendiente')->assertOk()
         ->assertJsonCount(1, 'data')

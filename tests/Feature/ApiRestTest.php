@@ -7,6 +7,7 @@ use App\Models\User;
 use Database\Seeders\ConfiguracionSeeder;
 use Database\Seeders\ContenidoSeeder;
 use Illuminate\Support\Facades\Mail;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function () {
@@ -158,5 +159,36 @@ describe('API del panel', function () {
         $this->getJson('/api/admin/dashboard')
             ->assertOk()
             ->assertJsonStructure(['data' => ['resumen' => ['solicitudes_nuevas', 'servicios_activos'], 'erp' => ['configurado', 'catalogos'], 'ultimos_mensajes']]);
+    });
+
+    it('da los contadores del menú del panel', function () {
+        Sanctum::actingAs(User::factory()->create());
+        MensajeContacto::create(['nombre' => 'A', 'telefono' => '987654321', 'mensaje' => 'x', 'origen' => 'contacto']);
+        MensajeContacto::create(['nombre' => 'B', 'telefono' => '987654321', 'mensaje' => 'x', 'origen' => 'contacto', 'leido_at' => now()]);
+
+        $this->getJson('/api/admin/contadores')->assertOk()
+            ->assertJsonPath('data.mensajes_no_leidos', 1)
+            ->assertJsonPath('data.reclamaciones_pendientes', 0);
+    });
+});
+
+describe('Datos que comparten las páginas', function () {
+    it('dice quién está conectado sin pedir sesión (null si nadie)', function () {
+        $this->getJson('/api/sesion')->assertOk()->assertJsonPath('data.usuario', null);
+
+        $usuario = User::factory()->create();
+        Sanctum::actingAs($usuario);
+        $this->getJson('/api/sesion')->assertOk()->assertJsonPath('data.usuario.email', $usuario->email);
+    });
+
+    it('da los planes del menú y ya no los manda con cada página', function () {
+        $this->getJson('/api/menu')->assertOk()->assertJsonStructure(['data' => ['planes' => [['titulo', 'slug']]]]);
+
+        // Con la página solo llegan los datos del marco (logo, colores, contacto)
+        $this->get('/')->assertInertia(fn (Assert $page) => $page
+            ->has('sitio')
+            ->missing('auth')
+            ->missing('planesMenu')
+            ->missing('mensajesNoLeidos'));
     });
 });

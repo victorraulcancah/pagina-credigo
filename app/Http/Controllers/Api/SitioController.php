@@ -9,6 +9,7 @@ use App\Services\BannerService;
 use App\Services\ConfiguracionService;
 use App\Services\PreguntaFrecuenteService;
 use App\Services\SeccionService;
+use App\Services\ServicioService;
 use Illuminate\Http\JsonResponse;
 
 /** Contenido público del sitio (solo lectura): ajustes, secciones, banners y preguntas frecuentes. */
@@ -24,6 +25,12 @@ class SitioController extends BaseApiController
     public function secciones(ListarSeccionesRequest $request, SeccionService $secciones): JsonResponse
     {
         return $this->successResponse($secciones->publicas($request->paginas()), 'Secciones');
+    }
+
+    /** Planes visibles para el menú "Planes" del sitio (cada uno lleva a su página). */
+    public function menu(ServicioService $servicios): JsonResponse
+    {
+        return $this->successResponse(['planes' => $servicios->paraMenu()], 'Menú');
     }
 
     public function banners(BannerService $banners): JsonResponse

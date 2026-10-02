@@ -2,10 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\MensajeContacto;
-use App\Models\Reclamacion;
 use App\Services\ConfiguracionService;
-use App\Services\ServicioService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -39,17 +36,12 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Solo el marco de cada página: logo, colores, nombre, contacto y redes (llegan antes de pintar,
+        // sin parpadeo). El usuario conectado, el menú de planes y los contadores del panel se piden
+        // a la API: /api/sesion, /api/menu y /api/admin/contadores.
         return [
             ...parent::share($request),
-            // Ajustes del sitio (empresa, contacto, redes, colores, logo) editables en /admin
             'sitio' => fn () => app(ConfiguracionService::class)->publicas(),
-            'auth' => [
-                'user' => fn () => $request->user()?->only(['id', 'name', 'email']),
-            ],
-            // Planes del menú "Planes" del sitio público (cada uno lleva a su página)
-            'planesMenu' => fn () => $request->is('admin', 'admin/*') ? [] : app(ServicioService::class)->paraMenu(),
-            'mensajesNoLeidos' => fn () => $request->user() ? MensajeContacto::noLeido()->count() : 0,
-            'reclamacionesPendientes' => fn () => $request->user() ? Reclamacion::pendiente()->count() : 0,
         ];
     }
 }

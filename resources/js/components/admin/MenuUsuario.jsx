@@ -1,15 +1,16 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, LogOut, UserCog } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useUsuario } from '@/hooks/useCompartido';
 import api from '@/lib/api';
 import { cn, iniciales } from '@/lib/utils';
 
 /** Usuario conectado en la barra superior del panel: perfil y cerrar sesión. */
 export default function MenuUsuario() {
-    const { props, url } = usePage();
+    const { url } = usePage();
     const [abierto, setAbierto] = useState(false);
     const ref = useRef(null);
-    const usuario = props.auth?.user ?? {};
+    const usuario = useUsuario() ?? {};
 
     // POST /api/logout y vuelta al login con la página recargada (sin datos del panel en memoria)
     const cerrarSesion = async () => {

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import MenuUsuario from '@/components/admin/MenuUsuario';
+import { useCompartido } from '@/hooks/useCompartido';
 import { useSitio, useTemaColores } from '@/hooks/useSitio';
 import { cn } from '@/lib/utils';
 
@@ -40,8 +41,8 @@ const menu = [
     {
         grupo: 'Contacto',
         items: [
-            { label: 'Solicitudes', href: '/admin/mensajes', icon: Inbox, contador: 'mensajesNoLeidos' },
-            { label: 'Reclamaciones', href: '/admin/reclamaciones', icon: BookOpenText, contador: 'reclamacionesPendientes' },
+            { label: 'Solicitudes', href: '/admin/mensajes', icon: Inbox, contador: 'mensajes_no_leidos' },
+            { label: 'Reclamaciones', href: '/admin/reclamaciones', icon: BookOpenText, contador: 'reclamaciones_pendientes' },
         ],
     },
     {
@@ -76,6 +77,8 @@ export default function AdminLayout({ title, children }) {
     useTemaColores();
     const [abierto, setAbierto] = useState(false);
     const [colapsado, setColapsado] = useState(leerColapsado);
+    // Solicitudes sin leer y reclamaciones pendientes (GET /api/admin/contadores)
+    const contadores = useCompartido('/admin/contadores', { siempre: true }) ?? {};
 
     const path = page.url.split('?')[0];
     const activo = (item) => (item.exacto ? path === item.href : path.startsWith(item.href));
@@ -145,7 +148,7 @@ export default function AdminLayout({ title, children }) {
                             )}
                             <ul className="flex flex-col gap-1">
                                 {bloque.items.map((item) => {
-                                    const contador = item.contador ? page.props[item.contador] : 0;
+                                    const contador = item.contador ? (contadores[item.contador] ?? 0) : 0;
                                     const esActivo = activo(item);
                                     return (
                                         <li key={item.href}>

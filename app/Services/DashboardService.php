@@ -27,6 +27,15 @@ class DashboardService
         ];
     }
 
+    /** Para el menú del panel. */
+    public function contadores(): array
+    {
+        return [
+            'mensajes_no_leidos' => MensajeContacto::noLeido()->count(),
+            'reclamaciones_pendientes' => Reclamacion::pendiente()->count(),
+        ];
+    }
+
     public function erp(): array
     {
         return [

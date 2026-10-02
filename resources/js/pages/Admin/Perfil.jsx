@@ -6,6 +6,7 @@ import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
+import { refrescarCompartido } from '@/hooks/useCompartido';
 import { useFormApi } from '@/hooks/useFormApi';
 
 function PerfilFormulario({ usuario }) {
@@ -14,7 +15,7 @@ function PerfilFormulario({ usuario }) {
 
     const guardarDatos = (e) => {
         e.preventDefault();
-        datos.put('/admin/perfil', { onSuccess: () => datos.setDefaults() });
+        datos.put('/admin/perfil', { recargar: () => refrescarCompartido('/sesion'), onSuccess: () => datos.setDefaults() });
     };
 
     const guardarClave = (e) => {

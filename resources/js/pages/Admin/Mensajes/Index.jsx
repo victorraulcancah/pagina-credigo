@@ -1,4 +1,3 @@
-import { router } from '@inertiajs/react';
 import { Calculator, FileSpreadsheet, Inbox, Search, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Cargando from '@/components/admin/Cargando';
@@ -12,6 +11,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { useAccionApi } from '@/hooks/useAccionApi';
+import { refrescarCompartido } from '@/hooks/useCompartido';
 import { useListaFiltrada } from '@/hooks/useListaFiltrada';
 import { formatoFecha } from '@/lib/fechas';
 import { cn } from '@/lib/utils';
@@ -40,7 +40,7 @@ export default function MensajesIndex() {
     // Tras un cambio: la lista y el contador de "no leídas" del menú
     const actualizar = () => {
         lista.recargar();
-        router.reload({ only: ['mensajesNoLeidos'] });
+        refrescarCompartido('/admin/contadores');
     };
 
     // Búsqueda con espera (evita una consulta por cada tecla)

@@ -35,6 +35,7 @@ Route::name('api.')->group(function () {
     // Sesión del panel
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1')->name('login');
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
+    Route::get('/sesion', [AuthController::class, 'sesion'])->middleware('throttle:60,1')->name('sesion');
 
     Route::middleware('throttle:60,1')->group(function () {
         // Todo lo que muestra cada página del sitio en una sola respuesta
@@ -42,6 +43,7 @@ Route::name('api.')->group(function () {
         Route::get('/paginas/{pagina}', [PaginaController::class, 'show'])->name('paginas.show');
 
         Route::get('/sitio', [SitioController::class, 'ajustes'])->name('sitio');
+        Route::get('/menu', [SitioController::class, 'menu'])->name('menu');
         Route::get('/secciones', [SitioController::class, 'secciones'])->name('secciones');
         Route::get('/banners', [SitioController::class, 'banners'])->name('banners');
         Route::get('/preguntas', [SitioController::class, 'preguntas'])->name('preguntas');
@@ -67,7 +69,8 @@ Route::name('api.')->group(function () {
     | Panel administrativo
     */
     Route::middleware('auth:sanctum')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', DashboardController::class)->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/contadores', [DashboardController::class, 'contadores'])->name('contadores');
 
         Route::apiResource('banners', AdminBannerController::class);
         Route::apiResource('servicios', ServicioController::class);

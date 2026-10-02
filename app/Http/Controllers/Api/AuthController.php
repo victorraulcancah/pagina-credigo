@@ -43,6 +43,12 @@ class AuthController extends BaseApiController
         ]);
     }
 
+    /** ¿Hay alguien conectado? Responde siempre 200 (usuario null si no): lo usa el menú del sitio. */
+    public function sesion(Request $request): JsonResponse
+    {
+        return $this->successResponse(['usuario' => $request->user('sanctum')?->only(['id', 'name', 'email'])], 'Sesión');
+    }
+
     public function logout(Request $request): JsonResponse
     {
         $this->auth->cerrarSesion($request->user(), $request->hasSession() ? $request->session() : null);

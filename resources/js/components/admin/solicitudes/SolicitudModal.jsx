@@ -1,4 +1,3 @@
-import { usePage } from '@inertiajs/react';
 import { Calculator, CircleCheckBig, Mail, MailOpen, Phone, Save, Trash, UserRound } from 'lucide-react';
 import { useEffect } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
@@ -7,6 +6,7 @@ import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import Select from '@/components/ui/Select';
 import Textarea from '@/components/ui/Textarea';
+import { useUsuario } from '@/hooks/useCompartido';
 import { useFormApi } from '@/hooks/useFormApi';
 import { formatoFecha } from '@/lib/fechas';
 import { cn } from '@/lib/utils';
@@ -65,7 +65,7 @@ function DatoContacto({ icono: Icono, etiqueta, children }) {
 
 /** Detalle de una solicitud con acciones de contacto y formulario de seguimiento. */
 export default function SolicitudModal({ mensaje, estados, origenes, usuarios, recargar, onClose, onMarcarNoLeido, onEliminar }) {
-    const { auth } = usePage().props;
+    const usuario = useUsuario();
     const form = useFormApi({ estado: 'nuevo', asignado_a: '', notas: '' });
     const { data, setData, errors, processing, recentlySuccessful } = form;
 
@@ -212,8 +212,8 @@ export default function SolicitudModal({ mensaje, estados, origenes, usuarios, r
                                     <label htmlFor="asignado_a" className="text-sm font-semibold text-gray-900">
                                         Asesor asignado
                                     </label>
-                                    {String(data.asignado_a) !== String(auth.user.id) && (
-                                        <button type="button" onClick={() => setData('asignado_a', auth.user.id)} className="text-xs font-semibold text-primary hover:underline">
+                                    {usuario && String(data.asignado_a) !== String(usuario.id) && (
+                                        <button type="button" onClick={() => setData('asignado_a', usuario.id)} className="text-xs font-semibold text-primary hover:underline">
                                             Asignarme
                                         </button>
                                     )}

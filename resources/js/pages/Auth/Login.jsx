@@ -1,20 +1,24 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
+import { useFormApi } from '@/hooks/useFormApi';
 import { useSitio, useTemaColores } from '@/hooks/useSitio';
 
 export default function Login() {
     const sitio = useSitio();
     useTemaColores();
     const [verPassword, setVerPassword] = useState(false);
-    const { data, setData, post, processing, errors, reset } = useForm({ email: '', password: '', remember: false });
+    const { data, setData, post, processing, errors, reset } = useFormApi({ email: '', password: '', remember: false });
 
     const enviar = (e) => {
         e.preventDefault();
-        post('/login', { onFinish: () => reset('password') });
+        // POST /api/login: si los datos son correctos inicia la sesión y dice a dónde ir
+        post('/login', { recargar: false, avisar: false, onSuccess: (respuesta) => router.visit(respuesta.redirect ?? '/admin') }).then(
+            ({ success }) => !success && reset('password'),
+        );
     };
 
     return (

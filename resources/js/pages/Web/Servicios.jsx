@@ -1,5 +1,6 @@
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Section from '@/components/ui/Section';
 import CtaSection from '@/components/web/CtaSection';
 import { DocumentosSection } from '@/components/web/Documentos';
@@ -9,7 +10,7 @@ import ListaPlanes from '@/components/web/ListaPlanes';
  * Todos los planes visibles como lista (cada uno lleva a su página, donde están su ficha y su video).
  * Debajo, las fichas en PDF que no son de un plan en particular.
  */
-export default function Servicios({ secciones, servicios, documentos }) {
+function ServiciosContenido({ secciones, servicios, documentos }) {
     const hero = secciones['servicios.hero'];
 
     return (
@@ -29,4 +30,9 @@ export default function Servicios({ secciones, servicios, documentos }) {
             <CtaSection seccion={secciones['general.cta']} whatsappPrimero />
         </PublicLayout>
     );
+}
+
+/** Servicios: el contenido llega de la API (GET /api/paginas/servicios). */
+export default function Servicios() {
+    return <PaginaApi url="/paginas/servicios">{(datos) => <ServiciosContenido {...datos} />}</PaginaApi>;
 }

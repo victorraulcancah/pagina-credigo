@@ -7,7 +7,7 @@ use Database\Seeders\ContenidoSeeder;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Inertia\Testing\AssertableInertia as Assert;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 /** Taller tal como lo devuelve el listado del ERP (incluye datos que la web NO debe mostrar). */
 function tallerErp(array $cambios = []): array
@@ -93,8 +93,7 @@ it('muestra los talleres del ERP solo con los datos públicos', function () {
     $caido = false;
     simularErp($caido);
 
-    $this->get('/talleres')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->component('Web/Talleres')
+    paginaApi('talleres', fn (AssertableJson $page) => $page
         ->has('talleres', 1)
         ->where('talleres.0.nombre', 'Automotriz Prueba')
         ->where('talleres.0.logo_url', 'https://erp.test/storage/talleres/logo.png')
@@ -120,14 +119,14 @@ it('sigue mostrando la última copia si el ERP no responde', function () {
     $caido = true;
     $this->travel(31)->minutes();
 
-    $this->get('/talleres')->assertInertia(fn (Assert $page) => $page->has('talleres', 1));
+    paginaApi('talleres', fn (AssertableJson $page) => $page->has('talleres', 1));
 });
 
 it('funciona sin ERP configurado y no llama a nadie', function () {
     config(['services.erp.url' => '']);
     Http::fake();
 
-    $this->get('/talleres')->assertOk()->assertInertia(fn (Assert $page) => $page->where('talleres', []));
+    paginaApi('talleres', fn (AssertableJson $page) => $page->where('talleres', []));
 
     Http::assertNothingSent();
 });

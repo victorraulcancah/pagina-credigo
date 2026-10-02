@@ -1,5 +1,6 @@
 import { CircleCheckBig, Printer, Search } from 'lucide-react';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Section from '@/components/ui/Section';
@@ -18,7 +19,7 @@ function Fila({ etiqueta, children }) {
 }
 
 /** Constancia de la hoja de reclamación registrada (imprimible). */
-export default function ReclamacionConstancia({ reclamacion, diasRespuesta }) {
+function ReclamacionConstanciaContenido({ reclamacion, diasRespuesta }) {
     const r = reclamacion;
 
     return (
@@ -80,5 +81,14 @@ export default function ReclamacionConstancia({ reclamacion, diasRespuesta }) {
                 </div>
             </Section>
         </PublicLayout>
+    );
+}
+
+/** Constancia de la hoja: sus datos llegan de una dirección firmada de la API (solo la tiene quien la registró). */
+export default function ReclamacionConstancia({ datosUrl }) {
+    return (
+        <PaginaApi url={datosUrl}>
+            {(_, consulta) => <ReclamacionConstanciaContenido reclamacion={consulta.datos} diasRespuesta={consulta.respuesta.opciones.dias_respuesta} />}
+        </PaginaApi>
     );
 }

@@ -9,7 +9,7 @@ use Database\Seeders\ContenidoSeeder;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Inertia\Testing\AssertableInertia as Assert;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 /** Respuestas del ERP para comercios, cupones y planes (con datos que la web NO debe mostrar). */
 function simularCatalogosErp(array &$precios): void
@@ -77,8 +77,7 @@ it('muestra puntaje, niveles, cupones públicos vigentes y comercios sin datos p
     $precios = ['cuota' => 130.0];
     simularCatalogosErp($precios);
 
-    $this->get('/beneficios')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->component('Web/Beneficios')
+    paginaApi('beneficios', fn (AssertableJson $page) => $page
         ->where('secciones', fn ($s) => collect(['hero', 'puntaje', 'rangos', 'niveles'])->every(fn ($c) => collect($s)->has("beneficios.{$c}")))
         ->has('cupones', 1)
         ->where('cupones.0.titulo', 'Vigente')
@@ -110,13 +109,13 @@ it('muestra la semana del conductor con la cuota semanal más baja en soles', fu
     $opcion($activo, ['cuota' => 60, 'activo' => false]);
     $opcion($inactivo, ['cuota' => 70]);
 
-    $this->get('/beneficios')->assertOk()->assertInertia(fn (Assert $page) => $page
+    paginaApi('beneficios', fn (AssertableJson $page) => $page
         ->where('secciones', fn ($s) => collect($s)['beneficios.semana']['titulo'] === 'Tu semana con CrediGo')
-        ->where('cuotaSemanal.cuota', fn ($cuota) => (float) $cuota === 95.0)
-        ->where('cuotaSemanal.moneda', 'PEN'));
+        ->where('cuota_semanal.cuota', fn ($cuota) => (float) $cuota === 95.0)
+        ->where('cuota_semanal.moneda', 'PEN'));
 
     // Ya no forma parte del inicio
-    $this->get('/')->assertOk()->assertInertia(fn (Assert $page) => $page
+    paginaApi('inicio', fn (AssertableJson $page) => $page
         ->where('secciones', fn ($s) => ! collect($s)->has('inicio.semana')));
 });
 

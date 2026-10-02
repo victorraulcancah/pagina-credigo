@@ -123,8 +123,8 @@ it('guarda los adjuntos en el disco privado y el panel los puede ver', function 
     Storage::disk('local')->assertExists($adjunto->ruta);
 
     // Sin sesión no se puede ver; con sesión sí
-    $this->get("/admin/reclamaciones/adjuntos/{$adjunto->id}")->assertRedirect('/login');
-    $this->actingAs(User::factory()->create())->get("/admin/reclamaciones/adjuntos/{$adjunto->id}")->assertOk();
+    $this->getJson("/api/admin/reclamaciones/adjuntos/{$adjunto->id}")->assertUnauthorized();
+    $this->actingAs(User::factory()->create())->get("/api/admin/reclamaciones/adjuntos/{$adjunto->id}")->assertOk();
 });
 
 it('rechaza adjuntos demasiado pesados o de otro formato', function () {
@@ -142,10 +142,19 @@ it('solo muestra la constancia con el enlace firmado', function () {
 
     $this->get("/libro-de-reclamaciones/constancia/{$reclamacion->id}")->assertForbidden();
 
-    $this->get(URL::signedRoute('reclamaciones.constancia', $reclamacion))->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('Web/ReclamacionConstancia')
-            ->where('reclamacion.codigo', $reclamacion->codigo));
+    // La página firmada da la dirección (también firmada) de la API con los datos
+    $pagina = $this->get(URL::signedRoute('reclamaciones.constancia', $reclamacion))->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Web/ReclamacionConstancia')->missing('reclamacion'));
+    $datosUrl = $pagina->viewData('page')['props']['datosUrl'];
+    expect($datosUrl)->toContain('/api/reclamaciones/')->toContain('signature=');
+
+    $this->getJson($datosUrl)->assertOk()
+        ->assertJsonPath('data.codigo', $reclamacion->codigo)
+        ->assertJsonMissingPath('data.respuesta')
+        ->assertJsonPath('opciones.dias_respuesta', Reclamacion::DIAS_HABILES_RESPUESTA);
+
+    // Sin firma, la API tampoco la entrega
+    $this->getJson("/api/reclamaciones/{$reclamacion->id}/constancia")->assertForbidden();
 });
 
 it('el panel responde la reclamación y la envía por correo', function () {

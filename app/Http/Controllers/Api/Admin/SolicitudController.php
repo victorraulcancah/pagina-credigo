@@ -9,8 +9,10 @@ use App\Http\Requests\Admin\SeguimientoSolicitudRequest;
 use App\Http\Resources\MensajeContactoResource;
 use App\Models\MensajeContacto;
 use App\Models\User;
+use App\Services\SolicitudesExcelService;
 use App\Services\SolicitudService;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** Bandeja de solicitudes (soporte y cotizador) con seguimiento tipo CRM. */
 class SolicitudController extends BaseApiController
@@ -37,6 +39,14 @@ class SolicitudController extends BaseApiController
                 ],
             ],
         );
+    }
+
+    /** Excel con las solicitudes que cumplen los filtros (la respuesta es el archivo). */
+    public function exportar(FiltroSolicitudesRequest $request, SolicitudesExcelService $excel): StreamedResponse
+    {
+        $filtros = $this->solicitudes->filtrosPorDefecto($request->validated());
+
+        return $excel->descargar($this->solicitudes->paraExportar($filtros, $request->user()->id), 'solicitudes-'.now()->format('Y-m-d').'.xlsx');
     }
 
     public function show(MensajeContacto $mensaje): JsonResponse

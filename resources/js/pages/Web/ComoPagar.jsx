@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Button from '@/components/ui/Button';
 import Icono from '@/components/ui/Icono';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
@@ -75,7 +76,7 @@ function CuentaCard({ cuenta, titular }) {
 }
 
 /** Página pública "Cómo pagar" (todo editable en Admin → Secciones → Cómo pagar, y sus guías en Documentos). */
-export default function ComoPagar({ secciones, documentos }) {
+function ComoPagarContenido({ secciones, documentos }) {
     const sitio = useSitio();
     const hero = secciones['pagos.hero'];
     const medios = secciones['pagos.medios'];
@@ -198,4 +199,9 @@ export default function ComoPagar({ secciones, documentos }) {
             <CtaSection seccion={secciones['general.cta']} whatsappPrimero />
         </PublicLayout>
     );
+}
+
+/** Cómo pagar: el contenido llega de la API (GET /api/paginas/como-pagar). */
+export default function ComoPagar() {
+    return <PaginaApi url="/paginas/como-pagar">{(datos) => <ComoPagarContenido {...datos} />}</PaginaApi>;
 }

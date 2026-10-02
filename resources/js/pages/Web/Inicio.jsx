@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Button from '@/components/ui/Button';
 import Icono from '@/components/ui/Icono';
 import Revelar from '@/components/ui/Revelar';
@@ -105,7 +106,7 @@ function Nosotros({ seccion }) {
 }
 
 /** Inicio: carrusel de banners del panel arriba y luego planes, recorrido, niveles y cierre. Todo el contenido viene del panel. */
-export default function Inicio({ banners, secciones, servicios, preguntas }) {
+function InicioContenido({ banners, secciones, servicios, preguntas }) {
     const faq = secciones['general.faq'];
 
     return (
@@ -119,4 +120,9 @@ export default function Inicio({ banners, secciones, servicios, preguntas }) {
             <CtaSection seccion={secciones['general.cta']} whatsappPrimero />
         </PublicLayout>
     );
+}
+
+/** Inicio: el contenido llega de la API (GET /api/paginas/inicio). */
+export default function Inicio() {
+    return <PaginaApi url="/paginas/inicio">{(datos) => <InicioContenido {...datos} />}</PaginaApi>;
 }

@@ -116,7 +116,7 @@ describe('seguimiento de solicitudes', function () {
     it('exporta las solicitudes a Excel', function () {
         enviarContacto();
 
-        $respuesta = $this->get('/admin/mensajes/exportar?estado=nuevo');
+        $respuesta = $this->get('/api/admin/solicitudes/exportar?estado=nuevo');
 
         $respuesta->assertOk()->assertDownload('solicitudes-'.now()->format('Y-m-d').'.xlsx');
         expect($respuesta->headers->get('content-type'))->toContain('spreadsheetml');

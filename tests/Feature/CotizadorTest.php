@@ -5,7 +5,7 @@ use App\Models\OpcionPlan;
 use App\Models\Servicio;
 use App\Models\User;
 use Database\Seeders\ContenidoSeeder;
-use Inertia\Testing\AssertableInertia as Assert;
+use Illuminate\Testing\Fluent\AssertableJson;
 
 beforeEach(function () {
     $this->seed(ContenidoSeeder::class);
@@ -13,8 +13,7 @@ beforeEach(function () {
 
 it('muestra solo los planes visibles que tienen opciones visibles', function () {
     // El seeder carga opciones para "Moto o auto por adjudicación" y "CrediYango", no para microfinanciamiento
-    $this->get('/cotizador')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->component('Web/Cotizador')
+    paginaApi('cotizador', fn (AssertableJson $page) => $page
         ->has('planes', 2)
         ->where('planes.1.titulo', 'CrediYango')
         ->where('planes.1.opciones.0.cuota', 100)
@@ -22,11 +21,11 @@ it('muestra solo los planes visibles que tienen opciones visibles', function () 
 
     OpcionPlan::query()->update(['activo' => false]);
 
-    $this->get('/cotizador')->assertInertia(fn (Assert $page) => $page->has('planes', 0));
+    paginaApi('cotizador', fn (AssertableJson $page) => $page->has('planes', 0));
 });
 
 it('marca en las tarjetas los planes que se pueden cotizar', function () {
-    $this->get('/servicios')->assertInertia(fn (Assert $page) => $page
+    paginaApi('servicios', fn (AssertableJson $page) => $page
         ->where('servicios.1.titulo', 'CrediYango')
         ->where('servicios.1.opciones_count', 1)
         ->where('servicios.2.opciones_count', 0));

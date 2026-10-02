@@ -5,6 +5,7 @@ use App\Models\Servicio;
 use App\Models\User;
 use Database\Seeders\ConfiguracionSeeder;
 use Database\Seeders\ContenidoSeeder;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -44,8 +45,7 @@ it('muestra la página del plan con sus opciones visibles, su ficha y los demás
     $ficha = Documento::create(['titulo' => 'Ficha Credi Motos', 'categoria' => 'planes', 'servicio_id' => $plan->id, 'archivo' => 'documentos/ficha.pdf', 'tamano' => 1000]);
     Documento::create(['titulo' => 'Ficha CrediYango', 'categoria' => 'planes', 'servicio_id' => $otro->id, 'archivo' => 'documentos/otra.pdf', 'tamano' => 1000]);
 
-    $this->get('/servicios/credi-motos')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->component('Web/Plan')
+    paginaApi('planes/credi-motos', fn (AssertableJson $page) => $page
         ->where('servicio.titulo', 'Credi Motos')
         ->where('servicio.detalle', "## Adjudicación\nPor sorteo mensual.")
         ->has('servicio.opciones', 1)
@@ -54,9 +54,15 @@ it('muestra la página del plan con sus opciones visibles, su ficha y los demás
         ->where('documentos.0.id', $ficha->id)
         ->has('otros', 1)
         ->where('otros.0.slug', 'crediyango')
-        ->where('secciones', fn ($s) => collect($s)->has('requisitos.documentos'))
+        ->where('secciones', fn ($s) => collect($s)->has('requisitos.documentos')));
+
+    // El servidor abre la página con el título y la descripción del plan (vista previa al compartir)
+    $this->get('/servicios/credi-motos')->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Web/Plan')
+        ->where('slug', 'credi-motos')
         ->where('seo.titulo', 'Credi Motos')
-        ->where('seo.descripcion', 'Tu moto propia'));
+        ->where('seo.descripcion', 'Tu moto propia')
+        ->missing('servicio'));
 });
 
 it('no muestra planes ocultos ni direcciones que no existen', function () {
@@ -70,9 +76,10 @@ it('lleva los planes visibles al menú, a las tarjetas y al sitemap', function (
     $plan = planConOpciones();
     Servicio::create(['titulo' => 'Oculto', 'descripcion' => 'x', 'activo' => false]);
 
+    // El menú llega con cada página; la lista de planes, de la API
     $this->get('/servicios')->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->where('planesMenu', fn ($planes) => collect($planes)->pluck('slug')->all() === ['credi-motos'])
-        ->where('servicios.0.slug', 'credi-motos'));
+        ->where('planesMenu', fn ($planes) => collect($planes)->pluck('slug')->all() === ['credi-motos']));
+    paginaApi('servicios', fn (AssertableJson $page) => $page->where('servicios.0.slug', 'credi-motos'));
 
     $this->get('/sitemap.xml')->assertOk()->assertSee(url('/servicios/credi-motos'), false)->assertDontSee('/servicios/oculto', false);
 

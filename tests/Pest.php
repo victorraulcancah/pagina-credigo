@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 /*
@@ -44,7 +45,15 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Revisa el contenido de una página pública tal como lo entrega la API (GET /api/paginas/{pagina}),
+ * con las mismas aserciones de siempre: where, has, missing...
+ *
+ * paginaApi('servicios', fn (AssertableJson $page) => $page->has('servicios', 2));
+ */
+function paginaApi(string $pagina, Closure $revisar): void
 {
-    // ..
+    $datos = test()->getJson('/api/paginas/'.$pagina)->assertOk()->assertJsonPath('success', true)->json('data');
+
+    $revisar(AssertableJson::fromArray($datos));
 }

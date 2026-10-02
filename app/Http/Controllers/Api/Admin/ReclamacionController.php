@@ -7,8 +7,10 @@ use App\Http\Requests\Admin\FiltroReclamacionesRequest;
 use App\Http\Requests\Admin\RespuestaReclamacionRequest;
 use App\Http\Resources\ReclamacionResource;
 use App\Models\Reclamacion;
+use App\Models\ReclamacionAdjunto;
 use App\Services\ReclamacionService;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** Bandeja del Libro de Reclamaciones. Las hojas no se eliminan (registro legal). */
 class ReclamacionController extends BaseApiController
@@ -25,6 +27,12 @@ class ReclamacionController extends BaseApiController
             'Reclamaciones',
             ['filtros' => $filtros, 'opciones' => ['dias_respuesta' => Reclamacion::DIAS_HABILES_RESPUESTA]],
         );
+    }
+
+    /** Adjunto de una hoja (foto, comprobante o video) desde el disco privado (la respuesta es el archivo). */
+    public function adjunto(ReclamacionAdjunto $adjunto): StreamedResponse
+    {
+        return $this->reclamaciones->adjunto($adjunto);
     }
 
     public function show(Reclamacion $reclamacion): JsonResponse

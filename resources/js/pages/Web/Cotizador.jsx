@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Icono from '@/components/ui/Icono';
@@ -37,7 +38,7 @@ function Fila({ etiqueta, valor }) {
 }
 
 /** Cotizador: el visitante elige plan y opción (montos cargados en el panel) y pide información. */
-export default function Cotizador({ secciones, planes }) {
+function CotizadorContenido({ secciones, planes }) {
     const { url } = usePage();
     const sitio = useSitio();
     const hero = secciones['cotizador.hero'];
@@ -225,4 +226,9 @@ export default function Cotizador({ secciones, planes }) {
             )}
         </PublicLayout>
     );
+}
+
+/** Cotizador: el contenido llega de la API (GET /api/paginas/cotizador). */
+export default function Cotizador() {
+    return <PaginaApi url="/paginas/cotizador">{(datos) => <CotizadorContenido {...datos} />}</PaginaApi>;
 }

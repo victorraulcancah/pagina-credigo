@@ -217,7 +217,7 @@ export default function ReclamacionesIndex() {
                                 <p className="mb-2 text-xs font-semibold text-gray-500 uppercase">Archivos adjuntos</p>
                                 <ul className="grid gap-2 sm:grid-cols-2">
                                     {seleccionada.adjuntos.map((adjunto) => {
-                                        const url = `/admin/reclamaciones/adjuntos/${adjunto.id}`;
+                                        const url = `/api/admin/reclamaciones/adjuntos/${adjunto.id}`;
                                         return (
                                             <li key={adjunto.id}>
                                                 <a

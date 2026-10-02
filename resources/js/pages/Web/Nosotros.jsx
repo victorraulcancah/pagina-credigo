@@ -1,6 +1,7 @@
 import { Compass, Eye, Target } from 'lucide-react';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import FeatureCard from '@/components/ui/FeatureCard';
 import Icono from '@/components/ui/Icono';
 import Revelar from '@/components/ui/Revelar';
@@ -41,7 +42,7 @@ function PilarFila({ seccion, icon: Icon, invertida }) {
     );
 }
 
-export default function Nosotros({ secciones }) {
+function NosotrosContenido({ secciones }) {
     const hero = secciones['nosotros.hero'];
     const pilares = [
         { seccion: secciones['nosotros.mision'], icon: Compass },
@@ -92,4 +93,9 @@ export default function Nosotros({ secciones }) {
             <CtaSection seccion={secciones['general.cta']} />
         </PublicLayout>
     );
+}
+
+/** Nosotros: el contenido llega de la API (GET /api/paginas/nosotros). */
+export default function Nosotros() {
+    return <PaginaApi url="/paginas/nosotros">{(datos) => <NosotrosContenido {...datos} />}</PaginaApi>;
 }

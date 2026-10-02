@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\ConsultarReclamacionRequest;
 use App\Http\Requests\ReclamacionRequest;
 use App\Http\Resources\ReclamacionEstadoResource;
+use App\Http\Resources\ReclamacionResource;
+use App\Models\Reclamacion;
 use App\Services\ReclamacionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\URL;
@@ -26,6 +28,18 @@ class ReclamacionController extends BaseApiController
             'codigo' => $reclamacion->codigo,
             'constancia_url' => URL::signedRoute('reclamaciones.constancia', $reclamacion),
         ], "Registramos tu hoja N.° {$reclamacion->codigo}");
+    }
+
+    /** Datos de la constancia (dirección firmada que da la página de la constancia). Sin la respuesta interna. */
+    public function constancia(Reclamacion $reclamacion): JsonResponse
+    {
+        $datos = (new ReclamacionResource($reclamacion->load('adjuntos')))->resolve();
+
+        return $this->successResponse(
+            collect($datos)->except(['respuesta', 'respondido_por', 'respondido_por_id'])->all(),
+            'Constancia',
+            extra: ['opciones' => ['dias_respuesta' => Reclamacion::DIAS_HABILES_RESPUESTA]],
+        );
     }
 
     /** Estado y respuesta de una hoja, con su número y el documento de quien la registró. */

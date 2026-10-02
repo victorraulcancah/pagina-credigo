@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class ReclamacionService
@@ -91,6 +92,12 @@ class ReclamacionService
             ->latest()
             ->paginate(15)
             ->withQueryString();
+    }
+
+    /** Muestra un adjunto guardado en el disco privado (solo para el panel). */
+    public function adjunto(ReclamacionAdjunto $adjunto): StreamedResponse
+    {
+        return Storage::disk(ReclamacionAdjunto::DISCO)->response($adjunto->ruta, $adjunto->nombre_original);
     }
 
     /** Hoja de un consumidor por su número y su documento (así nadie consulta hojas ajenas). */

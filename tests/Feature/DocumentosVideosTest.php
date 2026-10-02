@@ -9,6 +9,7 @@ use Database\Seeders\ConfiguracionSeeder;
 use Database\Seeders\ContenidoSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -43,14 +44,14 @@ describe('documentos PDF', function () {
             ->and($documento->tamano)->toBe(300 * 1024);
         Storage::disk('public')->assertExists($documento->archivo);
 
-        $this->get('/requisitos')->assertOk()->assertInertia(fn (Assert $page) => $page
+        paginaApi('requisitos', fn (AssertableJson $page) => $page
             ->has('documentos', 1)
             ->where('documentos.0.titulo', 'Lista de requisitos')
             ->where('documentos.0.archivo_url', fn ($url) => str_ends_with($url, $documento->archivo))
             ->missing('documentos.0.archivo'));
 
         // No aparece en otras páginas
-        $this->get('/como-pagar')->assertInertia(fn (Assert $page) => $page->has('documentos', 0));
+        paginaApi('como-pagar', fn (AssertableJson $page) => $page->has('documentos', 0));
     });
 
     it('lista los documentos en el panel con sus categorías y planes', function () {
@@ -118,11 +119,11 @@ describe('documentos PDF', function () {
 
         expect($requisitos->servicio_id)->toBeNull();
 
-        $this->get('/servicios')->assertOk()->assertInertia(fn (Assert $page) => $page
+        paginaApi('servicios', fn (AssertableJson $page) => $page
             ->has('documentos', 1)
             ->where('documentos.0.titulo', 'Brochure'));
 
-        $this->get("/servicios/{$plan->slug}")->assertOk()->assertInertia(fn (Assert $page) => $page
+        paginaApi("planes/{$plan->slug}", fn (AssertableJson $page) => $page
             ->has('documentos', 1)
             ->where('documentos.0.titulo', 'Ficha Credi Motos'));
     });
@@ -130,8 +131,8 @@ describe('documentos PDF', function () {
     it('muestra los documentos legales en las dos páginas legales', function () {
         subirDocumento(['titulo' => 'Reglamento', 'categoria' => 'legal']);
 
-        $this->get('/terminos-y-condiciones')->assertOk()->assertInertia(fn (Assert $page) => $page->where('documentos.0.titulo', 'Reglamento'));
-        $this->get('/politica-de-privacidad')->assertOk()->assertInertia(fn (Assert $page) => $page->has('documentos', 1));
+        paginaApi('terminos', fn (AssertableJson $page) => $page->where('documentos.0.titulo', 'Reglamento'));
+        paginaApi('privacidad', fn (AssertableJson $page) => $page->has('documentos', 1));
     });
 });
 

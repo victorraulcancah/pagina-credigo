@@ -87,6 +87,33 @@ describe('API del panel', function () {
         ['DELETE', '/api/admin/documentos/1'],
     ]);
 
+    it('una app u otro sistema inicia sesión con token, lo usa y lo revoca al salir', function () {
+        $usuario = User::factory()->create(['password' => 'secreto123']);
+
+        // Sin sesión de navegador: la API devuelve un token
+        $token = $this->postJson('/api/login', ['email' => $usuario->email, 'password' => 'secreto123', 'dispositivo' => 'app-credigo'])
+            ->assertOk()
+            ->assertJsonPath('token_type', 'Bearer')
+            ->json('token');
+        expect($token)->toBeString()->and($usuario->tokens()->count())->toBe(1);
+
+        $this->withToken($token)->getJson('/api/admin/perfil')->assertOk()->assertJsonPath('data.email', $usuario->email);
+
+        $this->withToken($token)->postJson('/api/logout')->assertOk();
+        expect($usuario->tokens()->count())->toBe(0);
+    });
+
+    it('bloquea el login tras 5 intentos fallidos', function () {
+        $usuario = User::factory()->create();
+
+        foreach (range(1, 5) as $intento) {
+            $this->postJson('/api/login', ['email' => $usuario->email, 'password' => 'incorrecta'])->assertJsonValidationErrors('email');
+        }
+
+        $this->postJson('/api/login', ['email' => $usuario->email, 'password' => 'incorrecta'])
+            ->assertJsonValidationErrors(['email' => 'Demasiados']);
+    });
+
     it('lista, crea, edita y elimina por REST con el formato estándar', function () {
         Sanctum::actingAs(User::factory()->create());
 

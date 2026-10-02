@@ -2,6 +2,7 @@ import { ArrowRight, MessageCircle } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Button from '@/components/ui/Button';
 import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
@@ -23,7 +24,7 @@ function Dividido({ izquierda, children }) {
 }
 
 /** Página pública de requisitos para inscribirse (todo editable en Admin → Secciones → Requisitos y Documentos). */
-export default function Requisitos({ secciones, documentos: pdfs }) {
+function RequisitosContenido({ secciones, documentos: pdfs }) {
     const sitio = useSitio();
     const hero = secciones['requisitos.hero'];
     const documentos = secciones['requisitos.documentos'];
@@ -88,4 +89,9 @@ export default function Requisitos({ secciones, documentos: pdfs }) {
             <CtaSection seccion={secciones['general.cta']} whatsappPrimero />
         </PublicLayout>
     );
+}
+
+/** Requisitos: el contenido llega de la API (GET /api/paginas/requisitos). */
+export default function Requisitos() {
+    return <PaginaApi url="/paginas/requisitos">{(datos) => <RequisitosContenido {...datos} />}</PaginaApi>;
 }

@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { ArrowLeft, ArrowRight, Calculator, Check } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Button from '@/components/ui/Button';
 import Container from '@/components/ui/Container';
 import Icono from '@/components/ui/Icono';
@@ -255,7 +256,7 @@ function OtrosPlanes({ planes, background }) {
 }
 
 /** Página de un plan (/servicios/{slug}). Todo viene del panel: Servicios, Cotizador, Documentos y Requisitos. */
-export default function Plan({ secciones, servicio, documentos, otros }) {
+function PlanContenido({ secciones, servicio, documentos, otros }) {
     const sitio = useSitio();
     const whatsapp = sitio.whatsappUrl(`Hola, quiero información sobre el plan "${servicio.titulo}"`);
     const menor = cuotaMasBaja(servicio.opciones);
@@ -272,4 +273,9 @@ export default function Plan({ secciones, servicio, documentos, otros }) {
             <CtaSection seccion={secciones['general.cta']} whatsappPrimero />
         </PublicLayout>
     );
+}
+
+/** Página de un plan: el contenido llega de la API (GET /api/paginas/planes/{slug}). */
+export default function Plan({ slug }) {
+    return <PaginaApi url={`/paginas/planes/${slug}`}>{(datos) => <PlanContenido {...datos} />}</PaginaApi>;
 }

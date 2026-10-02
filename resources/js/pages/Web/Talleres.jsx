@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
@@ -263,7 +264,7 @@ function TallerModal({ taller, onClose }) {
 }
 
 /** Talleres aliados: la lista viene del ERP (con copia en caché); los textos se editan en el panel. */
-export default function Talleres({ secciones, talleres, documentos }) {
+function TalleresContenido({ secciones, talleres, documentos }) {
     const hero = secciones['talleres.hero'];
     const [ciudad, setCiudad] = useState('');
     const [busqueda, setBusqueda] = useState('');
@@ -377,4 +378,9 @@ export default function Talleres({ secciones, talleres, documentos }) {
             <TallerModal taller={seleccionado} onClose={() => setSeleccionado(null)} />
         </PublicLayout>
     );
+}
+
+/** Talleres aliados (los talleres vienen del ERP): el contenido llega de la API (GET /api/paginas/talleres). */
+export default function Talleres() {
+    return <PaginaApi url="/paginas/talleres">{(datos) => <TalleresContenido {...datos} />}</PaginaApi>;
 }

@@ -9,6 +9,7 @@ use App\Models\User;
 use Database\Seeders\ContenidoSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 
 it('redirige al login si no hay sesión', function () {
@@ -18,17 +19,28 @@ it('redirige al login si no hay sesión', function () {
 it('inicia sesión y entra al panel', function () {
     $user = User::factory()->create(['password' => 'secreto123']);
 
-    $this->post('/login', ['email' => $user->email, 'password' => 'secreto123'])
-        ->assertRedirect('/admin');
+    $this->withHeader('Referer', config('app.url'))
+        ->postJson('/api/login', ['email' => $user->email, 'password' => 'secreto123'])
+        ->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('data.email', $user->email)
+        ->assertJsonPath('redirect', '/admin')
+        ->assertJsonMissingPath('token');
 
     $this->assertAuthenticatedAs($user);
+    $this->get('/admin')->assertOk();
+
+    // Cerrar sesión por la API
+    $this->withHeader('Referer', config('app.url'))->postJson('/api/logout')->assertOk();
+    $this->assertGuest('web');
 });
 
 it('rechaza credenciales incorrectas', function () {
     $user = User::factory()->create();
 
-    $this->post('/login', ['email' => $user->email, 'password' => 'incorrecta'])
-        ->assertSessionHasErrors('email');
+    $this->withHeader('Referer', config('app.url'))
+        ->postJson('/api/login', ['email' => $user->email, 'password' => 'incorrecta'])
+        ->assertJsonValidationErrors('email');
 
     $this->assertGuest();
 });
@@ -198,7 +210,7 @@ describe('con sesión iniciada', function () {
 
         Storage::disk('public')->assertExists($seccion->fresh()->imagen);
 
-        $this->get('/soporte')->assertInertia(fn (Assert $page) => $page
+        paginaApi('soporte', fn (AssertableJson $page) => $page
             ->where('secciones', fn ($secciones) => str_contains($secciones['contacto.hero']['imagen_url'] ?? '', '/storage/secciones/')));
     });
 
@@ -220,7 +232,7 @@ describe('con sesión iniciada', function () {
             Storage::disk('public')->assertExists($seccion->fresh()->imagen);
         }
 
-        $this->get('/nosotros')->assertInertia(fn (Assert $page) => $page
+        paginaApi('nosotros', fn (AssertableJson $page) => $page
             ->where('secciones', fn ($secciones) => collect(['mision', 'vision', 'objetivo'])
                 ->every(fn ($clave) => str_contains($secciones["nosotros.{$clave}"]['imagen_url'] ?? '', '/storage/secciones/'))));
     });

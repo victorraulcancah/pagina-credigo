@@ -2,6 +2,7 @@ import { Clock, Mail, MapPin, Phone } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Card from '@/components/ui/Card';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
@@ -37,7 +38,7 @@ function DatoContacto({ icon: Icon, titulo, href, externo = false, children }) {
     );
 }
 
-export default function Contacto({ secciones, tiposConsulta, preguntas }) {
+function ContactoContenido({ secciones, tiposConsulta, preguntas }) {
     const sitio = useSitio();
     const hero = secciones['contacto.hero'];
     const formulario = secciones['contacto.formulario'];
@@ -110,4 +111,9 @@ export default function Contacto({ secciones, tiposConsulta, preguntas }) {
             <FaqSection seccion={secciones['general.faq']} preguntas={preguntas} />
         </PublicLayout>
     );
+}
+
+/** Soporte: el contenido llega de la API (GET /api/paginas/soporte). */
+export default function Contacto() {
+    return <PaginaApi url="/paginas/soporte">{(datos) => <ContactoContenido {...datos} />}</PaginaApi>;
 }

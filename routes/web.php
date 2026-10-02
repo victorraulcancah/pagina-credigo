@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\AdjuntoReclamacionController;
-use App\Http\Controllers\Admin\ExportarSolicitudesController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Web\LibroReclamacionesController;
 use App\Http\Controllers\Web\PaginaController;
 use App\Http\Controllers\Web\SeoController;
@@ -11,13 +8,14 @@ use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
-| Rutas web: solo páginas (Inertia) y descargas.
-| Todo lo que guarda o borra va por la API REST (routes/api.php).
+| Rutas web: solo abren las pantallas (Inertia). Todos los datos, el login,
+| guardar, borrar y las descargas van por la API REST (routes/api.php).
 |--------------------------------------------------------------------------
 */
 
 /*
-| Sitio público (los datos llegan desde el servidor: Google y WhatsApp leen el título y la imagen)
+| Sitio público. El servidor solo pone en el HTML el título, la descripción y la imagen
+| (Google, WhatsApp y Facebook); el contenido lo pide cada página a /api/paginas/...
 */
 Route::controller(PaginaController::class)->group(function () {
     Route::get('/', 'inicio')->name('inicio');
@@ -37,29 +35,23 @@ Route::controller(PaginaController::class)->group(function () {
 // La página de contacto ahora se llama Soporte
 Route::permanentRedirect('/contacto', '/soporte');
 
+// Para buscadores: deben estar en la raíz del sitio (no en /api)
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
-// Libro de Reclamaciones virtual (Indecopi): registrar y consultar van por la API
+// Libro de Reclamaciones virtual (Indecopi)
 Route::controller(LibroReclamacionesController::class)->prefix('libro-de-reclamaciones')->name('reclamaciones.')->group(function () {
     Route::get('/', 'create')->name('create');
     Route::get('/constancia/{reclamacion}', 'constancia')->middleware('signed')->name('constancia');
     Route::get('/consultar', 'consultar')->name('consultar');
 });
 
-/*
-| Autenticación del panel (sesión: la misma que usa la API del panel)
-*/
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
-});
-
-Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+// Pantalla de acceso al panel: inicia sesión con POST /api/login
+Route::inertia('/login', 'Auth/Login')->middleware('guest')->name('login');
 
 /*
-| Panel administrativo (/admin): solo abre cada pantalla. Sus datos los pide a la API (/api/admin)
-| y también guarda y elimina por la API. Las descargas son archivos, no JSON.
+| Panel administrativo (/admin): solo abre cada pantalla; sus datos los pide a la API (/api/admin)
+| y también guarda, elimina y descarga por la API.
 */
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::inertia('/', 'Admin/Dashboard')->name('dashboard');
@@ -77,13 +69,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::inertia('/cotizador', 'Admin/Cotizador/Index')->name('cotizador.index');
     Route::inertia('/preguntas', 'Admin/Preguntas/Index')->name('preguntas.index');
     Route::inertia('/documentos', 'Admin/Documentos/Index')->name('documentos.index');
-
     Route::inertia('/mensajes', 'Admin/Mensajes/Index')->name('mensajes.index');
-    Route::get('/mensajes/exportar', ExportarSolicitudesController::class)->name('mensajes.exportar');
-
     Route::inertia('/reclamaciones', 'Admin/Reclamaciones/Index')->name('reclamaciones.index');
-    Route::get('/reclamaciones/adjuntos/{adjunto}', AdjuntoReclamacionController::class)->name('reclamaciones.adjunto');
-
     Route::inertia('/perfil', 'Admin/Perfil')->name('perfil.edit');
 });
 

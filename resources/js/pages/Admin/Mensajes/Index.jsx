@@ -35,7 +35,7 @@ export default function MensajesIndex() {
     const totalConteos = Object.values(conteos).reduce((suma, n) => suma + n, 0);
 
     const { page: _pagina, ...filtrosExcel } = filtros;
-    const urlExportar = `/admin/mensajes/exportar?${new URLSearchParams(filtrosExcel).toString()}`;
+    const urlExportar = `/api/admin/solicitudes/exportar?${new URLSearchParams(filtrosExcel).toString()}`;
 
     // Tras un cambio: la lista y el contador de "no leídas" del menú
     const actualizar = () => {

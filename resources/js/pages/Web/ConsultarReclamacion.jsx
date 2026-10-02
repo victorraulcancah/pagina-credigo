@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { Check, CircleAlert, CircleCheck, FilePlus, IdCard, Search, Ticket } from 'lucide-react';
 import { useState } from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import Button from '@/components/ui/Button';
 import Container from '@/components/ui/Container';
 import FormField from '@/components/ui/FormField';
@@ -98,7 +99,7 @@ function Resultado({ r }) {
 }
 
 /** Consulta pública del estado de una hoja de reclamación (número de hoja + documento). */
-export default function ConsultarReclamacion({ diasRespuesta }) {
+function ConsultarReclamacionContenido({ diasRespuesta }) {
     const form = useFormApi({ codigo: '', numero_documento: '' });
     const { data, setData, errors, processing } = form;
     const [resultado, setResultado] = useState(null);
@@ -199,4 +200,9 @@ export default function ConsultarReclamacion({ diasRespuesta }) {
             </div>
         </PublicLayout>
     );
+}
+
+/** Consultar mi reclamo: el contenido llega de la API (GET /api/paginas/consultar-reclamo). */
+export default function ConsultarReclamacion() {
+    return <PaginaApi url="/paginas/consultar-reclamo">{(datos) => <ConsultarReclamacionContenido {...datos} />}</PaginaApi>;
 }

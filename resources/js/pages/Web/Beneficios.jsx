@@ -2,6 +2,7 @@ import { BadgePercent, CalendarClock, MapPin, Smartphone } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import FeatureCard from '@/components/ui/FeatureCard';
 import Icono from '@/components/ui/Icono';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
@@ -208,7 +209,7 @@ function SemanaSection({ seccion, cuotaSemanal }) {
 }
 
 /** Beneficios: la semana con descuento por viajes, puntaje y niveles (textos del panel) + cupones y Comercios GO (vienen del ERP). */
-export default function Beneficios({ secciones, cuotaSemanal, comercios, cupones }) {
+function BeneficiosContenido({ secciones, cuotaSemanal, comercios, cupones }) {
     const hero = secciones['beneficios.hero'];
     const seccionCupones = secciones['beneficios.cupones'];
 
@@ -242,4 +243,9 @@ export default function Beneficios({ secciones, cuotaSemanal, comercios, cupones
             <CtaSection seccion={secciones['general.cta']} />
         </PublicLayout>
     );
+}
+
+/** Beneficios (cupones y comercios vienen del ERP): el contenido llega de la API (GET /api/paginas/beneficios). */
+export default function Beneficios() {
+    return <PaginaApi url="/paginas/beneficios">{(datos) => <BeneficiosContenido {...datos} />}</PaginaApi>;
 }

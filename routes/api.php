@@ -12,8 +12,10 @@ use App\Http\Controllers\Api\Admin\ReclamacionController as AdminReclamacionCont
 use App\Http\Controllers\Api\Admin\SeccionController;
 use App\Http\Controllers\Api\Admin\ServicioController;
 use App\Http\Controllers\Api\Admin\SolicitudController as AdminSolicitudController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogoErpController;
 use App\Http\Controllers\Api\DocumentoController;
+use App\Http\Controllers\Api\PaginaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\ReclamacionController;
 use App\Http\Controllers\Api\SitioController;
@@ -24,12 +26,21 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | API REST (/api) — respuesta estándar { success, message, data[, pagination] }
 |--------------------------------------------------------------------------
-| Públicas: solo lectura + los formularios del sitio.
-| Panel (/api/admin): con la sesión del login (Sanctum) o un token.
+| Públicas: el contenido de cada página, solo lectura + los formularios del sitio.
+| Login / logout: sesión del navegador (Sanctum SPA) o token para apps.
+| Panel (/api/admin): con esa sesión o con el token.
 */
 
 Route::name('api.')->group(function () {
+    // Sesión del panel
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1')->name('login');
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum')->name('logout');
+
     Route::middleware('throttle:60,1')->group(function () {
+        // Todo lo que muestra cada página del sitio en una sola respuesta
+        Route::get('/paginas/planes/{slug}', [PaginaController::class, 'plan'])->name('paginas.plan');
+        Route::get('/paginas/{pagina}', [PaginaController::class, 'show'])->name('paginas.show');
+
         Route::get('/sitio', [SitioController::class, 'ajustes'])->name('sitio');
         Route::get('/secciones', [SitioController::class, 'secciones'])->name('secciones');
         Route::get('/banners', [SitioController::class, 'banners'])->name('banners');
@@ -49,6 +60,8 @@ Route::name('api.')->group(function () {
     Route::post('/solicitudes', [SolicitudController::class, 'store'])->middleware('throttle:5,1')->name('solicitudes.store');
     Route::post('/reclamaciones', [ReclamacionController::class, 'store'])->middleware('throttle:5,1')->name('reclamaciones.store');
     Route::post('/reclamaciones/consultar', [ReclamacionController::class, 'consultar'])->middleware('throttle:10,1')->name('reclamaciones.consultar');
+    // Datos de la constancia: solo con la dirección firmada que da la página de la constancia
+    Route::get('/reclamaciones/{reclamacion}/constancia', [ReclamacionController::class, 'constancia'])->middleware('signed')->name('reclamaciones.constancia');
 
     /*
     | Panel administrativo
@@ -74,6 +87,7 @@ Route::name('api.')->group(function () {
 
         Route::controller(AdminSolicitudController::class)->prefix('solicitudes')->name('solicitudes.')->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/exportar', 'exportar')->name('exportar');
             Route::get('/{mensaje}', 'show')->name('show');
             Route::put('/{mensaje}/seguimiento', 'seguimiento')->name('seguimiento');
             Route::patch('/{mensaje}/leido', 'leido')->name('leido');
@@ -82,6 +96,7 @@ Route::name('api.')->group(function () {
 
         Route::controller(AdminReclamacionController::class)->prefix('reclamaciones')->name('reclamaciones.')->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/adjuntos/{adjunto}', 'adjunto')->name('adjunto');
             Route::get('/{reclamacion}', 'show')->name('show');
             Route::put('/{reclamacion}/respuesta', 'responder')->name('responder');
         });

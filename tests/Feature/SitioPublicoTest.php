@@ -4,30 +4,42 @@ use App\Models\MensajeContacto;
 use App\Models\Seccion;
 use Database\Seeders\ConfiguracionSeeder;
 use Database\Seeders\ContenidoSeeder;
+use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
     $this->seed([ConfiguracionSeeder::class, ContenidoSeeder::class]);
 });
 
-it('muestra las páginas públicas con su contenido', function (string $url, string $componente) {
+it('abre cada página con su título para buscadores y su contenido llega de la API', function (string $url, string $componente, string $pagina) {
+    // El servidor solo abre la página (con el título y la vista previa al compartir)
     $this->get($url)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component($componente)
-            ->has('secciones')
+            ->where('pagina', $pagina)
+            ->has('seo')
+            ->missing('secciones')
             ->where('sitio.empresa_nombre', 'CrediGo'));
+
+    // El contenido lo pide la página a la API
+    paginaApi($pagina, fn (AssertableJson $page) => $page->has('secciones'));
 })->with([
-    'inicio' => ['/', 'Web/Inicio'],
-    'nosotros' => ['/nosotros', 'Web/Nosotros'],
-    'servicios' => ['/servicios', 'Web/Servicios'],
-    'requisitos' => ['/requisitos', 'Web/Requisitos'],
-    'como pagar' => ['/como-pagar', 'Web/ComoPagar'],
-    'soporte' => ['/soporte', 'Web/Contacto'],
+    'inicio' => ['/', 'Web/Inicio', 'inicio'],
+    'nosotros' => ['/nosotros', 'Web/Nosotros', 'nosotros'],
+    'servicios' => ['/servicios', 'Web/Servicios', 'servicios'],
+    'requisitos' => ['/requisitos', 'Web/Requisitos', 'requisitos'],
+    'como pagar' => ['/como-pagar', 'Web/ComoPagar', 'como-pagar'],
+    'soporte' => ['/soporte', 'Web/Contacto', 'soporte'],
 ]);
 
+it('responde 404 en la API a páginas que no existen', function () {
+    $this->getJson('/api/paginas/inventada')->assertNotFound()->assertJsonPath('success', false);
+    $this->getJson('/api/paginas/planes/no-existe')->assertNotFound();
+});
+
 it('muestra los requisitos editables y enlaza a ellos desde "Cómo funciona"', function () {
-    $this->get('/requisitos')->assertInertia(fn (Assert $page) => $page
+    paginaApi('requisitos', fn (AssertableJson $page) => $page
         ->where('secciones', fn ($secciones) => collect(['hero', 'documentos', 'datos', 'proceso', 'empresas'])
             ->every(fn ($clave) => collect($secciones)->has("requisitos.{$clave}"))
             && count($secciones['requisitos.documentos']['items']) === 4));
@@ -38,7 +50,7 @@ it('muestra los requisitos editables y enlaza a ellos desde "Cómo funciona"', f
 });
 
 it('muestra cómo pagar sin cuentas inventadas: se cargan desde el panel', function () {
-    $this->get('/como-pagar')->assertInertia(fn (Assert $page) => $page
+    paginaApi('como-pagar', fn (AssertableJson $page) => $page
         ->where('secciones', fn ($secciones) => collect(['hero', 'medios', 'cuentas', 'aviso', 'despues', 'descuento'])
             ->every(fn ($clave) => collect($secciones)->has("pagos.{$clave}"))
             && $secciones['pagos.cuentas']['items'] === []));
@@ -60,7 +72,7 @@ it('crea solo las secciones de las páginas pedidas (para migraciones)', functio
 it('no envía al sitio las secciones desactivadas', function () {
     Seccion::where('pagina', 'nosotros')->where('clave', 'mision')->update(['activo' => false]);
 
-    $this->get('/nosotros')->assertInertia(fn (Assert $page) => $page
+    paginaApi('nosotros', fn (AssertableJson $page) => $page
         ->where('secciones', fn ($secciones) => ! collect($secciones)->has('nosotros.mision')
             && collect($secciones)->has('nosotros.vision')));
 });
@@ -75,7 +87,7 @@ it('guarda el mensaje del formulario de contacto', function () {
         'asunto' => 'No puedo entrar a la app',
         'mensaje' => 'Quiero información',
         'acepta_politica' => true,
-    ])->assertRedirect()->assertSuccessful();
+    ])->assertCreated();
 
     expect(MensajeContacto::sole())
         ->nombre_completo->toBe('Juan Pérez')

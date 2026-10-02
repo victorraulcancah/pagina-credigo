@@ -3,190 +3,105 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\BannerResource;
-use App\Http\Resources\DocumentoResource;
-use App\Http\Resources\PreguntaFrecuenteResource;
-use App\Http\Resources\ServicioResource;
-use App\Models\MensajeContacto;
-use App\Services\BannerService;
-use App\Services\DocumentoService;
-use App\Services\Erp\ComerciosErp;
-use App\Services\Erp\CuponesErp;
-use App\Services\Erp\TalleresErp;
-use App\Services\PreguntaFrecuenteService;
-use App\Services\SeccionService;
-use App\Services\ServicioService;
+use App\Services\PaginaService;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Páginas públicas del sitio. Los datos salen de los mismos Services y Resources que la API,
- * pero llegan con la página desde el servidor: el prop `seo` lo usa app.blade.php para el título,
- * la descripción y la vista previa al compartir (WhatsApp/Facebook leen el HTML, no el JS).
+ * Páginas públicas: el servidor solo abre la página con su título, descripción e imagen (prop `seo`,
+ * que app.blade.php pone en el HTML para Google, WhatsApp y Facebook). El contenido lo pide cada
+ * página a la API: GET /api/paginas/{pagina} y GET /api/paginas/planes/{slug}.
  */
 class PaginaController extends Controller
 {
-    public function __construct(
-        private SeccionService $secciones,
-        private ServicioService $servicios,
-        private DocumentoService $documentos,
-        private PreguntaFrecuenteService $preguntas,
-    ) {}
+    /** Página de la API → componente de React que la muestra */
+    private const VISTAS = [
+        'inicio' => 'Web/Inicio',
+        'nosotros' => 'Web/Nosotros',
+        'servicios' => 'Web/Servicios',
+        'requisitos' => 'Web/Requisitos',
+        'como-pagar' => 'Web/ComoPagar',
+        'talleres' => 'Web/Talleres',
+        'beneficios' => 'Web/Beneficios',
+        'soporte' => 'Web/Contacto',
+        'cotizador' => 'Web/Cotizador',
+        'terminos' => 'Web/Legal',
+        'privacidad' => 'Web/Legal',
+    ];
 
-    public function inicio(BannerService $banners): Response
+    public function __construct(private PaginaService $paginas) {}
+
+    public function inicio(): Response
     {
-        return Inertia::render('Web/Inicio', [
-            'banners' => BannerResource::collection($banners->activos())->resolve(),
-            'secciones' => $this->secciones->publicas(['inicio', 'general']),
-            // Los destacados, con sus opciones visibles: "Cuota desde S/ X por semana"
-            'servicios' => ServicioResource::collection($this->servicios->visibles(soloDestacados: true))->resolve(),
-            'preguntas' => PreguntaFrecuenteResource::collection($this->preguntas->activas())->resolve(),
-            'seo' => [],
-        ]);
-    }
-
-    /** Cotizador: planes visibles que tienen al menos una opción visible. */
-    public function cotizador(): Response
-    {
-        $secciones = $this->secciones->publicas(['cotizador']);
-
-        return Inertia::render('Web/Cotizador', [
-            'secciones' => $secciones,
-            'planes' => ServicioResource::collection($this->servicios->cotizables())->resolve(),
-            'seo' => $this->seo('Cotizador', $secciones['cotizador.hero'] ?? null),
-        ]);
+        return $this->pagina('inicio');
     }
 
     public function nosotros(): Response
     {
-        $secciones = $this->secciones->publicas(['nosotros', 'general']);
-
-        return Inertia::render('Web/Nosotros', [
-            'secciones' => $secciones,
-            'seo' => $this->seo('Nosotros', $secciones['nosotros.hero'] ?? null),
-        ]);
+        return $this->pagina('nosotros');
     }
 
     public function servicios(): Response
     {
-        $secciones = $this->secciones->publicas(['servicios', 'general']);
-
-        return Inertia::render('Web/Servicios', [
-            'secciones' => $secciones,
-            'servicios' => ServicioResource::collection($this->servicios->visibles())->resolve(),
-            // Fichas generales en PDF (las de un plan están en la página de ese plan)
-            'documentos' => DocumentoResource::collection($this->documentos->publicos('planes', false))->resolve(),
-            'seo' => $this->seo('Servicios', $secciones['servicios.hero'] ?? null),
-        ]);
+        return $this->pagina('servicios');
     }
 
-    /** Página de un plan: qué incluye, sus opciones del cotizador, detalle, ficha en PDF y video. */
+    /** Página de un plan: 404 real si no existe (para que Google no la indexe vacía). */
     public function plan(string $slug): Response
     {
-        $servicio = $this->servicios->publicoPorSlug($slug) ?? abort(404);
+        $seo = $this->paginas->seoPlan($slug) ?? abort(404);
 
-        return Inertia::render('Web/Plan', [
-            'secciones' => $this->secciones->publicas(['requisitos', 'general']),
-            'servicio' => (new ServicioResource($servicio))->resolve(),
-            'documentos' => DocumentoResource::collection($this->documentos->publicos('planes', $servicio->id))->resolve(),
-            'otros' => ServicioResource::collection($this->servicios->otros($servicio))->resolve(),
-            'seo' => array_filter([
-                'titulo' => $servicio->titulo,
-                'descripcion' => $servicio->descripcion,
-                'imagen' => $servicio->imagen_url,
-            ]),
-        ]);
+        return Inertia::render('Web/Plan', ['slug' => $slug, 'seo' => $seo]);
     }
 
     public function requisitos(): Response
     {
-        $secciones = $this->secciones->publicas(['requisitos', 'general']);
-
-        return Inertia::render('Web/Requisitos', [
-            'secciones' => $secciones,
-            'documentos' => DocumentoResource::collection($this->documentos->publicos('requisitos'))->resolve(),
-            'seo' => $this->seo('Requisitos', $secciones['requisitos.hero'] ?? null),
-        ]);
+        return $this->pagina('requisitos');
     }
 
     public function pagos(): Response
     {
-        $secciones = $this->secciones->publicas(['pagos', 'general']);
-
-        return Inertia::render('Web/ComoPagar', [
-            'secciones' => $secciones,
-            'documentos' => DocumentoResource::collection($this->documentos->publicos('pagos'))->resolve(),
-            'seo' => $this->seo('Cómo pagar', $secciones['pagos.hero'] ?? null),
-        ]);
+        return $this->pagina('como-pagar');
     }
 
-    public function talleres(TalleresErp $talleres): Response
+    public function talleres(): Response
     {
-        $secciones = $this->secciones->publicas(['talleres', 'general']);
-
-        return Inertia::render('Web/Talleres', [
-            'secciones' => $secciones,
-            'talleres' => $talleres->items(),
-            'documentos' => DocumentoResource::collection($this->documentos->publicos('talleres'))->resolve(),
-            'seo' => $this->seo('Talleres aliados', $secciones['talleres.hero'] ?? null),
-        ]);
+        return $this->pagina('talleres');
     }
 
-    public function beneficios(ComerciosErp $comercios, CuponesErp $cupones): Response
+    public function beneficios(): Response
     {
-        $secciones = $this->secciones->publicas(['beneficios', 'general']);
-
-        return Inertia::render('Web/Beneficios', [
-            'secciones' => $secciones,
-            // Franja "Tu semana": el lunes muestra "cuota desde" con el monto real más bajo
-            'cuotaSemanal' => $this->servicios->cuotaSemanalMasBaja(),
-            'comercios' => $comercios->items(),
-            'cupones' => $cupones->vigentes(),
-            'seo' => $this->seo('Beneficios', $secciones['beneficios.hero'] ?? null),
-        ]);
+        return $this->pagina('beneficios');
     }
 
     public function contacto(): Response
     {
-        $secciones = $this->secciones->publicas(['contacto', 'general']);
+        return $this->pagina('soporte');
+    }
 
-        return Inertia::render('Web/Contacto', [
-            'secciones' => $secciones,
-            'tiposConsulta' => MensajeContacto::TIPOS_CONSULTA,
-            'preguntas' => PreguntaFrecuenteResource::collection($this->preguntas->activas())->resolve(),
-            'seo' => $this->seo('Soporte', $secciones['contacto.hero'] ?? null),
-        ]);
+    public function cotizador(): Response
+    {
+        return $this->pagina('cotizador');
     }
 
     public function terminos(): Response
     {
-        return $this->paginaLegal('terminos');
+        return $this->pagina('terminos');
     }
 
     public function privacidad(): Response
     {
-        return $this->paginaLegal('privacidad');
+        return $this->pagina('privacidad');
     }
 
-    /** Páginas legales: su texto se edita en el panel (Secciones → Páginas legales). */
-    private function paginaLegal(string $clave): Response
+    /** `pagina`: lo que la página pide a la API. */
+    private function pagina(string $pagina): Response
     {
-        $seccion = $this->secciones->publicas(['legal'])["legal.{$clave}"] ?? abort(404);
+        abort_unless($this->paginas->existe($pagina), 404);
 
-        return Inertia::render('Web/Legal', [
-            'seccion' => $seccion,
-            'documentos' => DocumentoResource::collection($this->documentos->publicos('legal'))->resolve(),
-            'seo' => ['titulo' => $seccion['titulo']],
-        ]);
-    }
-
-    /** Título, descripción e imagen de una página a partir de su encabezado (sección hero). */
-    private function seo(string $titulo, ?array $hero): array
-    {
-        return array_filter([
-            'titulo' => $titulo,
-            'descripcion' => $hero['contenido'] ?? null,
-            'imagen' => $hero['imagen_url'] ?? null,
+        return Inertia::render(self::VISTAS[$pagina], [
+            'pagina' => $pagina,
+            'seo' => $this->paginas->seo($pagina),
         ]);
     }
 }

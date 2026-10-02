@@ -2,6 +2,7 @@ import { Link, router } from '@inertiajs/react';
 import { CircleAlert, CircleCheck, ClipboardList, FileText, ImagePlus, Mail, Search, Send, Smartphone, Video } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
+import PaginaApi from '@/components/web/PaginaApi';
 import ArchivoInput from '@/components/ui/ArchivoInput';
 import Button from '@/components/ui/Button';
 import Checkbox from '@/components/ui/Checkbox';
@@ -84,7 +85,7 @@ function OpcionTipo({ valor, actual, onChange, titulo, descripcion }) {
 }
 
 /** Libro de Reclamaciones virtual (Ley N° 29571, Código de Protección y Defensa del Consumidor). */
-export default function LibroReclamaciones({ tiposDocumento, tiposComprobante, soluciones, diasRespuesta }) {
+function LibroReclamacionesContenido({ tiposDocumento, tiposComprobante, soluciones, diasRespuesta }) {
     const sitio = useSitio();
     const form = useFormApi({
         // 1. Consumidor
@@ -507,3 +508,7 @@ export default function LibroReclamaciones({ tiposDocumento, tiposComprobante, s
     );
 }
 
+/** Libro de Reclamaciones: el contenido llega de la API (GET /api/paginas/libro-de-reclamaciones). */
+export default function LibroReclamaciones() {
+    return <PaginaApi url="/paginas/libro-de-reclamaciones">{(datos) => <LibroReclamacionesContenido {...datos} />}</PaginaApi>;
+}

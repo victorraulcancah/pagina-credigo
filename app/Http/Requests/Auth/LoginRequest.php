@@ -4,13 +4,15 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
+/** Inicio de sesión del panel. Bloquea tras 5 intentos fallidos por correo + IP. */
 class LoginRequest extends FormRequest
 {
+    private const MAX_INTENTOS = 5;
+
     public function authorize(): bool
     {
         return true;
@@ -22,44 +24,41 @@ class LoginRequest extends FormRequest
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
             'remember' => ['boolean'],
+            // Solo para apps u otros sistemas (sin sesión del navegador): nombre del token
+            'dispositivo' => ['nullable', 'string', 'max:100'],
         ];
     }
 
-    /** Intenta iniciar sesión; bloquea tras 5 intentos fallidos por correo + IP. */
-    public function authenticate(): void
+    /** @throws ValidationException si se superó el límite de intentos */
+    public function verificarIntentos(): void
     {
-        $this->ensureIsNotRateLimited();
-
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
-        }
-
-        RateLimiter::clear($this->throttleKey());
-    }
-
-    private function ensureIsNotRateLimited(): void
-    {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->claveIntentos(), self::MAX_INTENTOS)) {
             return;
         }
 
         event(new Lockout($this));
 
-        $seconds = RateLimiter::availableIn($this->throttleKey());
+        $segundos = RateLimiter::availableIn($this->claveIntentos());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => trans('auth.throttle', ['seconds' => $segundos, 'minutes' => ceil($segundos / 60)]),
         ]);
     }
 
-    private function throttleKey(): string
+    /** @throws ValidationException siempre: cuenta el intento y avisa que los datos no coinciden */
+    public function rechazar(): never
+    {
+        RateLimiter::hit($this->claveIntentos());
+
+        throw ValidationException::withMessages(['email' => trans('auth.failed')]);
+    }
+
+    public function limpiarIntentos(): void
+    {
+        RateLimiter::clear($this->claveIntentos());
+    }
+
+    private function claveIntentos(): string
     {
         return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
     }

@@ -1,7 +1,7 @@
 import { Calculator, CircleCheckBig, Mail, MailOpen, Phone, Save, Trash, UserRound } from 'lucide-react';
 import { useEffect } from 'react';
-import { FaWhatsapp } from 'react-icons/fa6';
-import { estadoUi, iniciales, whatsappDe } from '@/components/admin/solicitudes/estados';
+import { AccionesContacto, DatoContacto, Tarjeta } from '@/components/admin/Detalle';
+import { estadoUi, iniciales } from '@/components/admin/solicitudes/estados';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import Select from '@/components/ui/Select';
@@ -13,15 +13,6 @@ import { cn } from '@/lib/utils';
 
 // En las cotizaciones la primera línea es "Quiero cotizar: Plan — Opción"
 const ETIQUETAS = { 'Quiero cotizar': 'Plan' };
-
-function Tarjeta({ titulo, children, className }) {
-    return (
-        <section className={cn('rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-5', className)}>
-            {titulo && <h3 className="mb-3 text-xs font-bold tracking-wider text-gray-400 uppercase">{titulo}</h3>}
-            {children}
-        </section>
-    );
-}
 
 /** Mensaje de la solicitud: en cotizaciones, las líneas "Clave: valor" se muestran como tabla. */
 function ContenidoMensaje({ mensaje }) {
@@ -46,20 +37,6 @@ function ContenidoMensaje({ mensaje }) {
                 </div>
             ))}
         </dl>
-    );
-}
-
-function DatoContacto({ icono: Icono, etiqueta, children }) {
-    return (
-        <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary">
-                <Icono className="size-5" aria-hidden="true" />
-            </span>
-            <div className="min-w-0">
-                <p className="text-xs text-gray-500">{etiqueta}</p>
-                <p className="font-semibold break-all text-gray-900">{children}</p>
-            </div>
-        </div>
     );
 }
 
@@ -145,32 +122,7 @@ export default function SolicitudModal({ mensaje, estados, origenes, usuarios, r
                                     </DatoContacto>
                                 )}
                             </div>
-                            <div className="mt-4 grid grid-cols-3 gap-2">
-                                <a
-                                    href={whatsappDe(mensaje.telefono)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-3 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
-                                >
-                                    <FaWhatsapp className="size-4" aria-hidden="true" /> WhatsApp
-                                </a>
-                                <a
-                                    href={`tel:${mensaje.telefono.replace(/\s/g, '')}`}
-                                    className="flex items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-800"
-                                >
-                                    <Phone className="size-4" aria-hidden="true" /> Llamar
-                                </a>
-                                <a
-                                    href={mensaje.email ? `mailto:${mensaje.email}` : undefined}
-                                    aria-disabled={!mensaje.email}
-                                    className={cn(
-                                        'flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 transition',
-                                        mensaje.email ? 'bg-white text-primary ring-primary-200 hover:bg-primary-50' : 'pointer-events-none bg-gray-100 text-gray-400 ring-gray-200',
-                                    )}
-                                >
-                                    <Mail className="size-4" aria-hidden="true" /> Correo
-                                </a>
-                            </div>
+                            <AccionesContacto telefono={mensaje.telefono} email={mensaje.email} className="mt-4" />
                         </Tarjeta>
 
                         <Tarjeta titulo={mensaje.origen === 'cotizador' ? 'Cotización solicitada' : 'Mensaje'}>

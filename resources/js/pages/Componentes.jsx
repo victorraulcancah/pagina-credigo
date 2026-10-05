@@ -1,4 +1,6 @@
 import { ArrowRight, Car, HandCoins, Send, ShieldCheck, Smartphone, Users } from 'lucide-react';
+import { useState } from 'react';
+import ReclamacionModal from '@/components/admin/reclamaciones/ReclamacionModal';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Badge from '@/components/ui/Badge';
@@ -13,8 +15,44 @@ import Select from '@/components/ui/Select';
 import Stat from '@/components/ui/Stat';
 import Textarea from '@/components/ui/Textarea';
 
+// Hojas de ejemplo para ver la ventana de detalle del panel sin iniciar sesión (datos inventados)
+const HOJA_EJEMPLO = {
+    id: 1,
+    codigo: '2026-000001',
+    tipo: 'reclamo',
+    estado: 'pendiente',
+    created_at: new Date().toISOString(),
+    fecha_limite: new Date(Date.now() + 20 * 86_400_000).toISOString().slice(0, 10),
+    vencido: false,
+    nombre: 'Persona de Ejemplo',
+    tipo_documento: 'DNI',
+    numero_documento: '00000000',
+    telefono: '999999999',
+    email: 'ejemplo@ejemplo.test',
+    domicilio: 'Dirección de ejemplo 123, Arequipa',
+    menor_de_edad: false,
+    tipo_bien: 'servicio',
+    descripcion_bien: 'Plan CrediYango',
+    comprobante_texto: 'Contrato',
+    numero_contrato: 'EJ-001',
+    monto_reclamado: 100,
+    detalle: 'Texto de ejemplo del reclamo: qué pasó, cuándo y con quién.',
+    pedido: 'Texto de ejemplo de lo que pide el consumidor.',
+    solucion_texto: 'Cumplimiento del servicio contratado',
+    adjuntos: [],
+};
+const HOJA_ATENDIDA = {
+    ...HOJA_EJEMPLO,
+    estado: 'atendido',
+    respuesta: 'Texto de ejemplo de la respuesta enviada al consumidor.',
+    respondido_at: new Date().toISOString(),
+    respondido_por: { id: 1, name: 'Administrador' },
+};
+
 /** Guía visual de componentes (solo en entorno local: /componentes). */
 export default function Componentes() {
+    const [hojaEjemplo, setHojaEjemplo] = useState(null);
+
     return (
         <PublicLayout title="Componentes">
             <PageHero
@@ -136,6 +174,19 @@ export default function Componentes() {
                         </form>
                     </Card>
                 </div>
+            </Section>
+
+            <Section background="muted">
+                <SectionHeading eyebrow="Panel" title="Detalle de una reclamación" description="Ventana del panel con una hoja de ejemplo (pendiente o atendida)." />
+                <div className="mt-10 flex flex-wrap justify-center gap-3">
+                    <Button variant="secondary" onClick={() => setHojaEjemplo(HOJA_EJEMPLO)}>
+                        Ver hoja pendiente
+                    </Button>
+                    <Button variant="outline" onClick={() => setHojaEjemplo(HOJA_ATENDIDA)}>
+                        Ver hoja atendida
+                    </Button>
+                </div>
+                <ReclamacionModal reclamacion={hojaEjemplo} onClose={() => setHojaEjemplo(null)} recargar={false} />
             </Section>
 
             <Section background="accent">

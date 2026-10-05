@@ -10,7 +10,7 @@ use App\Models\Reclamacion;
 use App\Models\ReclamacionAdjunto;
 use App\Services\ReclamacionService;
 use Illuminate\Http\JsonResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /** Bandeja del Libro de Reclamaciones. Las hojas no se eliminan (registro legal). */
 class ReclamacionController extends BaseApiController
@@ -30,7 +30,7 @@ class ReclamacionController extends BaseApiController
     }
 
     /** Adjunto de una hoja (foto, comprobante o video) desde el disco privado (la respuesta es el archivo). */
-    public function adjunto(ReclamacionAdjunto $adjunto): StreamedResponse
+    public function adjunto(ReclamacionAdjunto $adjunto): BinaryFileResponse
     {
         return $this->reclamaciones->adjunto($adjunto);
     }

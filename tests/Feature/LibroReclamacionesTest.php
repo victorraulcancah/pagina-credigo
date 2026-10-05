@@ -125,6 +125,16 @@ it('guarda los adjuntos en el disco privado y el panel los puede ver', function 
     // Sin sesión no se puede ver; con sesión sí
     $this->getJson("/api/admin/reclamaciones/adjuntos/{$adjunto->id}")->assertUnauthorized();
     $this->actingAs(User::factory()->create())->get("/api/admin/reclamaciones/adjuntos/{$adjunto->id}")->assertOk();
+
+    // Se abre dentro del panel (no se descarga) y el video se puede pedir por partes para adelantarlo
+    $video = $reclamacion->adjuntos->firstWhere('tipo', 'video');
+    Storage::disk('local')->put($video->ruta, str_repeat('x', 500)); // el archivo falso llega vacío
+    $this->get("/api/admin/reclamaciones/adjuntos/{$video->id}")
+        ->assertOk()
+        ->assertHeader('Content-Type', 'video/mp4')
+        ->assertHeader('Accept-Ranges', 'bytes')
+        ->assertHeader('Content-Disposition', 'inline; filename=video.mp4');
+    $this->get("/api/admin/reclamaciones/adjuntos/{$video->id}", ['Range' => 'bytes=0-99'])->assertStatus(206);
 });
 
 it('rechaza adjuntos demasiado pesados o de otro formato', function () {

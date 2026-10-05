@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Throwable;
 
 class ReclamacionService
@@ -95,9 +97,23 @@ class ReclamacionService
     }
 
     /** Muestra un adjunto guardado en el disco privado (solo para el panel). */
-    public function adjunto(ReclamacionAdjunto $adjunto): StreamedResponse
+    /**
+     * Adjunto para verlo dentro del panel (inline). Se sirve como archivo para que
+     * el navegador pueda pedir por partes y adelantar los videos.
+     */
+    public function adjunto(ReclamacionAdjunto $adjunto): BinaryFileResponse
     {
-        return Storage::disk(ReclamacionAdjunto::DISCO)->response($adjunto->ruta, $adjunto->nombre_original);
+        $disco = Storage::disk(ReclamacionAdjunto::DISCO);
+        abort_unless($disco->exists($adjunto->ruta), 404);
+
+        // El encabezado no admite barras; la versión ASCII tampoco "%" (la usan navegadores antiguos)
+        $nombre = str_replace(['/', '\\'], '-', $adjunto->nombre_original);
+        $nombreAscii = str_replace('%', '', Str::ascii($nombre)) ?: 'adjunto';
+
+        return response()->file($disco->path($adjunto->ruta), [
+            'Content-Type' => $adjunto->mime,
+            'Content-Disposition' => HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_INLINE, $nombre, $nombreAscii),
+        ]);
     }
 
     /** Hoja de un consumidor por su número y su documento (así nadie consulta hojas ajenas). */

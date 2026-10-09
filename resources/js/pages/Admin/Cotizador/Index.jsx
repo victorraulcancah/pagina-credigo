@@ -17,13 +17,15 @@ import { useAccionApi } from '@/hooks/useAccionApi';
 import { useCrudModal } from '@/hooks/useCrudModal';
 import { formatoFecha } from '@/lib/fechas';
 import { FRECUENCIAS, resumenOpcion } from '@/lib/moneda';
+import { cn } from '@/lib/utils';
 
 const VACIO = {
     servicio_id: '',
     erp_ref: '',
     nombre: '',
     nota: '',
-    moneda: 'PEN',
+    moneda: 'PEN', // de la cuota
+    moneda_inicial: 'PEN',
     inicial: '',
     cuota: '',
     numero_cuotas: '',
@@ -32,7 +34,45 @@ const VACIO = {
     activo: true,
 };
 
-const ETIQUETA_MONEDA = { PEN: 'Soles (S/)', USD: 'Dólares (US$)' };
+const SIMBOLO_MONEDA = { PEN: 'S/', USD: 'US$' };
+
+/**
+ * Monto con su moneda: el selector S/ o US$ va pegado al campo, como un solo control.
+ * Cada monto lleva la suya (ej. inicial en US$ y cuotas semanales en S/).
+ */
+function MontoConMoneda({ id, moneda, onMoneda, monedas, etiquetaMoneda, error, ...props }) {
+    return (
+        <div
+            className={cn(
+                'flex h-11 overflow-hidden rounded-xl border bg-white transition focus-within:ring-2 sm:h-12',
+                error ? 'border-red-500 focus-within:ring-red-200' : 'border-primary-200 focus-within:border-primary focus-within:ring-accent',
+            )}
+        >
+            <select
+                aria-label={etiquetaMoneda}
+                value={moneda}
+                onChange={(e) => onMoneda(e.target.value)}
+                className="cursor-pointer border-r border-primary-200 bg-primary-50 pr-1 pl-3 text-sm font-semibold text-primary focus:outline-none sm:text-base"
+            >
+                {monedas.map((m) => (
+                    <option key={m} value={m}>
+                        {SIMBOLO_MONEDA[m] ?? m}
+                    </option>
+                ))}
+            </select>
+            <input
+                id={id}
+                type="number"
+                min={0}
+                step="0.01"
+                inputMode="decimal"
+                aria-invalid={error ? true : undefined}
+                className="min-w-0 flex-1 bg-transparent px-4 text-sm text-primary placeholder:text-primary-300 focus:outline-none sm:text-base"
+                {...props}
+            />
+        </div>
+    );
+}
 
 /** Texto corto con los montos de una opción, para la lista. */
 function montos(opcion) {
@@ -178,6 +218,7 @@ function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
             ...o,
             erp_ref: o.erp_ref ?? '',
             nota: o.nota ?? '',
+            moneda_inicial: o.moneda_inicial ?? o.moneda,
             inicial: o.inicial ?? '',
             cuota: o.cuota ?? '',
             numero_cuotas: o.numero_cuotas ?? '',
@@ -308,8 +349,37 @@ function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
                     <FormField label="Nota" htmlFor="nota" error={errors.nota} hint="Texto pequeño debajo del nombre (opcional)." className="sm:col-span-2">
                         <Input id="nota" value={data.nota} onChange={(e) => setData('nota', e.target.value)} error={errors.nota} />
                     </FormField>
-                    <FormField label="Moneda de los montos" htmlFor="moneda" error={errors.moneda}>
-                        <Select id="moneda" value={data.moneda} onChange={(e) => setData('moneda', e.target.value)} options={monedas.map((m) => ({ value: m, label: ETIQUETA_MONEDA[m] ?? m }))} />
+                    <FormField label="Inicial o inscripción" htmlFor="inicial" error={errors.inicial || errors.moneda_inicial} hint="Vacío si no aplica.">
+                        <MontoConMoneda
+                            id="inicial"
+                            moneda={data.moneda_inicial}
+                            onMoneda={(valor) => setData('moneda_inicial', valor)}
+                            monedas={monedas}
+                            etiquetaMoneda="Moneda de la inicial"
+                            value={data.inicial}
+                            onChange={(e) => setData('inicial', e.target.value)}
+                            error={errors.inicial || errors.moneda_inicial}
+                        />
+                    </FormField>
+                    <FormField
+                        label={`Monto de cada cuota (${FRECUENCIAS[data.frecuencia]?.periodo ?? ''})`}
+                        htmlFor="cuota"
+                        error={errors.cuota || errors.moneda}
+                        hint='Vacío = "consulta la cuota con un asesor".'
+                    >
+                        <MontoConMoneda
+                            id="cuota"
+                            moneda={data.moneda}
+                            onMoneda={(valor) => setData('moneda', valor)}
+                            monedas={monedas}
+                            etiquetaMoneda="Moneda de la cuota"
+                            value={data.cuota}
+                            onChange={(e) => setData('cuota', e.target.value)}
+                            error={errors.cuota || errors.moneda}
+                        />
+                    </FormField>
+                    <FormField label="Número de cuotas" htmlFor="numero_cuotas" error={errors.numero_cuotas}>
+                        <Input id="numero_cuotas" type="number" min={1} step="1" inputMode="numeric" value={data.numero_cuotas} onChange={(e) => setData('numero_cuotas', e.target.value)} error={errors.numero_cuotas} />
                     </FormField>
                     <FormField label="Frecuencia de pago" htmlFor="frecuencia" error={errors.frecuencia}>
                         <Select
@@ -318,15 +388,6 @@ function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
                             onChange={(e) => setData('frecuencia', e.target.value)}
                             options={frecuencias.map((f) => ({ value: f, label: f.charAt(0).toUpperCase() + f.slice(1) }))}
                         />
-                    </FormField>
-                    <FormField label="Inicial o inscripción" htmlFor="inicial" error={errors.inicial} hint="Vacío si no aplica.">
-                        <Input id="inicial" type="number" min={0} step="0.01" inputMode="decimal" value={data.inicial} onChange={(e) => setData('inicial', e.target.value)} error={errors.inicial} />
-                    </FormField>
-                    <FormField label={`Monto de cada cuota (${FRECUENCIAS[data.frecuencia]?.periodo ?? ''})`} htmlFor="cuota" error={errors.cuota} hint='Vacío = "consulta la cuota con un asesor".'>
-                        <Input id="cuota" type="number" min={0} step="0.01" inputMode="decimal" value={data.cuota} onChange={(e) => setData('cuota', e.target.value)} error={errors.cuota} />
-                    </FormField>
-                    <FormField label="Número de cuotas" htmlFor="numero_cuotas" error={errors.numero_cuotas}>
-                        <Input id="numero_cuotas" type="number" min={1} step="1" inputMode="numeric" value={data.numero_cuotas} onChange={(e) => setData('numero_cuotas', e.target.value)} error={errors.numero_cuotas} />
                     </FormField>
                     <FormField label="Orden" htmlFor="orden" error={errors.orden}>
                         <Input id="orden" type="number" min={0} value={data.orden} onChange={(e) => setData('orden', e.target.value)} error={errors.orden} />

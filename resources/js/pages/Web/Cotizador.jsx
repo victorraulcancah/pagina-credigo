@@ -145,7 +145,12 @@ function CotizadorContenido({ secciones, planes }) {
                                                 </span>
                                                 <span className="min-w-0 flex-1">
                                                     <span className="block font-bold text-primary">{o.nombre}</span>
-                                                    {o.nota && <span className="block text-sm text-primary-700/80">{o.nota}</span>}
+                                                    {/* Si la inicial va en otra moneda (ej. US$ con cuotas en S/), se avisa aquí */}
+                                                    {(o.nota || r.otraMoneda) && (
+                                                        <span className="block text-sm text-primary-700/80">
+                                                            {[o.nota, r.otraMoneda && `Inicial ${r.inicial}`].filter(Boolean).join(' · ')}
+                                                        </span>
+                                                    )}
                                                 </span>
                                                 <span className="shrink-0 text-right">
                                                     {r.cuota ? (

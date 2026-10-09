@@ -17,7 +17,7 @@ class OpcionPlan extends Model
     protected $table = 'opciones_plan';
 
     protected $fillable = [
-        'servicio_id', 'erp_ref', 'nombre', 'nota', 'moneda', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia', 'orden', 'activo',
+        'servicio_id', 'erp_ref', 'nombre', 'nota', 'moneda', 'moneda_inicial', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia', 'orden', 'activo',
     ];
 
     protected function casts(): array

@@ -21,7 +21,9 @@ class OpcionPlanRequest extends FormRequest
             'servicio_id' => ['required', 'exists:servicios,id'],
             'nombre' => ['required', 'string', 'max:120'],
             'nota' => ['nullable', 'string', 'max:255'],
+            // `moneda` es la de la cuota; la inicial puede ir en otra (ej. inicial en US$ y cuotas en S/)
             'moneda' => ['required', Rule::in(OpcionPlan::MONEDAS)],
+            'moneda_inicial' => ['sometimes', 'required', Rule::in(OpcionPlan::MONEDAS)],
             'inicial' => ['nullable', 'numeric', 'min:0', 'max:99999999'],
             'cuota' => ['nullable', 'numeric', 'min:0', 'max:99999999', 'required_with:numero_cuotas'],
             'numero_cuotas' => ['nullable', 'integer', 'min:1', 'max:1000'],
@@ -36,6 +38,8 @@ class OpcionPlanRequest extends FormRequest
         return [
             'servicio_id' => 'plan',
             'nota' => 'nota',
+            'moneda' => 'moneda de la cuota',
+            'moneda_inicial' => 'moneda de la inicial',
             'inicial' => 'inicial o inscripción',
             'cuota' => 'monto de la cuota',
             'numero_cuotas' => 'número de cuotas',

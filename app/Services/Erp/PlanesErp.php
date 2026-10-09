@@ -98,12 +98,10 @@ class PlanesErp extends CatalogoErp
         $codigo = $moneda === 2 ? 'USD' : 'PEN';
         $codigoInicial = $monedaInicial === 2 ? 'USD' : 'PEN';
         $montoInicial = $inicial > 0 ? $inicial : ($inscripcion > 0 ? $inscripcion : null);
-        // OpcionPlan maneja una sola moneda: si la inicial está en otra, se indica en la nota
-        $mismaMoneda = $codigoInicial === $codigo;
 
+        // La inicial va en su propia moneda (puede ser US$ con cuotas en S/)
         $nota = collect([
             $certificado ? 'Certificado de '.number_format((float) $certificado, 0, '.', ',') : null,
-            $montoInicial && ! $mismaMoneda ? ($inicial > 0 ? 'Inicial ' : 'Inscripción ').$this->monto($montoInicial, $codigoInicial) : null,
             $inicial > 0 && $inscripcion > 0 ? 'Inscripción '.$this->monto($inscripcion, $codigoInicial) : null,
         ])->filter()->implode(' · ');
 
@@ -112,7 +110,8 @@ class PlanesErp extends CatalogoErp
             'nombre' => mb_substr($nombre, 0, 120),
             'nota' => $nota ?: null,
             'moneda' => $codigo,
-            'inicial' => $mismaMoneda ? $montoInicial : null,
+            'moneda_inicial' => $codigoInicial,
+            'inicial' => $montoInicial,
             'cuota' => $cuota > 0 ? $cuota : null,
             'numero_cuotas' => $cuotas > 0 ? $cuotas : null,
             'frecuencia' => $frecuencia,
@@ -137,7 +136,7 @@ class PlanesErp extends CatalogoErp
             $precio = $precios->get($opcion->erp_ref);
 
             if ($precio && $precio['importable']) {
-                $opcion->update(Arr::only($precio, ['moneda', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia']));
+                $opcion->update(Arr::only($precio, ['moneda', 'moneda_inicial', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia']));
             }
         });
     }

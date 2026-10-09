@@ -55,7 +55,7 @@ class OpcionPlanService
         }
 
         return OpcionPlan::create([
-            ...Arr::only($precio, ['nombre', 'nota', 'moneda', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia']),
+            ...Arr::only($precio, ['nombre', 'nota', 'moneda', 'moneda_inicial', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia']),
             'servicio_id' => $servicioId,
             'erp_ref' => $erpRef,
             'orden' => OpcionPlan::where('servicio_id', $servicioId)->count(),

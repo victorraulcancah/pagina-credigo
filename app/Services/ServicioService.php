@@ -12,7 +12,7 @@ class ServicioService
     private const CARPETA = 'servicios';
 
     /** Columnas de las opciones que necesita la web para "Cuota desde" y la tabla del plan */
-    private const COLUMNAS_OPCION = ['id', 'servicio_id', 'nombre', 'nota', 'moneda', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia'];
+    private const COLUMNAS_OPCION = ['id', 'servicio_id', 'nombre', 'nota', 'moneda', 'moneda_inicial', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia'];
 
     public function __construct(private ImagenService $imagenes) {}
 

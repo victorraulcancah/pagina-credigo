@@ -71,6 +71,32 @@ it('el panel crea, edita y elimina opciones del cotizador', function () {
     expect(OpcionPlan::find($opcion->id))->toBeNull();
 });
 
+it('guarda la inicial en dólares y las cuotas en soles', function () {
+    $this->actingAs(User::factory()->create());
+    $plan = Servicio::firstWhere('titulo', 'Todo lo que tu unidad necesita');
+
+    $this->post('/api/admin/cotizador/opciones', [
+        'servicio_id' => $plan->id,
+        'nombre' => 'KIA SOLUTO PLUS',
+        'moneda' => 'PEN',
+        'moneda_inicial' => 'USD',
+        'inicial' => 2500,
+        'cuota' => 380,
+        'numero_cuotas' => 185,
+        'frecuencia' => 'semanal',
+        'orden' => 0,
+        'activo' => true,
+    ])->assertSuccessful()
+        ->assertJsonPath('data.moneda', 'PEN')
+        ->assertJsonPath('data.moneda_inicial', 'USD');
+
+    expect(OpcionPlan::firstWhere('nombre', 'KIA SOLUTO PLUS')->moneda_inicial)->toBe('USD');
+
+    $this->post('/api/admin/cotizador/opciones', [
+        'servicio_id' => $plan->id, 'nombre' => 'Otra', 'moneda' => 'PEN', 'moneda_inicial' => 'EUR', 'frecuencia' => 'semanal', 'orden' => 0,
+    ])->assertJsonValidationErrors('moneda_inicial');
+});
+
 it('exige el monto de la cuota si se indica el número de cuotas', function () {
     $this->actingAs(User::factory()->create());
 

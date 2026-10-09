@@ -13,7 +13,7 @@ import Documentos from '@/components/web/Documentos';
 import TextoFormateado from '@/components/web/TextoFormateado';
 import Video from '@/components/web/Video';
 import { useSitio } from '@/hooks/useSitio';
-import { cuotaMasBaja, FRECUENCIAS, formatoMoneda } from '@/lib/moneda';
+import { cuotaMasBaja, FRECUENCIAS, formatoMoneda, monedaInicial } from '@/lib/moneda';
 import { cn } from '@/lib/utils';
 
 const Titulo = ({ className, children }) => (
@@ -90,7 +90,7 @@ function Encabezado({ servicio, menor, whatsapp }) {
 function FilaOpcion({ opcion }) {
     const frecuencia = FRECUENCIAS[opcion.frecuencia] ?? FRECUENCIAS.semanal;
     const datos = [
-        ['Inicial', formatoMoneda(opcion.inicial, opcion.moneda)],
+        ['Inicial', formatoMoneda(opcion.inicial, monedaInicial(opcion))],
         ['Cuota', formatoMoneda(opcion.cuota, opcion.moneda), frecuencia.periodo],
         ['Cuotas', opcion.numero_cuotas ? `${opcion.numero_cuotas}` : null, frecuencia.plural],
     ];

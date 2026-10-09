@@ -57,8 +57,8 @@ function simularCatalogosErp(array &$precios): void
                 'grupo_financiamiento' => ['monto_comision' => 500, 'tasa_interes' => 30],
                 'variantes_disponibles' => [[
                     'variante_id' => 7, 'nombre' => 'Certificado 5,500', 'certificado' => 5500.0, 'monto_cuota' => $precios['cuota'],
-                    'cantidad_cuotas' => 58, 'cuota_inicial' => 0.0, 'monto_inscripcion' => 150.0, 'tasa_interes' => 21.3,
-                    'frecuencia_pago_id' => 1, 'moneda_id' => 1, 'moneda_inicial_id' => 1,
+                    'cantidad_cuotas' => 58, 'cuota_inicial' => $precios['inicial'] ?? 0.0, 'monto_inscripcion' => 150.0, 'tasa_interes' => 21.3,
+                    'frecuencia_pago_id' => 1, 'moneda_id' => 1, 'moneda_inicial_id' => $precios['moneda_inicial_id'] ?? 1,
                 ]],
             ]]]);
         }
@@ -145,6 +145,31 @@ it('el panel agrega una opción con los precios del ERP y la mantiene actualizad
     app(PlanesErp::class)->sincronizar();
 
     expect($opcion->fresh()->cuota)->toBe(135.0);
+});
+
+it('trae la inicial del ERP en su propia moneda aunque las cuotas sean en soles', function () {
+    // Inicial de US$ 2,500 con cuotas semanales en soles (ej. KIA SOLUTO PLUS)
+    $precios = ['cuota' => 380.0, 'inicial' => 2500.0, 'moneda_inicial_id' => 2];
+    simularCatalogosErp($precios);
+    $this->actingAs(User::factory()->create());
+
+    $this->post('/api/admin/cotizador/opciones/erp', ['servicio_id' => Servicio::firstOrFail()->id, 'erp_ref' => 'v7'])->assertSuccessful();
+
+    $opcion = OpcionPlan::where('erp_ref', 'v7')->sole();
+    expect($opcion)
+        ->moneda->toBe('PEN')
+        ->moneda_inicial->toBe('USD')
+        ->inicial->toBe(2500.0)
+        ->cuota->toBe(380.0)
+        // La inicial ya no se repite en la nota; la inscripción sí queda indicada
+        ->and($opcion->nota)->not->toContain('Inicial')
+        ->and($opcion->nota)->toContain('Inscripción US$ 150');
+
+    // Si en el ERP la inicial pasa a soles, la opción vinculada se corrige sola
+    $precios['moneda_inicial_id'] = 1;
+    app(PlanesErp::class)->sincronizar();
+
+    expect($opcion->fresh()->moneda_inicial)->toBe('PEN');
 });
 
 it('no agrega precios que el ERP ya no tiene ni permite inventar un vínculo', function () {

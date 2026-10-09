@@ -1,10 +1,44 @@
 import { Link } from '@inertiajs/react';
-import { BookOpenText, Clock, Mail, MapPin, Phone } from 'lucide-react';
+import { ArrowUpRight, BookOpenText, Clock, Mail, MapPin, Phone } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import Logo from '@/components/layout/Logo';
 import Container from '@/components/ui/Container';
 import { navLinks } from '@/data/navegacion';
 import { useSitio } from '@/hooks/useSitio';
+
+// El logo de Magus se pinta en su cian usando el SVG como máscara (el archivo viene en otro color)
+const LOGO_MAGUS = {
+    maskImage: 'url(/images/logos/magus.svg)',
+    WebkitMaskImage: 'url(/images/logos/magus.svg)',
+    maskSize: 'contain',
+    WebkitMaskSize: 'contain',
+    maskRepeat: 'no-repeat',
+    WebkitMaskRepeat: 'no-repeat',
+    maskPosition: 'center',
+    WebkitMaskPosition: 'center',
+};
+
+/** Tarjeta "Desarrollado por" con los colores de Magus (no los de CrediGo). */
+function CreditoMagus() {
+    return (
+        <a
+            href="https://magustechnologies.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex max-w-full items-center gap-4 rounded-2xl border border-cyan-400/60 bg-[#0a0f1c] px-4 py-3 text-left shadow-[0_0_24px_-8px_rgb(34_211_238/0.5)] transition duration-300 hover:border-cyan-300 hover:shadow-[0_0_28px_-6px_rgb(34_211_238/0.7)] focus-visible:outline-cyan-300 sm:px-5"
+        >
+            <span aria-hidden="true" style={LOGO_MAGUS} className="h-8 w-20 shrink-0 bg-cyan-400 transition group-hover:bg-cyan-300 sm:h-10 sm:w-24" />
+            <span aria-hidden="true" className="h-10 w-px shrink-0 bg-white/15" />
+            <span className="min-w-0">
+                <span className="block text-sm font-semibold text-white">Desarrollado por Magus Technologies</span>
+                <span className="mt-0.5 inline-flex items-center gap-1 text-sm text-cyan-400 group-hover:text-cyan-300">
+                    magustechnologies.com
+                    <ArrowUpRight className="size-3.5 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" aria-hidden="true" />
+                </span>
+            </span>
+        </a>
+    );
+}
 
 function SocialLink({ href, label, icon: Icon }) {
     return (
@@ -116,22 +150,25 @@ export default function Footer() {
 
             <div className="border-t border-white/10">
                 {/* pb/pr extra para que el botón flotante de WhatsApp no tape el texto */}
-                <Container className="flex flex-col gap-2 pt-6 pb-24 text-center text-xs sm:flex-row sm:items-center sm:justify-between sm:pr-24 sm:pb-6 sm:text-left sm:text-sm lg:pr-28">
-                    <p>
-                        © {new Date().getFullYear()} {sitio.empresa_razon_social || sitio.empresa_nombre}
-                        {sitio.empresa_ruc && ` · RUC ${sitio.empresa_ruc}`}
-                    </p>
-                    <nav aria-label="Legal" className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-                        <Link href="/terminos-y-condiciones" className="transition hover:text-accent">
-                            Términos y condiciones
-                        </Link>
-                        <Link href="/politica-de-privacidad" className="transition hover:text-accent">
-                            Política de privacidad
-                        </Link>
-                        <Link href="/libro-de-reclamaciones" className="transition hover:text-accent">
-                            Libro de Reclamaciones
-                        </Link>
-                    </nav>
+                <Container className="flex flex-col items-center gap-6 pt-6 pb-24 text-center text-xs sm:pr-24 sm:pb-6 sm:text-sm lg:flex-row lg:justify-between lg:pr-28 lg:text-left">
+                    <div className="flex flex-col gap-2">
+                        <p>
+                            © {new Date().getFullYear()} {sitio.empresa_razon_social || sitio.empresa_nombre}
+                            {sitio.empresa_ruc && ` · RUC ${sitio.empresa_ruc}`}
+                        </p>
+                        <nav aria-label="Legal" className="flex flex-wrap justify-center gap-x-4 gap-y-1 lg:justify-start">
+                            <Link href="/terminos-y-condiciones" className="transition hover:text-accent">
+                                Términos y condiciones
+                            </Link>
+                            <Link href="/politica-de-privacidad" className="transition hover:text-accent">
+                                Política de privacidad
+                            </Link>
+                            <Link href="/libro-de-reclamaciones" className="transition hover:text-accent">
+                                Libro de Reclamaciones
+                            </Link>
+                        </nav>
+                    </div>
+                    <CreditoMagus />
                 </Container>
             </div>
         </footer>

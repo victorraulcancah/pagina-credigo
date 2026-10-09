@@ -29,7 +29,10 @@ class ReclamacionController extends BaseApiController
         );
     }
 
-    /** Adjunto de una hoja (foto, comprobante o video) desde el disco privado (la respuesta es el archivo). */
+    /**
+     * Adjunto de una hoja (foto, comprobante o video) desde el disco privado (la respuesta es el archivo).
+     * Se pide con la dirección firmada que da ReclamacionAdjuntoResource, no con la sesión.
+     */
     public function adjunto(ReclamacionAdjunto $adjunto): BinaryFileResponse
     {
         return $this->reclamaciones->adjunto($adjunto);

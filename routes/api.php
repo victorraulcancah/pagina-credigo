@@ -64,6 +64,11 @@ Route::name('api.')->group(function () {
     Route::post('/reclamaciones/consultar', [ReclamacionController::class, 'consultar'])->middleware('throttle:10,1')->name('reclamaciones.consultar');
     // Datos de la constancia: solo con la dirección firmada que da la página de la constancia
     Route::get('/reclamaciones/{reclamacion}/constancia', [ReclamacionController::class, 'constancia'])->middleware('signed')->name('reclamaciones.constancia');
+    // Adjunto de una reclamación: solo con la dirección firmada y temporal que el panel da a cada
+    // adjunto (así se abre en otra pestaña o en el reproductor, que no llevan la sesión de la API)
+    Route::get('/admin/reclamaciones/adjuntos/{adjunto}', [AdminReclamacionController::class, 'adjunto'])
+        ->middleware('signed:relative')
+        ->name('admin.reclamaciones.adjunto');
 
     /*
     | Panel administrativo
@@ -99,7 +104,6 @@ Route::name('api.')->group(function () {
 
         Route::controller(AdminReclamacionController::class)->prefix('reclamaciones')->name('reclamaciones.')->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('/adjuntos/{adjunto}', 'adjunto')->name('adjunto');
             Route::get('/{reclamacion}', 'show')->name('show');
             Route::put('/{reclamacion}/respuesta', 'responder')->name('responder');
         });

@@ -44,8 +44,8 @@ function FilasBien({ r }) {
     );
 }
 
-// Los adjuntos se sirven desde el disco privado, solo con la sesión del panel
-const urlAdjunto = (adjunto) => `/api/admin/reclamaciones/adjuntos/${adjunto.id}`;
+// Dirección firmada y temporal que da la API para cada adjunto (disco privado)
+const urlAdjunto = (adjunto) => adjunto.url;
 
 /** Nombre, tipo y peso de un adjunto, con enlace para abrirlo en otra pestaña. */
 function CabeceraAdjunto({ adjunto, icono: Icono }) {

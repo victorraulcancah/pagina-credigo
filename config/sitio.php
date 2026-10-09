@@ -41,6 +41,7 @@ return [
         'color_primario' => '#0f1037',
         'color_acento' => '#f8ec34',
         'logo' => null,
+        'logo_empresa' => null, // logo de la empresa (Arequipa GO), va junto al de CrediGo
         'favicon' => null,
 
         // Avisos internos: correos que reciben las solicitudes y reclamaciones (separados por coma)
@@ -53,7 +54,7 @@ return [
     ],
 
     // Claves que guardan rutas de imagen (se suben como archivo)
-    'imagenes' => ['logo', 'favicon', 'imagen_compartir'],
+    'imagenes' => ['logo', 'logo_empresa', 'favicon', 'imagen_compartir'],
 
     // Claves que no se envían al sitio público (solo se ven en el panel)
     'privadas' => ['notificaciones_email'],

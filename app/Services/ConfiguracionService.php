@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Ajustes del sitio (empresa, contacto, redes, colores, logo).
+ * Ajustes del sitio (empresa, contacto, redes, colores, logos).
  * Valores por defecto en config/sitio.php; lo guardado en BD los reemplaza.
  * Se cachean porque se leen en cada página (se limpian al guardar).
  */
@@ -54,6 +54,7 @@ class ConfiguracionService
             'analytics_ga4' => $this->idSeguro($ajustes['analytics_ga4'], '/^G-[A-Z0-9]{4,20}$/'),
             'analytics_meta_pixel' => $this->idSeguro($ajustes['analytics_meta_pixel'], '/^\d{10,20}$/'),
             'logo_url' => $this->imagenes->url($ajustes['logo']),
+            'logo_empresa_url' => $this->imagenes->url($ajustes['logo_empresa']),
             'favicon_url' => $this->imagenes->url($ajustes['favicon']),
             'imagen_compartir_url' => $this->imagenes->url($ajustes['imagen_compartir']),
         ];

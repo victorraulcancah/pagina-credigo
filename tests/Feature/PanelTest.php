@@ -102,6 +102,19 @@ describe('con sesión iniciada', function () {
         Storage::disk('public')->assertExists($segundo);
     });
 
+    it('sube y quita el logo de la empresa, que el sitio recibe junto al de CrediGo', function () {
+        Storage::fake('public');
+
+        $this->post('/api/admin/configuracion', ['_method' => 'put', 'logo_empresa' => UploadedFile::fake()->image('arequipa-go.png')])->assertSuccessful();
+        $ruta = Configuracion::where('clave', 'logo_empresa')->value('valor');
+        Storage::disk('public')->assertExists($ruta);
+        $this->getJson('/api/sitio')->assertJsonPath('data.logo_empresa_url', Storage::disk('public')->url($ruta));
+
+        $this->put('/api/admin/configuracion', ['quitar_logo_empresa' => true])->assertSuccessful();
+        Storage::disk('public')->assertMissing($ruta);
+        $this->getJson('/api/sitio')->assertJsonPath('data.logo_empresa_url', null);
+    });
+
     it('crea, edita y elimina un servicio', function () {
         $datos = ['titulo' => 'Seguros', 'descripcion' => 'Seguro vehicular', 'icono' => 'ShieldCheck', 'orden' => 1, 'activo' => true, 'destacado' => false];
 

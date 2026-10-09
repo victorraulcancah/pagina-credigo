@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Eye, EyeOff, LogIn } from 'lucide-react';
 import { useState } from 'react';
+import Logo from '@/components/layout/Logo';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
@@ -36,9 +37,7 @@ export default function Login() {
 
             <div className="relative w-full max-w-md">
                 <div className="mb-8 flex justify-center">
-                    <Link href="/" aria-label="Ir al sitio">
-                        <img src={sitio.logo} alt={sitio.empresa_nombre} className="h-16 w-auto object-contain sm:h-20" />
-                    </Link>
+                    <Logo tamano="login" etiqueta="Ir al sitio" />
                 </div>
 
                 <div className="rounded-3xl bg-white p-6 shadow-2xl sm:p-10">

@@ -50,7 +50,7 @@ export default function Footer() {
             <div className="h-1.5 bg-accent" />
             <Container className="grid gap-10 py-14 sm:grid-cols-2 sm:py-16 lg:grid-cols-12 lg:gap-8">
                 <div className="sm:col-span-2 lg:col-span-5">
-                    <Logo />
+                    <Logo tamano="pie" />
                     {sitio.empresa_descripcion && (
                         <p className="mt-5 max-w-sm text-sm leading-relaxed">{sitio.empresa_descripcion}</p>
                     )}

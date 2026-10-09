@@ -172,7 +172,7 @@ export default function Navbar() {
         >
             <div className="relative">
                 <Container className="flex h-14 items-center justify-between gap-3 sm:h-16">
-                    <Logo className="h-8 sm:h-10" />
+                    <Logo />
 
                     <nav aria-label="Principal" className="hidden items-center gap-1 lg:flex">
                         {menu.map((item) =>

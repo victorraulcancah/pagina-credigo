@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import MenuUsuario from '@/components/admin/MenuUsuario';
+import Logo from '@/components/layout/Logo';
 import { useCompartido } from '@/hooks/useCompartido';
 import { useSitio, useTemaColores } from '@/hooks/useSitio';
 import { cn } from '@/lib/utils';
@@ -118,8 +119,9 @@ export default function AdminLayout({ title, children }) {
                 )}
             >
                 <div className={cn('flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-4', colapsado && 'lg:justify-center lg:px-2')}>
-                    <Link href="/admin" className="flex items-center gap-3" title={colapsado ? 'Dashboard' : undefined}>
-                        <img src={sitio.logo} alt={sitio.empresa_nombre} className={cn('h-9 w-auto object-contain', colapsado && 'lg:max-w-14')} />
+                    <Link href="/admin" className="flex min-w-0 items-center gap-3" title={colapsado ? 'Dashboard' : undefined}>
+                        {/* Contraído solo cabe el logo de CrediGo */}
+                        <Logo tamano="panel" href={null} empresaClassName={cn(colapsado && 'lg:hidden')} className={cn(colapsado && 'lg:max-w-14')} />
                         <span className={cn('text-xs font-semibold tracking-wider whitespace-nowrap text-white/60 uppercase transition-opacity', colapsado && 'lg:hidden')}>
                             Panel
                         </span>

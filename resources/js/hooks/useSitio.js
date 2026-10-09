@@ -10,6 +10,7 @@ const REDES = [
 ];
 
 export const LOGO_POR_DEFECTO = '/images/logos/credigo.png';
+export const LOGO_EMPRESA_POR_DEFECTO = '/images/logos/arequipa-go.png';
 
 /**
  * Ajustes del sitio compartidos por el backend (HandleInertiaRequests → `sitio`),
@@ -26,6 +27,7 @@ export function useSitio() {
     return {
         ...sitio,
         logo: sitio.logo_url || LOGO_POR_DEFECTO,
+        logoEmpresa: sitio.logo_empresa_url || LOGO_EMPRESA_POR_DEFECTO,
         redes: REDES.filter((red) => sitio[red.clave]).map((red) => ({ ...red, href: sitio[red.clave] })),
         whatsappUrl,
     };

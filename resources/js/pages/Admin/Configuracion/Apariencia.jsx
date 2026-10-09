@@ -6,10 +6,11 @@ import PageHeader from '@/components/admin/PageHeader';
 import PantallaApi from '@/components/admin/PantallaApi';
 import Panel from '@/components/admin/Panel';
 import AdminLayout from '@/components/layout/AdminLayout';
+import { ParLogos } from '@/components/layout/Logo';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import { useFormApi } from '@/hooks/useFormApi';
-import { LOGO_POR_DEFECTO } from '@/hooks/useSitio';
+import { LOGO_EMPRESA_POR_DEFECTO, LOGO_POR_DEFECTO } from '@/hooks/useSitio';
 
 /** Contraste WCAG entre dos colores hex (1 a 21). */
 function contraste(a, b) {
@@ -26,14 +27,21 @@ function contraste(a, b) {
 
 const esHex = (valor) => /^#[0-9a-fA-F]{6}$/.test(valor);
 
+const ARCHIVOS_LIMPIOS = { logo: null, quitar_logo: false, logo_empresa: null, quitar_logo_empresa: false, favicon: null, quitar_favicon: false };
+
+/** Vista de una imagen del formulario: la elegida sin guardar, la guardada o la de por defecto. */
+function useImagenVista(archivo, quitada, actualUrl, porDefecto) {
+    const nueva = useMemo(() => (archivo ? URL.createObjectURL(archivo) : null), [archivo]);
+    useEffect(() => () => nueva && URL.revokeObjectURL(nueva), [nueva]);
+
+    return nueva ?? (quitada ? porDefecto : actualUrl || porDefecto);
+}
+
 function AparienciaFormulario({ ajustes, coloresPorDefecto }) {
     const form = useFormApi({
         color_primario: ajustes.color_primario,
         color_acento: ajustes.color_acento,
-        logo: null,
-        quitar_logo: false,
-        favicon: null,
-        quitar_favicon: false,
+        ...ARCHIVOS_LIMPIOS,
     });
     const { data, setData, processing, errors, isDirty } = form;
 
@@ -49,16 +57,14 @@ function AparienciaFormulario({ ajustes, coloresPorDefecto }) {
         e.preventDefault();
         form.put('/admin/configuracion', {
             onSuccess: () => {
-                const archivosLimpios = { logo: null, quitar_logo: false, favicon: null, quitar_favicon: false };
-                setData((d) => ({ ...d, ...archivosLimpios }));
-                form.setDefaults({ color_primario: data.color_primario, color_acento: data.color_acento, ...archivosLimpios });
+                setData((d) => ({ ...d, ...ARCHIVOS_LIMPIOS }));
+                form.setDefaults({ color_primario: data.color_primario, color_acento: data.color_acento, ...ARCHIVOS_LIMPIOS });
             },
         });
     };
 
-    const logoNuevo = useMemo(() => (data.logo ? URL.createObjectURL(data.logo) : null), [data.logo]);
-    useEffect(() => () => logoNuevo && URL.revokeObjectURL(logoNuevo), [logoNuevo]);
-    const logoVista = logoNuevo ?? (data.quitar_logo ? LOGO_POR_DEFECTO : ajustes.logo_url || LOGO_POR_DEFECTO);
+    const logoVista = useImagenVista(data.logo, data.quitar_logo, ajustes.logo_url, LOGO_POR_DEFECTO);
+    const logoEmpresaVista = useImagenVista(data.logo_empresa, data.quitar_logo_empresa, ajustes.logo_empresa_url, LOGO_EMPRESA_POR_DEFECTO);
 
     const botonGuardar = (
         <Button type="submit" form="form-apariencia" variant="secondary" icon={Save} disabled={processing || !isDirty}>
@@ -70,7 +76,7 @@ function AparienciaFormulario({ ajustes, coloresPorDefecto }) {
         <AdminLayout title="Apariencia">
             <PageHeader
                 title="Apariencia"
-                description="Colores de marca, logo y favicon. Los cambios se aplican en todo el sitio al guardar."
+                description="Colores de marca, logos y favicon. Los cambios se aplican en todo el sitio al guardar."
                 actions={botonGuardar}
             />
 
@@ -107,7 +113,7 @@ function AparienciaFormulario({ ajustes, coloresPorDefecto }) {
                         className="overflow-hidden rounded-2xl ring-1 ring-gray-200"
                     >
                         <div className="flex items-center justify-between gap-3 bg-primary px-4 py-2.5">
-                            <img src={logoVista} alt="" className="h-8 w-auto object-contain" />
+                            <ParLogos empresa={logoEmpresaVista} marca={logoVista} tamano="panel" />
                             <span className="inline-flex items-center gap-1.5 rounded-full border-2 border-accent px-3 py-1 text-xs font-semibold text-white">
                                 <LogIn className="size-3.5" /> Acceso al sistema
                             </span>
@@ -130,7 +136,21 @@ function AparienciaFormulario({ ajustes, coloresPorDefecto }) {
                     </div>
                 </Panel>
 
-                <Panel title="Logo" description="Se usa en el menú, el pie de página y el login. PNG con fondo transparente o WEBP, máx. 2 MB.">
+                <Panel title="Logo de la empresa" description="Logo de Arequipa GO: va a la izquierda del de CrediGo, separado por una línea. PNG o WEBP, máx. 2 MB.">
+                    <ImageUpload
+                        actualUrl={ajustes.logo_empresa_url}
+                        archivo={data.logo_empresa}
+                        onArchivo={(archivo) => setData('logo_empresa', archivo)}
+                        quitada={data.quitar_logo_empresa}
+                        onQuitar={(valor) => setData('quitar_logo_empresa', valor)}
+                        error={errors.logo_empresa}
+                        hint={!ajustes.logo_empresa_url ? 'Ahora se usa el logo por defecto de Arequipa GO.' : undefined}
+                        aspect="aspect-[3/1]"
+                        fondo="bg-primary"
+                    />
+                </Panel>
+
+                <Panel title="Logo de CrediGo" description="Va a la derecha del logo de la empresa en el menú, el pie de página, el login y el panel. PNG con fondo transparente o WEBP, máx. 2 MB.">
                     <ImageUpload
                         actualUrl={ajustes.logo_url}
                         archivo={data.logo}
@@ -165,7 +185,7 @@ function AparienciaFormulario({ ajustes, coloresPorDefecto }) {
     );
 }
 
-/** Colores, logo y favicon: los ajustes llegan de la API (GET /api/admin/configuracion). */
+/** Colores, logos y favicon: los ajustes llegan de la API (GET /api/admin/configuracion). */
 export default function Apariencia() {
     return (
         <PantallaApi url="/admin/configuracion" titulo="Apariencia">

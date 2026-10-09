@@ -57,8 +57,10 @@ class ConfiguracionRequest extends FormRequest
             'color_primario' => ['sometimes', 'required', self::COLOR_HEX],
             'color_acento' => ['sometimes', 'required', self::COLOR_HEX],
             'logo' => ['sometimes', 'nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'logo_empresa' => ['sometimes', 'nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
             'favicon' => ['sometimes', 'nullable', 'file', 'mimes:png,ico,webp', 'max:512'],
             'quitar_logo' => ['sometimes', 'boolean'],
+            'quitar_logo_empresa' => ['sometimes', 'boolean'],
             'quitar_favicon' => ['sometimes', 'boolean'],
 
             // Correos separados por coma: cada uno debe ser válido
@@ -113,6 +115,7 @@ class ConfiguracionRequest extends FormRequest
             'color_acento' => 'color de acento',
             'notificaciones_email' => 'correos de avisos',
             'imagen_compartir' => 'imagen para compartir',
+            'logo_empresa' => 'logo de la empresa',
         ];
     }
 }

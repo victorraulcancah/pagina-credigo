@@ -215,7 +215,9 @@ Confident pills, color-swap on hover, no lift.
 - **Error / Disabled:** red border and red-200 ring; disabled takes the wash ground.
 
 ### Navigation
-Full-width blue sticky bar, logo left, semibold 14px items as pills: inactive at white 85% with a white/10 hover, active filled yellow with blue text. A yellow "Cotiza tu plan" pill sits right. Desktop groups open a white 32px-radius panel with a pointer arrow and a blue promo tile; under lg everything collapses into a white 24px-radius sheet with 12px-radius rows.
+Full-width blue sticky bar, the logo pair left, semibold 14px items as pills: inactive at white 85% with a white/10 hover, active filled yellow with blue text. A yellow "Cotiza tu plan" pill sits right. Desktop groups open a white 32px-radius panel with a pointer arrow and a blue promo tile; under lg everything collapses into a white 24px-radius sheet with 12px-radius rows.
+
+**Logo pair (`Logo` / `ParLogos`):** the company logo (Arequipa GO, a solid yellow badge) then the CrediGo logo (white lettering), split by a 1px white/25 line. The badge sits one step shorter than the CrediGo logo because a solid block reads heavier than open lettering (nav 28/32px against 32/40px). The pair goes everywhere the brand signs a blue surface: nav bar, footer, login and the panel sidebar. The collapsed sidebar keeps only the CrediGo logo. Both images are uploaded in Admin → Apariencia.
 
 ### Week Strip (signature)
 Seven equal columns inside a 16px-rounded box ringed in white/15, divided by white/15 rules. Monday is the yellow cell carrying "cuota desde" and the lowest real weekly amount; Tuesday–Saturday carry five trip ticks that fill progressively in yellow; Sunday is the brighter cell with the yellow "cuota baja" line; today wears the "Hoy" pill. Below, a three-part legend (pay / drive / discount) on the same 7-column grid. It lives on /beneficios, right under the page header, as the explanation of the trip discount. When it enters the viewport the days light from 35% to full opacity one every 140ms. Under md it becomes a vertical ruled list, one row per day, with the item title leading and the day name beside it.

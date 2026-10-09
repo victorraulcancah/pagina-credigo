@@ -23,3 +23,8 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Los ajustes de PHP de esta web no se sirven como archivo
+<Files ".user.ini">
+    Require all denied
+</Files>

@@ -93,6 +93,19 @@ export default function Login() {
                             {processing ? 'Ingresando...' : 'Ingresar'}
                         </Button>
                     </form>
+
+                    {/* Crédito del desarrollador: en gris, toma su color al pasar el mouse */}
+                    <div className="mt-8 border-t border-primary-100 pt-5 text-center">
+                        <p className="text-xs text-primary-500">Desarrollado por</p>
+                        <a
+                            href="https://magustechnologies.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 inline-block rounded-lg opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0 focus-visible:opacity-100 focus-visible:grayscale-0"
+                        >
+                            <img src="/images/logos/magus.svg" alt="Magus Technologies" className="h-12 w-auto" />
+                        </a>
+                    </div>
                 </div>
 
                 <Link href="/" className="mt-6 flex items-center justify-center gap-2 text-sm font-medium text-white/80 hover:text-white">

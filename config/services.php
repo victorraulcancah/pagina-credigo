@@ -38,6 +38,12 @@ return [
         'cache_minutos' => (int) env('ERP_CACHE_MINUTOS', 30),
     ],
 
+    // Clave con la que el ERP lee las visitas del sitio (GET /api/estadisticas/visitas).
+    // Es un secreto: vive solo en .env. Vacía = nadie puede leerlas.
+    'estadisticas' => [
+        'token' => env('ESTADISTICAS_TOKEN'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

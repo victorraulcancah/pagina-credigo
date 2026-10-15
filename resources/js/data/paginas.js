@@ -8,6 +8,7 @@ export const PAGINAS = {
     talleres: { label: 'Talleres aliados', url: '/talleres', descripcion: 'La lista de talleres viene del ERP' },
     beneficios: { label: 'Beneficios', url: '/beneficios', descripcion: 'Comercios GO y cupones vienen del ERP' },
     cotizador: { label: 'Cotizador', url: '/cotizador' },
+    historias: { label: 'Historias de conductores', url: '/historias', descripcion: 'Las historias se cargan en Testimonios' },
     contacto: { label: 'Soporte', url: '/soporte' },
     general: { label: 'Bloques compartidos', descripcion: 'Aparecen en varias páginas' },
     legal: { label: 'Páginas legales', descripcion: 'Términos y condiciones · Política de privacidad' },

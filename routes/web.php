@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\LibroReclamacionesController;
 use App\Http\Controllers\Web\PaginaController;
 use App\Http\Controllers\Web\SeoController;
+use App\Http\Middleware\ContarVisita;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -16,8 +17,9 @@ use Inertia\Inertia;
 /*
 | Sitio público. El servidor solo pone en el HTML el título, la descripción y la imagen
 | (Google, WhatsApp y Facebook); el contenido lo pide cada página a /api/paginas/...
+| Cada página abierta suma al contador de visitas (ContarVisita).
 */
-Route::controller(PaginaController::class)->group(function () {
+Route::controller(PaginaController::class)->middleware(ContarVisita::class)->group(function () {
     Route::get('/', 'inicio')->name('inicio');
     Route::get('/nosotros', 'nosotros')->name('nosotros');
     Route::get('/servicios', 'servicios')->name('servicios');
@@ -26,6 +28,7 @@ Route::controller(PaginaController::class)->group(function () {
     Route::get('/como-pagar', 'pagos')->name('pagos');
     Route::get('/talleres', 'talleres')->name('talleres');
     Route::get('/beneficios', 'beneficios')->name('beneficios');
+    Route::get('/historias', 'historias')->name('historias');
     Route::get('/soporte', 'contacto')->name('soporte');
     Route::get('/cotizador', 'cotizador')->name('cotizador');
     Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');
@@ -40,7 +43,7 @@ Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 // Libro de Reclamaciones virtual (Indecopi)
-Route::controller(LibroReclamacionesController::class)->prefix('libro-de-reclamaciones')->name('reclamaciones.')->group(function () {
+Route::controller(LibroReclamacionesController::class)->middleware(ContarVisita::class)->prefix('libro-de-reclamaciones')->name('reclamaciones.')->group(function () {
     Route::get('/', 'create')->name('create');
     Route::get('/constancia/{reclamacion}', 'constancia')->middleware('signed')->name('constancia');
     Route::get('/consultar', 'consultar')->name('consultar');
@@ -56,6 +59,7 @@ Route::inertia('/login', 'Auth/Login')->middleware('guest')->name('login');
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::inertia('/', 'Admin/Dashboard')->name('dashboard');
 
+    Route::inertia('/testimonios', 'Admin/Testimonios/Index')->name('testimonios');
     Route::inertia('/configuracion/empresa', 'Admin/Configuracion/Empresa')->name('configuracion.empresa');
     Route::inertia('/configuracion/apariencia', 'Admin/Configuracion/Apariencia')->name('configuracion.apariencia');
     Route::inertia('/configuracion/seo', 'Admin/Configuracion/Seo')->name('configuracion.seo');

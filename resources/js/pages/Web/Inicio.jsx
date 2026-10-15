@@ -10,6 +10,7 @@ import FaqSection from '@/components/web/FaqSection';
 import HeroBanner from '@/components/web/HeroBanner';
 import ListaPlanes from '@/components/web/ListaPlanes';
 import Recorrido from '@/components/web/Recorrido';
+import TestimoniosSection from '@/components/web/Testimonios';
 import TituloSeccion from '@/components/web/TituloSeccion';
 import { cn } from '@/lib/utils';
 
@@ -105,8 +106,11 @@ function Nosotros({ seccion }) {
     );
 }
 
-/** Inicio: carrusel de banners del panel arriba y luego planes, recorrido, niveles y cierre. Todo el contenido viene del panel. */
-function InicioContenido({ banners, secciones, servicios, preguntas }) {
+/**
+ * Inicio: carrusel de banners del panel arriba y luego planes, recorrido, niveles, historias
+ * de conductores y cierre. Todo el contenido viene del panel.
+ */
+function InicioContenido({ banners, secciones, servicios, preguntas, testimonios, totalTestimonios }) {
     const faq = secciones['general.faq'];
 
     return (
@@ -115,6 +119,7 @@ function InicioContenido({ banners, secciones, servicios, preguntas }) {
             <Planes encabezado={secciones['inicio.servicios']} servicios={servicios} />
             <Recorrido id="como-funciona" seccion={secciones['inicio.como_funciona']} />
             <Niveles seccion={secciones['general.beneficios']} />
+            <TestimoniosSection seccion={secciones['inicio.testimonios']} testimonios={testimonios} total={totalTestimonios} />
             <Nosotros seccion={secciones['inicio.nosotros']} />
             <FaqSection seccion={faq && { ...faq, subtitulo: null }} preguntas={preguntas} />
             <CtaSection seccion={secciones['general.cta']} whatsappPrimero />

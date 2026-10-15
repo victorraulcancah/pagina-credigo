@@ -23,6 +23,7 @@ class PaginaController extends Controller
         'como-pagar' => 'Web/ComoPagar',
         'talleres' => 'Web/Talleres',
         'beneficios' => 'Web/Beneficios',
+        'historias' => 'Web/Historias',
         'soporte' => 'Web/Contacto',
         'cotizador' => 'Web/Cotizador',
         'terminos' => 'Web/Legal',
@@ -72,6 +73,11 @@ class PaginaController extends Controller
     public function beneficios(): Response
     {
         return $this->pagina('beneficios');
+    }
+
+    public function historias(): Response
+    {
+        return $this->pagina('historias');
     }
 
     public function contacto(): Response

@@ -88,6 +88,20 @@ class ContenidoSeeder extends Seeder
                 ],
             ]],
 
+            // Si el título empieza con una cifra ("+150 conductores…"), la web la resalta
+            ['inicio', 'testimonios', 'Inicio · Historias de conductores', ['titulo', 'contenido', 'boton'], [
+                'titulo' => '+150 conductores ya tienen su propio vehículo',
+                'contenido' => 'Conoce sus experiencias y cómo lograron cumplir su sueño.',
+                'boton_texto' => 'Ver más historias',
+                'boton_url' => '/historias',
+            ]],
+
+            // ── Historias de conductores ────────────────────────────
+            ['historias', 'hero', 'Historias · Encabezado', ['titulo', 'contenido', 'imagen'], [
+                'titulo' => 'Historias de conductores',
+                'contenido' => 'Conductores de Yango e InDrive que ya trabajan con su propio vehículo cuentan cómo lo lograron.',
+            ]],
+
             // ── Nosotros ────────────────────────────────────────────
             ['nosotros', 'hero', 'Nosotros · Encabezado', ['titulo', 'contenido', 'imagen'], [
                 'titulo' => 'Somos CrediGo',

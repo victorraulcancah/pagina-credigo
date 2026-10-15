@@ -12,14 +12,17 @@ use App\Http\Controllers\Api\Admin\ReclamacionController as AdminReclamacionCont
 use App\Http\Controllers\Api\Admin\SeccionController;
 use App\Http\Controllers\Api\Admin\ServicioController;
 use App\Http\Controllers\Api\Admin\SolicitudController as AdminSolicitudController;
+use App\Http\Controllers\Api\Admin\TestimonioController as AdminTestimonioController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogoErpController;
 use App\Http\Controllers\Api\DocumentoController;
+use App\Http\Controllers\Api\EstadisticaController;
 use App\Http\Controllers\Api\PaginaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\ReclamacionController;
 use App\Http\Controllers\Api\SitioController;
 use App\Http\Controllers\Api\SolicitudController;
+use App\Http\Middleware\VerificarClaveEstadisticas;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -70,6 +73,11 @@ Route::name('api.')->group(function () {
         ->middleware('signed:relative')
         ->name('admin.reclamaciones.adjunto');
 
+    // Visitas del sitio para el dashboard del ERP: solo con la clave de ESTADISTICAS_TOKEN
+    Route::get('/estadisticas/visitas', [EstadisticaController::class, 'visitas'])
+        ->middleware([VerificarClaveEstadisticas::class, 'throttle:60,1'])
+        ->name('estadisticas.visitas');
+
     /*
     | Panel administrativo
     */
@@ -78,6 +86,7 @@ Route::name('api.')->group(function () {
         Route::get('/contadores', [DashboardController::class, 'contadores'])->name('contadores');
 
         Route::apiResource('banners', AdminBannerController::class);
+        Route::apiResource('testimonios', AdminTestimonioController::class);
         Route::apiResource('servicios', ServicioController::class);
         Route::apiResource('documentos', AdminDocumentoController::class);
         Route::apiResource('preguntas', PreguntaFrecuenteController::class)->parameters(['preguntas' => 'pregunta']);

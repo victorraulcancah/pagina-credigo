@@ -6,6 +6,7 @@ use App\Http\Resources\BannerResource;
 use App\Http\Resources\DocumentoResource;
 use App\Http\Resources\PreguntaFrecuenteResource;
 use App\Http\Resources\ServicioResource;
+use App\Http\Resources\TestimonioResource;
 use App\Models\MensajeContacto;
 use App\Models\Reclamacion;
 use App\Models\Servicio;
@@ -21,6 +22,9 @@ use App\Services\Erp\TalleresErp;
 class PaginaService
 {
     /** página => [páginas de secciones que usa, sección de encabezado, título por defecto] */
+    // Historias que entran en el carrusel del inicio (el resto, en /historias)
+    public const TESTIMONIOS_INICIO = 8;
+
     public const PAGINAS = [
         'inicio' => [['inicio', 'general'], null, null],
         'nosotros' => [['nosotros', 'general'], 'nosotros.hero', 'Nosotros'],
@@ -29,6 +33,7 @@ class PaginaService
         'como-pagar' => [['pagos', 'general'], 'pagos.hero', 'Cómo pagar'],
         'talleres' => [['talleres', 'general'], 'talleres.hero', 'Talleres aliados'],
         'beneficios' => [['beneficios', 'general'], 'beneficios.hero', 'Beneficios'],
+        'historias' => [['historias', 'general'], 'historias.hero', 'Historias de conductores'],
         'soporte' => [['contacto', 'general'], 'contacto.hero', 'Soporte'],
         'cotizador' => [['cotizador'], 'cotizador.hero', 'Cotizador'],
         'terminos' => [['legal'], null, null],
@@ -43,6 +48,7 @@ class PaginaService
         private DocumentoService $documentos,
         private PreguntaFrecuenteService $preguntas,
         private BannerService $banners,
+        private TestimonioService $testimonios,
     ) {}
 
     public function existe(string $pagina): bool
@@ -66,6 +72,13 @@ class PaginaService
                 // Los destacados, con sus opciones visibles: "Cuota desde S/ X por semana"
                 'servicios' => ServicioResource::collection($this->servicios->visibles(soloDestacados: true))->resolve(),
                 'preguntas' => $this->preguntasActivas(),
+                // Historias de conductores: las primeras van en el carrusel; el total decide "Ver más historias"
+                'testimonios' => TestimonioResource::collection($this->testimonios->publicados(self::TESTIMONIOS_INICIO))->resolve(),
+                'total_testimonios' => $this->testimonios->totalPublicados(),
+            ],
+            'historias' => [
+                'secciones' => $secciones,
+                'testimonios' => TestimonioResource::collection($this->testimonios->publicados())->resolve(),
             ],
             'nosotros' => ['secciones' => $secciones],
             'servicios' => [

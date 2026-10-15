@@ -27,7 +27,7 @@ function TarjetaHistoria({ testimonio, indice }) {
     return (
         <Revelar as="li" desde={indice % 2 ? 'derecha' : 'izquierda'} retraso={escalonar(indice, 110)} className="h-full">
             <figure className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-white ring-1 ring-primary-100 transition duration-300 hover:ring-2 hover:ring-primary">
-                <div className="relative aspect-[4/3] overflow-hidden bg-primary">
+                <div className="relative aspect-video overflow-hidden bg-primary">
                     {reproduciendo ? (
                         <VideoEnLinea src={testimonio.video_archivo_url} titulo={titulo} />
                     ) : (
@@ -35,7 +35,7 @@ function TarjetaHistoria({ testimonio, indice }) {
                             <PortadaHistoria
                                 testimonio={testimonio}
                                 alt={`Foto de ${testimonio.nombre}`}
-                                className="size-full object-top text-7xl transition-transform duration-700 ease-out group-hover:scale-105"
+                                className="size-full object-[50%_30%] text-7xl transition-transform duration-700 ease-out group-hover:scale-105"
                             />
                             {/* Sin foto ni video: las iniciales llevan el resplandor amarillo de la marca */}
                             {!testimonio.foto_url && !conVideo && (
@@ -54,14 +54,14 @@ function TarjetaHistoria({ testimonio, indice }) {
                                     src={testimonio.foto_vehiculo_url}
                                     alt={testimonio.vehiculo ? `Vehículo: ${testimonio.vehiculo}` : `Vehículo de ${testimonio.nombre}`}
                                     loading="lazy"
-                                    className="pointer-events-none absolute right-5 bottom-5 aspect-[4/3] w-[38%] max-w-56 rounded-2xl bg-white object-cover shadow-xl shadow-primary/30 ring-4 ring-white transition duration-500 ease-out group-hover:-translate-y-2 group-hover:-rotate-2"
+                                    className="pointer-events-none absolute right-5 bottom-5 aspect-[4/3] w-[30%] max-w-48 rounded-2xl bg-white object-cover shadow-xl shadow-primary/30 ring-4 ring-white transition duration-500 ease-out group-hover:-translate-y-2 group-hover:-rotate-2"
                                 />
                             )}
                         </>
                     )}
                 </div>
 
-                <div className="relative flex flex-1 flex-col p-7 sm:p-8">
+                <div className="relative flex flex-1 flex-col p-6 sm:p-7">
                     <div className="flex items-center justify-between gap-4">
                         <span
                             aria-hidden="true"
@@ -72,10 +72,10 @@ function TarjetaHistoria({ testimonio, indice }) {
                         <Estrellas valor={testimonio.calificacion} />
                     </div>
 
-                    <blockquote className="mt-5 text-lg leading-snug font-semibold text-pretty text-primary sm:text-xl">“{testimonio.comentario}”</blockquote>
+                    <blockquote className="mt-4 text-lg leading-snug font-semibold text-pretty text-primary sm:text-xl">“{testimonio.comentario}”</blockquote>
 
-                    <figcaption className="mt-8 flex flex-1 flex-wrap items-end justify-between gap-x-4 gap-y-3">
-                        <div className="w-full border-t border-primary-100 pt-6 sm:flex sm:items-end sm:justify-between sm:gap-4">
+                    <figcaption className="mt-6 flex flex-1 flex-wrap items-end justify-between gap-x-4 gap-y-3">
+                        <div className="w-full border-t border-primary-100 pt-5 sm:flex sm:items-end sm:justify-between sm:gap-4">
                             <div className="min-w-0">
                                 <p className="text-lg font-bold">{testimonio.nombre}</p>
                                 {testimonio.vehiculo && (

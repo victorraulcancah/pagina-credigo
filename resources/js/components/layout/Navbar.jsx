@@ -215,8 +215,8 @@ export default function Navbar() {
                             className="hidden items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap text-white/85 transition hover:bg-white/10 hover:text-white lg:inline-flex"
                         >
                             {usuario ? <LayoutDashboard className="size-4" aria-hidden="true" /> : <LogIn className="size-4" aria-hidden="true" />}
-                            {/* En 1024 px solo el ícono (el nombre queda para lectores de pantalla) */}
-                            <span className="sr-only xl:not-sr-only">{usuario ? 'Ir al panel' : 'Acceso al sistema'}</span>
+                            {/* Hasta 1536 px solo el ícono (el nombre queda para lectores de pantalla): con todo el menú no entra */}
+                            <span className="sr-only 2xl:not-sr-only 2xl:whitespace-nowrap">{usuario ? 'Ir al panel' : 'Acceso al sistema'}</span>
                         </Link>
                         <Link
                             href="/cotizador"

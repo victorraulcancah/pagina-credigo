@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Articulo;
+use App\Models\CategoriaBlog;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 
@@ -25,10 +26,15 @@ class ArticuloService
             ->get();
     }
 
-    /** Los que se ven en el sitio, del más nuevo al más antiguo. */
-    public function visibles(int $limite = self::MAXIMO_LISTA): Collection
+    /** Los que se ven en el sitio (todos o los de una categoría), del más nuevo al más antiguo. */
+    public function visibles(?CategoriaBlog $categoria = null, int $limite = self::MAXIMO_LISTA): Collection
     {
-        return Articulo::visible()->with('categoria:id,nombre,slug')->recientes()->limit($limite)->get();
+        return Articulo::visible()
+            ->with('categoria:id,nombre,slug')
+            ->when($categoria, fn ($q) => $q->where('categoria_blog_id', $categoria->id))
+            ->recientes()
+            ->limit($limite)
+            ->get();
     }
 
     /** Un artículo visible por su dirección (null si no existe, es borrador o aún no llega su fecha). */

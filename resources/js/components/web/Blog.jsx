@@ -3,6 +3,9 @@ import { ArrowRight, Clock, Newspaper } from 'lucide-react';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
 import { cn } from '@/lib/utils';
 
+/** Cada artículo vive dentro de su categoría: /blog/noticias/{slug}. */
+export const urlArticulo = (articulo) => `/blog/${articulo.categoria?.slug}/${articulo.slug}`;
+
 /** "12 de octubre de 2026" */
 export const fechaArticulo = (iso) =>
     iso ? new Intl.DateTimeFormat('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso)) : '';
@@ -67,7 +70,7 @@ export function TarjetaArticulo({ articulo, indice = 0 }) {
     return (
         <Revelar as="li" retraso={escalonar(indice, 90)} className="h-full">
             <Link
-                href={`/blog/${articulo.slug}`}
+                href={urlArticulo(articulo)}
                 className="group flex h-full flex-col overflow-hidden rounded-[1.5rem] bg-white ring-1 ring-primary-100 transition duration-300 hover:ring-2 hover:ring-primary"
             >
                 <div className="relative aspect-[16/10]">

@@ -5,35 +5,16 @@ namespace App\Services;
 use App\Models\CategoriaBlog;
 use Illuminate\Database\Eloquent\Collection;
 
-/** Categorías del blog. Al borrar una, sus artículos quedan sin categoría (no se borran). */
+/** Las 3 categorías fijas del blog: Eventos, Noticias y Tendencias. */
 class CategoriaBlogService
 {
-    /** Todas, con cuántos artículos tiene cada una (para el panel). */
-    public function listar(): Collection
+    public function todas(): Collection
     {
-        return CategoriaBlog::withCount('articulos')->orderBy('orden')->orderBy('nombre')->get();
+        return CategoriaBlog::orderBy('orden')->get(['id', 'nombre', 'slug']);
     }
 
-    /** Las que tienen artículos visibles (para el filtro de /blog). */
-    public function conArticulos(): Collection
+    public function porSlug(string $slug): ?CategoriaBlog
     {
-        return CategoriaBlog::whereHas('articulos', fn ($q) => $q->visible())->orderBy('orden')->orderBy('nombre')->get(['id', 'nombre', 'slug']);
-    }
-
-    public function crear(array $datos): CategoriaBlog
-    {
-        return CategoriaBlog::create($datos);
-    }
-
-    public function actualizar(CategoriaBlog $categoria, array $datos): CategoriaBlog
-    {
-        $categoria->update($datos);
-
-        return $categoria->refresh();
-    }
-
-    public function eliminar(CategoriaBlog $categoria): void
-    {
-        $categoria->delete();
+        return CategoriaBlog::where('slug', $slug)->first(['id', 'nombre', 'slug']);
     }
 }

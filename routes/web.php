@@ -30,7 +30,8 @@ Route::controller(PaginaController::class)->middleware(ContarVisita::class)->gro
     Route::get('/beneficios', 'beneficios')->name('beneficios');
     Route::get('/historias', 'historias')->name('historias');
     Route::get('/blog', 'blog')->name('blog');
-    Route::get('/blog/{slug}', 'articulo')->name('articulo');
+    Route::get('/blog/{categoria}', 'blogCategoria')->name('blog.categoria');
+    Route::get('/blog/{categoria}/{slug}', 'articulo')->name('articulo');
     Route::get('/soporte', 'contacto')->name('soporte');
     Route::get('/cotizador', 'cotizador')->name('cotizador');
     Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');

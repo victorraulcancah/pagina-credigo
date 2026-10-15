@@ -17,7 +17,8 @@ class ArticuloRequest extends FormRequest
         return [
             'titulo' => ['required', 'string', 'max:160'],
             'slug' => ['nullable', 'string', 'max:180', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('articulos', 'slug')->ignore($this->route('articulo'))],
-            'categoria_blog_id' => ['nullable', 'integer', 'exists:categorias_blog,id'],
+            // Eventos, Noticias o Tendencias: la dirección del artículo va dentro de su categoría
+            'categoria_blog_id' => ['required', 'integer', 'exists:categorias_blog,id'],
             'resumen' => ['nullable', 'string', 'max:300'],
             'contenido' => ['required', 'string', 'max:50000'],
             'portada' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],

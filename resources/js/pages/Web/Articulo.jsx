@@ -20,10 +20,19 @@ function Encabezado({ articulo }) {
             <div aria-hidden="true" className="pointer-events-none absolute -top-32 -right-32 size-96 resplandor-acento" />
             <Container className="relative pt-12 sm:pt-16 lg:pt-20">
                 <div className="mx-auto max-w-3xl">
-                    <Revelar>
-                        <Link href="/blog" className="group inline-flex items-center gap-2 text-sm font-semibold text-white/70 transition hover:text-white">
+                    {/* Migas: Blog / Categoría */}
+                    <Revelar as="nav" aria-label="Estás en" className="flex flex-wrap items-center gap-2 text-sm font-semibold text-white/70">
+                        <Link href="/blog" className="group inline-flex items-center gap-2 transition hover:text-white">
                             <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" aria-hidden="true" /> Blog
                         </Link>
+                        {articulo.categoria && (
+                            <>
+                                <span aria-hidden="true">/</span>
+                                <Link href={`/blog/${articulo.categoria.slug}`} className="transition hover:text-white">
+                                    {articulo.categoria.nombre}
+                                </Link>
+                            </>
+                        )}
                     </Revelar>
                     {articulo.categoria && (
                         <Revelar retraso={80} className="mt-6">
@@ -116,8 +125,14 @@ function ArticuloContenido({ secciones, articulo, relacionados }) {
                 <Section background="muted">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <h2 className="text-3xl leading-tight font-bold tracking-[-0.03em] sm:text-4xl">Sigue leyendo</h2>
-                        <Button href="/blog" variant="outline" icon={ArrowRight} iconPosition="right" className="self-start sm:self-auto">
-                            Ver todo el blog
+                        <Button
+                            href={articulo.categoria ? `/blog/${articulo.categoria.slug}` : '/blog'}
+                            variant="outline"
+                            icon={ArrowRight}
+                            iconPosition="right"
+                            className="self-start sm:self-auto"
+                        >
+                            {articulo.categoria ? `Más de ${articulo.categoria.nombre}` : 'Ver todo el blog'}
                         </Button>
                     </div>
                     <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -133,7 +148,13 @@ function ArticuloContenido({ secciones, articulo, relacionados }) {
     );
 }
 
-/** Artículo del blog (/blog/{slug}): el contenido llega de la API (GET /api/paginas/blog/{slug}). */
-export default function Articulo({ slug }) {
-    return <PaginaApi url={`/paginas/blog/${slug}`}>{(datos) => <ArticuloContenido {...datos} />}</PaginaApi>;
+/** Artículo del blog (/blog/{categoria}/{slug}): el contenido llega de la API (GET /api/paginas/blog/{categoria}/{slug}). */
+export default function Articulo({ categoria, slug }) {
+    const url = `/paginas/blog/${categoria}/${slug}`;
+
+    return (
+        <PaginaApi key={url} url={url}>
+            {(datos) => <ArticuloContenido {...datos} />}
+        </PaginaApi>
+    );
 }

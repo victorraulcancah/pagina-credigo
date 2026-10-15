@@ -1,11 +1,10 @@
-import { Check, ExternalLink, Eye, Heading2, ImagePlus, List, Newspaper, Pencil, Plus, Save, Star, Tags, Trash2, X } from 'lucide-react';
+import { ExternalLink, Eye, Heading2, ImagePlus, List, Newspaper, Plus, Save, Star, Tags } from 'lucide-react';
 import { useRef, useState } from 'react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
 import ImageUpload from '@/components/admin/ImageUpload';
 import PageHeader from '@/components/admin/PageHeader';
-import Panel from '@/components/admin/Panel';
 import VideoInput from '@/components/admin/VideoInput';
 import AdminLayout from '@/components/layout/AdminLayout';
 import Button from '@/components/ui/Button';
@@ -15,13 +14,12 @@ import Modal from '@/components/ui/Modal';
 import Select from '@/components/ui/Select';
 import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
-import { fechaArticulo } from '@/components/web/Blog';
-import { useAccionApi } from '@/hooks/useAccionApi';
+import { fechaArticulo, urlArticulo } from '@/components/web/Blog';
 import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
 import api, { erroresDeValidacion, mensajeDeError } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { deleteConfirm, errorAlert } from '@/utils/sweetalert';
+import { errorAlert } from '@/utils/sweetalert';
 
 const MAX_RESUMEN = 300;
 
@@ -130,89 +128,7 @@ function EditorContenido({ value, onChange, error }) {
     );
 }
 
-/** Categorías del blog: crear, renombrar y borrar (sus artículos quedan sin categoría). */
-function Categorias({ categorias, recargar }) {
-    const { ejecutar, enCurso } = useAccionApi(recargar);
-    const [nueva, setNueva] = useState('');
-    const [editando, setEditando] = useState(null); // { id, nombre }
-
-    const crear = async (e) => {
-        e.preventDefault();
-        if (!nueva.trim()) return;
-        const { success } = await ejecutar('post', '/admin/categorias-blog', { nombre: nueva.trim(), orden: categorias.length });
-        if (success) setNueva('');
-    };
-
-    const renombrar = async () => {
-        const { success } = await ejecutar('put', `/admin/categorias-blog/${editando.id}`, { nombre: editando.nombre.trim() });
-        if (success) setEditando(null);
-    };
-
-    const borrar = async (categoria) => {
-        const texto = categoria.articulos_count ? `Sus ${categoria.articulos_count} artículo(s) quedarán sin categoría.` : undefined;
-        if (await deleteConfirm(`¿Eliminar la categoría "${categoria.nombre}"?`, texto)) {
-            ejecutar('delete', `/admin/categorias-blog/${categoria.id}`);
-        }
-    };
-
-    return (
-        <Panel title="Categorías" description="Se usan para ordenar el blog y filtrarlo.">
-            <ul className="flex flex-col divide-y divide-gray-100">
-                {categorias.map((categoria) => (
-                    <li key={categoria.id} className="flex items-center gap-2 py-2">
-                        {editando?.id === categoria.id ? (
-                            <>
-                                <Input
-                                    value={editando.nombre}
-                                    onChange={(e) => setEditando({ ...editando, nombre: e.target.value })}
-                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), renombrar())}
-                                    aria-label="Nombre de la categoría"
-                                    className="h-9 sm:h-9"
-                                    autoFocus
-                                />
-                                <button type="button" onClick={renombrar} disabled={enCurso} aria-label="Guardar" className="rounded-lg p-2 text-green-700 hover:bg-green-50">
-                                    <Check className="size-4" />
-                                </button>
-                                <button type="button" onClick={() => setEditando(null)} aria-label="Cancelar" className="rounded-lg p-2 text-gray-500 hover:bg-gray-100">
-                                    <X className="size-4" />
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-800">{categoria.nombre}</span>
-                                <span className="text-xs text-gray-400">{categoria.articulos_count}</span>
-                                <button
-                                    type="button"
-                                    onClick={() => setEditando({ id: categoria.id, nombre: categoria.nombre })}
-                                    aria-label={`Renombrar ${categoria.nombre}`}
-                                    className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-primary"
-                                >
-                                    <Pencil className="size-4" />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => borrar(categoria)}
-                                    aria-label={`Eliminar ${categoria.nombre}`}
-                                    className="rounded-lg p-2 text-gray-500 hover:bg-red-50 hover:text-red-600"
-                                >
-                                    <Trash2 className="size-4" />
-                                </button>
-                            </>
-                        )}
-                    </li>
-                ))}
-            </ul>
-            <form onSubmit={crear} className="mt-3 flex gap-2">
-                <Input value={nueva} onChange={(e) => setNueva(e.target.value)} placeholder="Nueva categoría" aria-label="Nueva categoría" className="h-9 sm:h-9" />
-                <Button type="submit" variant="secondary" size="sm" icon={Plus} disabled={enCurso || !nueva.trim()}>
-                    Agregar
-                </Button>
-            </form>
-        </Panel>
-    );
-}
-
-/** Blog de la empresa: artículos y categorías (GET /api/admin/articulos). */
+/** Blog de la empresa: artículos en Eventos, Noticias o Tendencias (GET /api/admin/articulos). */
 export default function BlogIndex() {
     const lista = useConsulta('/admin/articulos');
     const articulos = lista.datos ?? [];
@@ -246,7 +162,7 @@ export default function BlogIndex() {
         <AdminLayout title="Blog">
             <PageHeader
                 title="Blog"
-                description="Artículos de la empresa: noticias, consejos y novedades. Se ven en /blog cuando están publicados y llega su fecha."
+                description="Artículos de la empresa en Eventos, Noticias o Tendencias. Se ven en /blog (y en la página de su categoría) cuando están publicados y llega su fecha."
                 actions={
                     <>
                         <Button href="/blog" newTab variant="ghost" icon={ExternalLink} className="border border-gray-200">
@@ -260,10 +176,10 @@ export default function BlogIndex() {
             {!lista.datos ? (
                 <Cargando error={lista.error} onReintentar={lista.recargar} />
             ) : (
-                <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                <div>
                     <div>
                         {articulos.length === 0 ? (
-                            <EmptyState icon={Newspaper} title="Todavía no hay artículos" description="Escribe el primero: una noticia, un consejo o una novedad." action={nuevo} />
+                            <EmptyState icon={Newspaper} title="Todavía no hay artículos" description="Escribe el primero: un evento, una noticia o una tendencia." action={nuevo} />
                         ) : (
                             <ul className="flex flex-col gap-3">
                                 {articulos.map((articulo) => {
@@ -297,7 +213,7 @@ export default function BlogIndex() {
                                                 </p>
                                             </div>
                                             {articulo.estado === 'publicado' && (
-                                                <Button href={`/blog/${articulo.slug}`} newTab variant="ghost" size="sm" icon={Eye} className="shrink-0 border border-gray-200">
+                                                <Button href={urlArticulo(articulo)} newTab variant="ghost" size="sm" icon={Eye} className="shrink-0 border border-gray-200">
                                                     Ver
                                                 </Button>
                                             )}
@@ -309,9 +225,6 @@ export default function BlogIndex() {
                         )}
                     </div>
 
-                    <div>
-                        <Categorias categorias={categorias} recargar={lista.recargar} />
-                    </div>
                 </div>
             )}
 
@@ -371,12 +284,12 @@ export default function BlogIndex() {
                         <EditorContenido value={data.contenido} onChange={(valor) => setData('contenido', valor)} error={errors.contenido} />
                     </FormField>
 
-                    <FormField label="Categoría" htmlFor="categoria_blog_id" error={errors.categoria_blog_id}>
+                    <FormField label="Categoría" htmlFor="categoria_blog_id" error={errors.categoria_blog_id} required>
                         <Select
                             id="categoria_blog_id"
                             value={data.categoria_blog_id}
                             onChange={(e) => setData('categoria_blog_id', e.target.value)}
-                            placeholder="Sin categoría"
+                            placeholder="Elige una categoría"
                             options={categorias.map((c) => ({ value: c.id, label: c.nombre }))}
                             error={errors.categoria_blog_id}
                         />
@@ -396,7 +309,7 @@ export default function BlogIndex() {
                     </FormField>
                     <FormField label="Dirección en la web" htmlFor="slug" error={errors.slug} hint="Vacío = se arma con el título.">
                         <div className="flex items-center gap-2">
-                            <span className="shrink-0 text-sm text-gray-500">/blog/</span>
+                            <span className="shrink-0 text-sm text-gray-500">/blog/{categorias.find((c) => String(c.id) === String(data.categoria_blog_id))?.slug ?? '…'}/</span>
                             <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} error={errors.slug} placeholder="como-pagar-tu-cuota" />
                         </div>
                     </FormField>

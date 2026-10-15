@@ -1,19 +1,18 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight, Newspaper } from 'lucide-react';
-import { useState } from 'react';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Button from '@/components/ui/Button';
 import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
-import { ChipCategoria, MetaArticulo, PortadaArticulo, TarjetaArticulo } from '@/components/web/Blog';
+import { ChipCategoria, MetaArticulo, PortadaArticulo, TarjetaArticulo, urlArticulo } from '@/components/web/Blog';
 import CtaSection from '@/components/web/CtaSection';
 import PaginaApi from '@/components/web/PaginaApi';
 import { cn } from '@/lib/utils';
 
 /** El artículo destacado (o el más nuevo) en grande: portada con zoom lento al aparecer. */
 function Destacado({ articulo }) {
-    const url = `/blog/${articulo.slug}`;
+    const url = urlArticulo(articulo);
 
     return (
         <article className="group grid items-center gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-14">
@@ -44,21 +43,29 @@ function Destacado({ articulo }) {
     );
 }
 
-/** Mientras no haya artículos publicados. */
-function SinArticulos() {
+/** Sin artículos publicados (en todo el blog o en esa categoría). */
+function SinArticulos({ categoria }) {
     return (
         <Revelar className="mx-auto flex max-w-2xl flex-col items-center border-y border-primary-100 py-14 text-center">
             <span className="flex size-12 items-center justify-center rounded-xl bg-primary text-accent">
                 <Newspaper className="size-6" aria-hidden="true" />
             </span>
-            <h2 className="mt-6 text-2xl leading-tight font-bold tracking-[-0.02em] text-balance sm:text-3xl">Pronto publicaremos nuestros primeros artículos</h2>
+            <h2 className="mt-6 text-2xl leading-tight font-bold tracking-[-0.02em] text-balance sm:text-3xl">
+                {categoria ? `Todavía no hay publicaciones en ${categoria.nombre}` : 'Pronto publicaremos nuestros primeros artículos'}
+            </h2>
             <p className="mt-3 max-w-lg text-lg text-pretty text-primary-700/80">
-                Aquí compartiremos noticias, consejos y novedades para los conductores. Mientras tanto, conoce nuestros planes.
+                {categoria ? 'Vuelve pronto o mira lo que ya publicamos en el blog.' : 'Aquí compartiremos eventos, noticias y tendencias para los conductores.'}
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button href="/servicios" icon={ArrowRight} iconPosition="right">
-                    Ver planes
-                </Button>
+                {categoria ? (
+                    <Button href="/blog" icon={ArrowRight} iconPosition="right">
+                        Ver todo el blog
+                    </Button>
+                ) : (
+                    <Button href="/servicios" icon={ArrowRight} iconPosition="right">
+                        Ver planes
+                    </Button>
+                )}
                 <Button href="/cotizador" variant="outline">
                     Cotiza tu plan
                 </Button>
@@ -67,73 +74,86 @@ function SinArticulos() {
     );
 }
 
-/** Filtro por categoría (solo las que tienen artículos). */
-function FiltroCategorias({ categorias, actual, onCambiar }) {
+/** Categorías como enlaces: Todas · Eventos · Noticias · Tendencias (cada una con su página). */
+function Categorias({ categorias, actual }) {
+    const opciones = [{ id: null, nombre: 'Todas', url: '/blog' }, ...categorias.map((c) => ({ ...c, url: `/blog/${c.slug}` }))];
+
     return (
-        <div role="group" aria-label="Filtrar por categoría" className="flex flex-wrap gap-2">
-            {[null, ...categorias].map((categoria) => {
-                const activa = (actual?.id ?? null) === (categoria?.id ?? null);
+        <nav aria-label="Categorías del blog" className="flex flex-wrap gap-2">
+            {opciones.map((opcion) => {
+                const activa = (actual?.id ?? null) === opcion.id;
                 return (
-                    <button
-                        key={categoria?.id ?? 'todas'}
-                        type="button"
-                        onClick={() => onCambiar(categoria)}
-                        aria-pressed={activa}
+                    <Link
+                        key={opcion.url}
+                        href={opcion.url}
+                        preserveScroll
+                        aria-current={activa ? 'page' : undefined}
                         className={cn(
                             'rounded-full px-4 py-2 text-sm font-semibold transition-colors',
                             activa ? 'bg-primary text-white' : 'bg-primary-50 text-primary hover:bg-primary-100',
                         )}
                     >
-                        {categoria?.nombre ?? 'Todos'}
-                    </button>
+                        {opcion.nombre}
+                    </Link>
                 );
             })}
-        </div>
+        </nav>
     );
 }
 
-function BlogContenido({ secciones, articulos, categorias }) {
+function BlogContenido({ secciones, articulos, categorias, categoria }) {
     const hero = secciones['blog.hero'];
-    const [categoria, setCategoria] = useState(null);
 
-    // Sin filtro: el destacado (o el más nuevo) va en grande y el resto en la grilla
-    const destacado = articulos.find((a) => a.destacado) ?? articulos[0];
-    const tarjetas = categoria ? articulos.filter((a) => a.categoria?.id === categoria.id) : articulos.filter((a) => a !== destacado);
+    // En /blog el destacado (o el más nuevo) va en grande y el resto en tarjetas;
+    // en la página de una categoría, todos sus artículos en tarjetas
+    const destacado = categoria ? null : (articulos.find((a) => a.destacado) ?? articulos[0]);
+    const tarjetas = articulos.filter((a) => a !== destacado);
 
     return (
-        <PublicLayout title={hero?.titulo || 'Blog'} description={hero?.contenido}>
+        <PublicLayout title={categoria ? `${categoria.nombre} · Blog` : hero?.titulo || 'Blog'} description={hero?.contenido}>
             <PageHero
                 imagen={hero?.imagen_url}
                 colorTitulo={hero?.color_titulo}
                 colorTexto={hero?.color_texto}
-                title={hero?.titulo || 'Blog'}
+                title={categoria?.nombre ?? (hero?.titulo || 'Blog')}
                 description={hero?.contenido}
             />
 
             <Section>
-                {articulos.length === 0 ? (
-                    <SinArticulos />
-                ) : (
-                    <>
-                        {!categoria && <Destacado articulo={destacado} />}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <Categorias categorias={categorias} actual={categoria} />
+                    {articulos.length > 0 && (
+                        <p className="text-sm text-primary-700/70">
+                            {articulos.length} {articulos.length === 1 ? 'publicación' : 'publicaciones'}
+                        </p>
+                    )}
+                </div>
 
-                        {(categorias.length > 1 || tarjetas.length > 0) && (
-                            <div className={cn('flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between', !categoria && 'mt-20 border-t border-primary-100 pt-14')}>
-                                <h2 className="text-2xl leading-tight font-bold tracking-[-0.02em] sm:text-3xl">{categoria ? categoria.nombre : 'Más artículos'}</h2>
-                                {categorias.length > 1 && <FiltroCategorias categorias={categorias} actual={categoria} onCambiar={setCategoria} />}
-                            </div>
-                        )}
+                <div className="mt-10">
+                    {articulos.length === 0 ? (
+                        <SinArticulos categoria={categoria} />
+                    ) : (
+                        <>
+                            {destacado && <Destacado articulo={destacado} />}
 
-                        {tarjetas.length > 0 && (
-                            // key: al cambiar de categoría las tarjetas vuelven a entrar animadas
-                            <ul key={categoria?.id ?? 'todos'} className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                                {tarjetas.map((articulo, i) => (
-                                    <TarjetaArticulo key={articulo.id} articulo={articulo} indice={i} />
-                                ))}
-                            </ul>
-                        )}
-                    </>
-                )}
+                            {tarjetas.length > 0 && (
+                                <>
+                                    {destacado && (
+                                        <h2 className="mt-20 border-t border-primary-100 pt-14 text-2xl leading-tight font-bold tracking-[-0.02em] sm:text-3xl">
+                                            Más publicaciones
+                                        </h2>
+                                    )}
+                                    {/* key: al cambiar de categoría las tarjetas vuelven a entrar animadas */}
+                                    <ul key={categoria?.id ?? 'todas'} className={cn('grid gap-6 sm:grid-cols-2 lg:grid-cols-3', destacado && 'mt-8')}>
+                                        {tarjetas.map((articulo, i) => (
+                                            <TarjetaArticulo key={articulo.id} articulo={articulo} indice={i} />
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
+                        </>
+                    )}
+                </div>
             </Section>
 
             <CtaSection seccion={secciones['general.cta']} whatsappPrimero />
@@ -141,7 +161,16 @@ function BlogContenido({ secciones, articulos, categorias }) {
     );
 }
 
-/** Blog de la empresa: el contenido llega de la API (GET /api/paginas/blog). */
-export default function Blog() {
-    return <PaginaApi url="/paginas/blog">{(datos) => <BlogContenido {...datos} />}</PaginaApi>;
+/**
+ * Blog de la empresa: todo (/blog) o una categoría (/blog/eventos, /blog/noticias, /blog/tendencias).
+ * El contenido llega de la API (GET /api/paginas/blog[/{categoria}]).
+ */
+export default function Blog({ categoria }) {
+    const url = categoria ? `/paginas/blog/${categoria}` : '/paginas/blog';
+
+    return (
+        <PaginaApi key={url} url={url}>
+            {(datos) => <BlogContenido {...datos} />}
+        </PaginaApi>
+    );
 }

@@ -85,11 +85,7 @@ class PaginaService
                 'secciones' => $secciones,
                 'testimonios' => TestimonioResource::collection($this->testimonios->publicados())->resolve(),
             ],
-            'blog' => [
-                'secciones' => $secciones,
-                'articulos' => ArticuloResource::collection($this->articulos->visibles())->resolve(),
-                'categorias' => CategoriaBlogResource::collection($this->categoriasBlog->conArticulos())->resolve(),
-            ],
+            'blog' => $this->blog(),
             'nosotros' => ['secciones' => $secciones],
             'servicios' => [
                 'secciones' => $secciones,
@@ -151,12 +147,48 @@ class PaginaService
         ];
     }
 
-    /** Página de un artículo del blog (por su dirección), o null si no existe o aún no se publica. */
-    public function articulo(string $slug): ?array
+    /**
+     * El blog: todos sus artículos o, con `$categoria` (eventos, noticias, tendencias), solo los
+     * de esa categoría. Null si la categoría no existe.
+     */
+    public function blog(?string $categoria = null): ?array
+    {
+        $actual = $categoria === null ? null : $this->categoriasBlog->porSlug($categoria);
+
+        if ($categoria !== null && ! $actual) {
+            return null;
+        }
+
+        return [
+            'secciones' => $this->secciones->publicas(['blog', 'general']),
+            'categorias' => CategoriaBlogResource::collection($this->categoriasBlog->todas())->resolve(),
+            'categoria' => $actual ? (new CategoriaBlogResource($actual))->resolve() : null,
+            'articulos' => ArticuloResource::collection($this->articulos->visibles($actual))->resolve(),
+        ];
+    }
+
+    /** Título y descripción de la página de una categoría del blog ("Eventos - Blog"). */
+    public function seoBlogCategoria(string $categoria): ?array
+    {
+        $actual = $this->categoriasBlog->porSlug($categoria);
+        $hero = $this->secciones->publicas(['blog'])['blog.hero'] ?? null;
+
+        return $actual ? array_filter([
+            'titulo' => "{$actual->nombre} · Blog",
+            'descripcion' => $hero['contenido'] ?? null,
+            'imagen' => $hero['imagen_url'] ?? null,
+        ]) : null;
+    }
+
+    /**
+     * Página de un artículo del blog (por su categoría y su dirección), o null si no existe,
+     * aún no se publica o la categoría no es la suya.
+     */
+    public function articulo(string $categoria, string $slug): ?array
     {
         $articulo = $this->articulos->visiblePorSlug($slug);
 
-        if (! $articulo) {
+        if (! $articulo || $articulo->categoria?->slug !== $categoria) {
             return null;
         }
 
@@ -168,11 +200,11 @@ class PaginaService
     }
 
     /** Al compartir un artículo se ve su título, su resumen y su portada. */
-    public function seoArticulo(string $slug): ?array
+    public function seoArticulo(string $categoria, string $slug): ?array
     {
         $articulo = $this->articulos->visiblePorSlug($slug);
 
-        return $articulo ? array_filter([
+        return $articulo && $articulo->categoria?->slug === $categoria ? array_filter([
             'titulo' => $articulo->titulo,
             'descripcion' => $articulo->resumen,
             'imagen' => $articulo->portada_url,

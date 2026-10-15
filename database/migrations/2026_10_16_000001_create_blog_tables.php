@@ -7,9 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Blog de la empresa (/blog): artículos con categoría, portada y contenido con subtítulos,
- * viñetas e imágenes. Un artículo se ve en el sitio cuando está publicado y su fecha ya llegó
- * (con fecha futura queda programado).
+ * Blog de la empresa (/blog) con 3 categorías fijas: Eventos, Noticias y Tendencias, cada una
+ * con su página (/blog/eventos…). Cada artículo va dentro de su categoría
+ * (/blog/noticias/{articulo}), con portada y contenido con subtítulos, viñetas e imágenes.
+ * Se ve en el sitio cuando está publicado y su fecha ya llegó (con fecha futura queda programado).
  */
 return new class extends Migration
 {
@@ -41,12 +42,12 @@ return new class extends Migration
             $table->index(['publicado', 'publicado_at']);
         });
 
-        // Categorías para empezar (se editan o borran en el panel)
+        // Las 3 categorías del blog (fijas: el menú y las direcciones dependen de ellas)
         $ahora = now();
         DB::table('categorias_blog')->insert([
-            ['nombre' => 'Noticias', 'slug' => 'noticias', 'orden' => 0, 'created_at' => $ahora, 'updated_at' => $ahora],
-            ['nombre' => 'Consejos', 'slug' => 'consejos', 'orden' => 1, 'created_at' => $ahora, 'updated_at' => $ahora],
-            ['nombre' => 'Novedades', 'slug' => 'novedades', 'orden' => 2, 'created_at' => $ahora, 'updated_at' => $ahora],
+            ['nombre' => 'Eventos', 'slug' => 'eventos', 'orden' => 0, 'created_at' => $ahora, 'updated_at' => $ahora],
+            ['nombre' => 'Noticias', 'slug' => 'noticias', 'orden' => 1, 'created_at' => $ahora, 'updated_at' => $ahora],
+            ['nombre' => 'Tendencias', 'slug' => 'tendencias', 'orden' => 2, 'created_at' => $ahora, 'updated_at' => $ahora],
         ]);
 
         // Encabezado de la página /blog

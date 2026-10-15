@@ -86,12 +86,20 @@ class PaginaController extends Controller
         return $this->pagina('blog');
     }
 
-    /** Un artículo del blog: 404 real si no existe o aún no se publica. */
-    public function articulo(string $slug): Response
+    /** Una categoría del blog (/blog/eventos, /blog/noticias, /blog/tendencias). */
+    public function blogCategoria(string $categoria): Response
     {
-        $seo = $this->paginas->seoArticulo($slug) ?? abort(404);
+        $seo = $this->paginas->seoBlogCategoria($categoria) ?? abort(404);
 
-        return Inertia::render('Web/Articulo', ['slug' => $slug, 'seo' => $seo]);
+        return Inertia::render('Web/Blog', ['pagina' => 'blog', 'categoria' => $categoria, 'seo' => $seo]);
+    }
+
+    /** Un artículo del blog: 404 real si no existe, aún no se publica o no es de esa categoría. */
+    public function articulo(string $categoria, string $slug): Response
+    {
+        $seo = $this->paginas->seoArticulo($categoria, $slug) ?? abort(404);
+
+        return Inertia::render('Web/Articulo', ['categoria' => $categoria, 'slug' => $slug, 'seo' => $seo]);
     }
 
     public function contacto(): Response

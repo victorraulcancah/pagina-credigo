@@ -99,10 +99,10 @@ class Articulo extends Model
         return max(1, (int) ceil($palabras / self::PALABRAS_POR_MINUTO));
     }
 
-    /** Página pública del artículo. */
+    /** Página pública del artículo, dentro de su categoría (/blog/noticias/{slug}). */
     public function url(): string
     {
-        return "/blog/{$this->slug}";
+        return "/blog/{$this->categoria?->slug}/{$this->slug}";
     }
 
     protected function portadaUrl(): Attribute

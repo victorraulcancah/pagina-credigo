@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Articulo;
+use App\Models\CategoriaBlog;
 use App\Models\Seccion;
 use App\Models\Servicio;
 use App\Models\Testimonio;
@@ -36,9 +37,12 @@ class SeoService
             $paginas[] = ['/historias', 0.6, max($ultimaEdicion(['historias']), Testimonio::publicado()->max('updated_at'))];
         }
 
-        // Blog: la portada y cada artículo publicado
+        // Blog: su portada, cada categoría y cada artículo publicado
         $paginas[] = ['/blog', 0.6, max($ultimaEdicion(['blog']), Articulo::visible()->max('updated_at'))];
-        foreach (Articulo::visible()->recientes()->get(['slug', 'updated_at']) as $articulo) {
+        foreach (CategoriaBlog::orderBy('orden')->get(['slug']) as $categoria) {
+            $paginas[] = [$categoria->url(), 0.5, Articulo::visible()->whereRelation('categoria', 'slug', $categoria->slug)->max('updated_at')];
+        }
+        foreach (Articulo::visible()->with('categoria:id,slug')->recientes()->get(['slug', 'categoria_blog_id', 'updated_at']) as $articulo) {
             $paginas[] = [$articulo->url(), 0.6, $articulo->updated_at];
         }
 

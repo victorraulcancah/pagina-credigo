@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Str;
 
-/** Categoría del blog (Noticias, Consejos, Novedades…). */
+/**
+ * Categoría del blog. Son 3 fijas (Eventos, Noticias y Tendencias, las crea la migración):
+ * el menú y las direcciones (/blog/eventos…) dependen de ellas, por eso no se editan en el panel.
+ */
 class CategoriaBlog extends Model
 {
     protected $table = 'categorias_blog';
@@ -18,23 +20,14 @@ class CategoriaBlog extends Model
         return ['orden' => 'integer'];
     }
 
-    /** La dirección se arma con el nombre ("Consejos de manejo" → consejos-de-manejo). */
-    protected static function booted(): void
-    {
-        static::saving(function (CategoriaBlog $categoria) {
-            if (blank($categoria->slug) || $categoria->isDirty('nombre')) {
-                $base = Str::slug($categoria->nombre) ?: 'categoria';
-                $slug = $base;
-                for ($i = 2; static::where('slug', $slug)->whereKeyNot($categoria->id)->exists(); $i++) {
-                    $slug = "{$base}-{$i}";
-                }
-                $categoria->slug = $slug;
-            }
-        });
-    }
-
     public function articulos(): HasMany
     {
         return $this->hasMany(Articulo::class);
+    }
+
+    /** Página pública de la categoría. */
+    public function url(): string
+    {
+        return "/blog/{$this->slug}";
     }
 }

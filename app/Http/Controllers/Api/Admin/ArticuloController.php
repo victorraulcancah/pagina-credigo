@@ -23,7 +23,7 @@ class ArticuloController extends BaseApiController
         return $this->successResponse(
             ArticuloResource::collection($this->articulos->listar()),
             'Artículos',
-            extra: ['opciones' => ['categorias' => CategoriaBlogResource::collection($categorias->listar())]],
+            extra: ['opciones' => ['categorias' => CategoriaBlogResource::collection($categorias->todas())]],
         );
     }
 

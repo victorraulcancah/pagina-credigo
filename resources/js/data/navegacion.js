@@ -27,7 +27,22 @@ export const menuPrincipal = [
     { label: 'Nosotros', href: '/nosotros' },
     { label: 'Beneficios', href: '/beneficios' },
     { label: 'Historias', href: '/historias' },
-    { label: 'Blog', href: '/blog' },
+    {
+        label: 'Blog',
+        grupo: 'Nuestro blog',
+        items: [
+            { label: 'Todo el blog', href: '/blog', exacto: true },
+            { label: 'Eventos', href: '/blog/eventos' },
+            { label: 'Noticias', href: '/blog/noticias' },
+            { label: 'Tendencias', href: '/blog/tendencias' },
+        ],
+        destacado: {
+            titulo: 'Lo último de CrediGo',
+            texto: 'Eventos, noticias y tendencias para los conductores de aplicativo.',
+            boton: 'Ir al blog',
+            href: '/blog',
+        },
+    },
     {
         label: 'Planes',
         grupo: 'Nuestros planes',

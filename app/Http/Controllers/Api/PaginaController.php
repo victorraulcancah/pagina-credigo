@@ -23,10 +23,20 @@ class PaginaController extends BaseApiController
             : $this->successResponse($contenido, 'Página');
     }
 
-    /** GET /api/paginas/blog/{slug}: un artículo del blog. */
-    public function articulo(string $slug): JsonResponse
+    /** GET /api/paginas/blog/{categoria}: los artículos de una categoría del blog. */
+    public function blogCategoria(string $categoria): JsonResponse
     {
-        $contenido = $this->paginas->articulo($slug);
+        $contenido = $this->paginas->blog($categoria);
+
+        return $contenido === null
+            ? $this->notFoundResponse('Esa categoría del blog no existe')
+            : $this->successResponse($contenido, 'Blog');
+    }
+
+    /** GET /api/paginas/blog/{categoria}/{slug}: un artículo del blog. */
+    public function articulo(string $categoria, string $slug): JsonResponse
+    {
+        $contenido = $this->paginas->articulo($categoria, $slug);
 
         return $contenido === null
             ? $this->notFoundResponse('Ese artículo no existe o aún no se publica')

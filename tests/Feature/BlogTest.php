@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Inertia\Testing\AssertableInertia as Assert;
 
-/** Artículo publicado (con fecha de hace un rato), con datos de prueba. */
+/** Artículo publicado (con fecha de hace un rato) en Noticias, con datos de prueba. */
 function articulo(array $datos = []): Articulo
 {
     static $n = 0;
@@ -18,6 +18,7 @@ function articulo(array $datos = []): Articulo
 
     return Articulo::create([
         'titulo' => "Artículo {$n}",
+        'categoria_blog_id' => CategoriaBlog::where('slug', 'noticias')->value('id'),
         'resumen' => 'Resumen de prueba.',
         'contenido' => "Primer párrafo.\n\n## Un subtítulo\n\nSegundo párrafo.",
         'publicado' => true,
@@ -28,22 +29,28 @@ function articulo(array $datos = []): Articulo
 
 beforeEach(function () {
     $this->seed([ConfiguracionSeeder::class, ContenidoSeeder::class]);
-    // Las categorías iniciales las crea la migración del blog
-    if (! CategoriaBlog::exists()) {
-        foreach (['Noticias', 'Consejos', 'Novedades'] as $i => $nombre) {
-            CategoriaBlog::create(['nombre' => $nombre, 'orden' => $i]);
-        }
+});
+
+it('el blog tiene sus 3 categorías, cada una con su página', function () {
+    expect(CategoriaBlog::orderBy('orden')->pluck('slug')->all())->toBe(['eventos', 'noticias', 'tendencias']);
+
+    foreach (['eventos', 'noticias', 'tendencias'] as $categoria) {
+        $this->get("/blog/{$categoria}")->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Web/Blog')->where('categoria', $categoria));
     }
+
+    $this->get('/blog/consejos')->assertNotFound();
+    $this->getJson('/api/paginas/blog/consejos')->assertNotFound();
 });
 
 it('el panel crea, edita y elimina un artículo con su portada', function () {
     Storage::fake('public');
     $this->actingAs(User::factory()->create());
-    $consejos = CategoriaBlog::where('slug', 'consejos')->sole();
+    $tendencias = CategoriaBlog::where('slug', 'tendencias')->sole();
 
     $this->post('/api/admin/articulos', [
         'titulo' => 'Cómo pagar tu cuota sin salir de casa',
-        'categoria_blog_id' => $consejos->id,
+        'categoria_blog_id' => $tendencias->id,
         'resumen' => 'Todos los medios de pago.',
         'contenido' => "Texto.\n\n## Paso 1\n\n- Entra a la app",
         'portada' => UploadedFile::fake()->image('portada.jpg', 1600, 900),
@@ -51,7 +58,7 @@ it('el panel crea, edita y elimina un artículo con su portada', function () {
         'publicado' => true,
     ])->assertCreated()
         ->assertJsonPath('data.slug', 'como-pagar-tu-cuota-sin-salir-de-casa')
-        ->assertJsonPath('data.categoria.nombre', 'Consejos')
+        ->assertJsonPath('data.categoria.nombre', 'Tendencias')
         ->assertJsonPath('data.estado', 'publicado');
 
     $articulo = Articulo::sole();
@@ -60,10 +67,10 @@ it('el panel crea, edita y elimina un artículo con su portada', function () {
 
     $this->getJson('/api/admin/articulos')->assertOk()
         ->assertJsonCount(1, 'data')
-        ->assertJsonPath('opciones.categorias.1.nombre', 'Consejos');
+        ->assertJsonPath('opciones.categorias.2.nombre', 'Tendencias');
 
     $this->post("/api/admin/articulos/{$articulo->id}", [
-        '_method' => 'put', 'titulo' => 'Título nuevo', 'slug' => $articulo->slug, 'contenido' => 'Otro texto', 'quitar_portada' => true, 'publicado' => false,
+        '_method' => 'put', 'titulo' => 'Título nuevo', 'slug' => $articulo->slug, 'categoria_blog_id' => $tendencias->id, 'contenido' => 'Otro texto', 'quitar_portada' => true, 'publicado' => false,
     ])->assertOk()->assertJsonPath('data.estado', 'borrador')->assertJsonPath('data.portada_url', null);
     Storage::disk('public')->assertMissing($articulo->portada);
 
@@ -87,42 +94,59 @@ it('sube imágenes para el contenido y las borra junto con el artículo', functi
 });
 
 it('el blog muestra solo los artículos publicados cuya fecha ya llegó', function () {
-    $noticias = CategoriaBlog::where('slug', 'noticias')->sole();
-    articulo(['titulo' => 'Visible', 'categoria_blog_id' => $noticias->id]);
+    articulo(['titulo' => 'Visible']);
     articulo(['titulo' => 'Borrador', 'publicado' => false]);
     articulo(['titulo' => 'Programado', 'publicado_at' => now()->addDay()]);
 
     paginaApi('blog', fn (AssertableJson $page) => $page
         ->has('articulos', 1)
         ->where('articulos.0.titulo', 'Visible')
-        ->where('articulos.0.categoria.nombre', 'Noticias')
+        ->where('articulos.0.categoria.slug', 'noticias')
         ->missing('articulos.0.contenido')
         ->missing('articulos.0.estado')
-        // El filtro solo ofrece categorías con artículos visibles
-        ->has('categorias', 1)
-        ->where('categorias.0.slug', 'noticias')
+        ->has('categorias', 3)
+        ->where('categoria', null)
         ->where('secciones', fn ($s) => collect($s)->has('blog.hero'))
         ->etc());
 
     $this->get('/blog')->assertOk();
-    $this->get('/blog/visible')->assertOk();
-    $this->get('/blog/borrador')->assertNotFound();
-    $this->get('/blog/programado')->assertNotFound();
-    $this->getJson('/api/paginas/blog/programado')->assertNotFound();
+    $this->get('/blog/noticias/visible')->assertOk();
+    $this->get('/blog/noticias/borrador')->assertNotFound();
+    $this->get('/blog/noticias/programado')->assertNotFound();
+    $this->getJson('/api/paginas/blog/noticias/programado')->assertNotFound();
 
-    $this->get('/sitemap.xml')->assertSee(url('/blog/visible'), false)->assertDontSee(url('/blog/borrador'), false);
+    $this->get('/sitemap.xml')
+        ->assertSee(url('/blog/noticias/visible'), false)
+        ->assertSee(url('/blog/eventos'), false)
+        ->assertDontSee(url('/blog/noticias/borrador'), false);
+});
+
+it('cada categoría muestra solo sus artículos y el artículo vive dentro de la suya', function () {
+    $eventos = CategoriaBlog::where('slug', 'eventos')->sole();
+    articulo(['titulo' => 'Feria de autos', 'categoria_blog_id' => $eventos->id]);
+    articulo(['titulo' => 'Nueva oficina']);
+
+    $this->getJson('/api/paginas/blog/eventos')->assertOk()
+        ->assertJsonCount(1, 'data.articulos')
+        ->assertJsonPath('data.articulos.0.titulo', 'Feria de autos')
+        ->assertJsonPath('data.categoria.nombre', 'Eventos');
+    $this->getJson('/api/paginas/blog/tendencias')->assertOk()->assertJsonCount(0, 'data.articulos');
+
+    // En otra categoría el artículo no existe
+    $this->get('/blog/eventos/feria-de-autos')->assertOk();
+    $this->get('/blog/noticias/feria-de-autos')->assertNotFound();
 });
 
 it('cada artículo tiene su página con el contenido, lectura y relacionados de su categoría', function () {
-    [$noticias, $consejos] = [CategoriaBlog::where('slug', 'noticias')->sole(), CategoriaBlog::where('slug', 'consejos')->sole()];
-    $principal = articulo(['titulo' => 'Principal', 'categoria_blog_id' => $consejos->id, 'contenido' => str_repeat('palabra ', 450)]);
-    articulo(['titulo' => 'Otra noticia', 'categoria_blog_id' => $noticias->id]);
-    articulo(['titulo' => 'Otro consejo', 'categoria_blog_id' => $consejos->id]);
+    $tendencias = CategoriaBlog::where('slug', 'tendencias')->sole();
+    articulo(['titulo' => 'Principal', 'categoria_blog_id' => $tendencias->id, 'contenido' => str_repeat('palabra ', 450)]);
+    articulo(['titulo' => 'Otra noticia']);
+    articulo(['titulo' => 'Otro consejo', 'categoria_blog_id' => $tendencias->id]);
 
-    $this->get('/blog/principal')->assertOk()
-        ->assertInertia(fn (Assert $page) => $page->component('Web/Articulo')->where('slug', 'principal')->where('seo.titulo', 'Principal'));
+    $this->get('/blog/tendencias/principal')->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Web/Articulo')->where('slug', 'principal')->where('categoria', 'tendencias')->where('seo.titulo', 'Principal'));
 
-    $this->getJson('/api/paginas/blog/principal')->assertOk()
+    $this->getJson('/api/paginas/blog/tendencias/principal')->assertOk()
         ->assertJsonPath('data.articulo.minutos_lectura', 3)
         ->assertJsonPath('data.articulo.contenido', str_repeat('palabra ', 450))
         // Primero los de su misma categoría
@@ -135,28 +159,14 @@ it('valida el artículo y la dirección', function () {
     $this->actingAs(User::factory()->create());
     articulo(['titulo' => 'Ocupada']);
 
-    $this->postJson('/api/admin/articulos', ['titulo' => '', 'contenido' => ''])->assertJsonValidationErrors(['titulo', 'contenido']);
-    $this->postJson('/api/admin/articulos', ['titulo' => 'X', 'contenido' => 'Y', 'slug' => 'ocupada'])->assertJsonValidationErrors('slug');
-    $this->postJson('/api/admin/articulos', ['titulo' => 'X', 'contenido' => 'Y', 'video_url' => 'https://ejemplo.com'])->assertJsonValidationErrors('video_url');
+    $noticias = CategoriaBlog::where('slug', 'noticias')->value('id');
+
+    $this->postJson('/api/admin/articulos', ['titulo' => '', 'contenido' => ''])->assertJsonValidationErrors(['titulo', 'contenido', 'categoria_blog_id']);
+    $this->postJson('/api/admin/articulos', ['titulo' => 'X', 'contenido' => 'Y', 'categoria_blog_id' => $noticias, 'slug' => 'ocupada'])->assertJsonValidationErrors('slug');
+    $this->postJson('/api/admin/articulos', ['titulo' => 'X', 'contenido' => 'Y', 'categoria_blog_id' => $noticias, 'video_url' => 'https://ejemplo.com'])->assertJsonValidationErrors('video_url');
 
     // Mismo título: la dirección no se repite
-    $this->postJson('/api/admin/articulos', ['titulo' => 'Ocupada', 'contenido' => 'Y'])->assertCreated()->assertJsonPath('data.slug', 'ocupada-2');
-});
-
-it('el panel administra las categorías; al borrar una, sus artículos quedan sin categoría', function () {
-    $this->actingAs(User::factory()->create());
-
-    $id = $this->postJson('/api/admin/categorias-blog', ['nombre' => 'Seguridad vial'])->assertCreated()
-        ->assertJsonPath('data.slug', 'seguridad-vial')->json('data.id');
-    $this->postJson('/api/admin/categorias-blog', ['nombre' => 'Seguridad vial'])->assertJsonValidationErrors('nombre');
-
-    $articulo = articulo(['categoria_blog_id' => $id]);
-    $this->getJson('/api/admin/categorias-blog')->assertOk()->assertJsonFragment(['nombre' => 'Seguridad vial', 'articulos_count' => 1]);
-
-    $this->putJson("/api/admin/categorias-blog/{$id}", ['nombre' => 'Manejo seguro'])->assertOk()->assertJsonPath('data.slug', 'manejo-seguro');
-    $this->deleteJson("/api/admin/categorias-blog/{$id}")->assertOk();
-
-    expect($articulo->fresh()->categoria_blog_id)->toBeNull();
+    $this->postJson('/api/admin/articulos', ['titulo' => 'Ocupada', 'contenido' => 'Y', 'categoria_blog_id' => $noticias])->assertCreated()->assertJsonPath('data.slug', 'ocupada-2');
 });
 
 it('sin artículos el blog abre igual (con su aviso) y el panel exige sesión', function () {

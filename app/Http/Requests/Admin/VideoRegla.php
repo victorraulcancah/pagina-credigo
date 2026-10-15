@@ -13,23 +13,37 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 final class VideoRegla
 {
-    public const PATRON = '~^https://(?:'
-        .'(?:www\.|m\.)?youtube\.com/(?:watch\?(?:[^#]*&)?v=|shorts/|live/|embed/)[\w-]{11}'
-        .'|youtu\.be/[\w-]{11}'
-        .'|(?:www\.)?tiktok\.com/@[\w.-]+/video/\d+'
-        .'|(?:www\.|m\.|web\.)?facebook\.com/(?:[^?#]+/videos/|watch/?\?v=|reel/)\S+'
-        .'|(?:www\.)?vimeo\.com/\d+'
-        .')~i';
+    private const YOUTUBE = '(?:www\.|m\.)?youtube\.com/(?:watch\?(?:[^#]*&)?v=|shorts/|live/|embed/)[\w-]{11}|youtu\.be/[\w-]{11}';
 
-    public static function reglas(): array
+    private const TIKTOK = '(?:www\.)?tiktok\.com/@[\w.-]+/video/\d+';
+
+    private const FACEBOOK = '(?:www\.|m\.|web\.)?facebook\.com/(?:[^?#]+/videos/|watch/?\?v=|reel/)\S+';
+
+    private const VIMEO = '(?:www\.)?vimeo\.com/\d+';
+
+    public const PATRON = '~^https://(?:'.self::YOUTUBE.'|'.self::TIKTOK.'|'.self::FACEBOOK.'|'.self::VIMEO.')~i';
+
+    /** Los testimonios llevan un enlace por red: red => [patrón, mensaje si el enlace no es de esa red]. */
+    private const REDES = [
+        'tiktok' => [self::TIKTOK, 'Pega el enlace de un video de TikTok (https://www.tiktok.com/@usuario/video/… o el de Compartir: https://vm.tiktok.com/…).'],
+        'youtube' => [self::YOUTUBE, 'Pega el enlace de un video de YouTube (https://www.youtube.com/watch?v=…, /shorts/… o https://youtu.be/…).'],
+        'facebook' => [self::FACEBOOK, 'Pega el enlace de un video de Facebook (https://www.facebook.com/…/videos/… o /reel/…). Los enlaces cortos (fb.watch) no sirven: abre el video y copia el enlace del navegador.'],
+    ];
+
+    /** `$red` (tiktok, youtube o facebook): solo acepta videos de esa red. */
+    public static function reglas(?string $red = null): array
     {
-        return ['nullable', 'string', 'max:255', 'regex:'.self::PATRON];
+        $patron = $red ? '~^https://(?:'.self::REDES[$red][0].')~i' : self::PATRON;
+
+        return ['nullable', 'string', 'max:255', 'regex:'.$patron];
     }
 
-    public static function mensajes(string $campo): array
+    public static function mensajes(string $campo, ?string $red = null): array
     {
         return [
-            "{$campo}.regex" => 'Pega el enlace de un video de YouTube, TikTok, Facebook o Vimeo (empieza con https://). Los enlaces cortos de Facebook (fb.watch) no sirven: abre el video y copia el enlace del navegador.',
+            "{$campo}.regex" => $red
+                ? self::REDES[$red][1]
+                : 'Pega el enlace de un video de YouTube, TikTok, Facebook o Vimeo (empieza con https://). Los enlaces cortos de Facebook (fb.watch) no sirven: abre el video y copia el enlace del navegador.',
         ];
     }
 

@@ -1,10 +1,22 @@
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin, Quote, Star } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { FaFacebookF, FaTiktok, FaYoutube } from 'react-icons/fa6';
 import Button from '@/components/ui/Button';
 import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
-import { BotonVideo } from '@/components/web/Video';
+import { BotonReproducir, pausarVideos, VentanaVideo, VideoEnLinea } from '@/components/web/Video';
 import { cn } from '@/lib/utils';
+import { parsearVideo } from '@/lib/video';
+
+/**
+ * Redes donde el conductor puede tener el video de su historia (un enlace por red en el panel).
+ * El ícono va con el color de la red (`color`) y al pasar el mouse el círculo se rellena con él (`relleno`).
+ */
+export const REDES_VIDEO = [
+    { campo: 'tiktok_url', nombre: 'TikTok', icono: FaTiktok, color: 'text-[#010101]', relleno: 'hover:bg-[#010101]', placeholder: 'https://www.tiktok.com/@usuario/video/…' },
+    { campo: 'youtube_url', nombre: 'YouTube', icono: FaYoutube, color: 'text-[#ff0033]', relleno: 'hover:bg-[#ff0033]', placeholder: 'https://www.youtube.com/watch?v=…' },
+    { campo: 'facebook_url', nombre: 'Facebook', icono: FaFacebookF, color: 'text-[#0866ff]', relleno: 'hover:bg-[#0866ff]', placeholder: 'https://www.facebook.com/…/videos/…' },
+];
 
 const iniciales = (nombre = '') =>
     nombre
@@ -43,6 +55,74 @@ export function FotoConductor({ testimonio, alt = '', className }) {
     );
 }
 
+/**
+ * Portada de una historia: la foto del conductor; sin foto pero con video subido, el primer
+ * cuadro del video (solo se descargan sus datos iniciales); sin ninguno, sus iniciales.
+ */
+export function PortadaHistoria({ testimonio, alt, className }) {
+    if (!testimonio.foto_url && testimonio.video_archivo_url) {
+        return (
+            <video
+                src={`${testimonio.video_archivo_url}#t=0.1`}
+                preload="metadata"
+                muted
+                playsInline
+                aria-hidden="true"
+                tabIndex={-1}
+                className={cn('object-cover', className)}
+            />
+        );
+    }
+
+    return <FotoConductor testimonio={testimonio} alt={alt} className={className} />;
+}
+
+/** Íconos de TikTok, YouTube y Facebook (solo los que tienen enlace): cada uno abre su video en una ventana. */
+export function VideosEnRedes({ testimonio, className }) {
+    const [elegida, setElegida] = useState(null);
+    const [abierta, setAbierta] = useState(false);
+    const redes = REDES_VIDEO.filter((red) => parsearVideo(testimonio[red.campo]));
+    if (!redes.length) return null;
+
+    return (
+        <div className={cn('flex items-center gap-3', className)}>
+            <span className="text-xs font-semibold text-primary-700/70">Mira su video en</span>
+            <ul className="flex gap-2">
+                {redes.map((red) => (
+                    <li key={red.campo}>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                pausarVideos();
+                                setElegida(red);
+                                setAbierta(true);
+                            }}
+                            aria-label={`Ver la historia de ${testimonio.nombre} en ${red.nombre}`}
+                            title={red.nombre}
+                            className={cn(
+                                'flex size-10 items-center justify-center rounded-full bg-white ring-1 ring-primary-100 transition duration-300 ease-out',
+                                'hover:-translate-y-0.5 hover:text-white hover:shadow-lg hover:shadow-primary/20 hover:ring-transparent',
+                                red.color,
+                                red.relleno,
+                            )}
+                        >
+                            <red.icono className="size-4" aria-hidden="true" />
+                        </button>
+                    </li>
+                ))}
+            </ul>
+            {elegida && (
+                <VentanaVideo
+                    url={testimonio[elegida.campo]}
+                    titulo={`La historia de ${testimonio.nombre} en ${elegida.nombre}`}
+                    abierto={abierta}
+                    onClose={() => setAbierta(false)}
+                />
+            )}
+        </div>
+    );
+}
+
 /** Calificación que dio el propio conductor (1 a 5). Sin calificación no se muestra nada. */
 export function Estrellas({ valor, className }) {
     if (!valor) return null;
@@ -73,7 +153,7 @@ export function Comentario({ texto, className }) {
     );
 }
 
-/** Nombre, ciudad, estrellas, vehículo y el video (si hay) de un conductor. */
+/** Nombre, ciudad, estrellas, vehículo y sus videos en redes (si hay) de un conductor. */
 export function DatosConductor({ testimonio, className }) {
     return (
         <div className={className}>
@@ -85,17 +165,18 @@ export function DatosConductor({ testimonio, className }) {
             )}
             <Estrellas valor={testimonio.calificacion} className="mt-2" />
             {testimonio.vehiculo && <p className="mt-2 text-sm font-semibold">{testimonio.vehiculo}</p>}
-            {(testimonio.video_archivo_url || testimonio.video_url) && (
-                <BotonVideo url={testimonio.video_archivo_url || testimonio.video_url} titulo={`La historia de ${testimonio.nombre}`} enlace className="mt-3 text-sm font-semibold">
-                    Ver su historia en video
-                </BotonVideo>
-            )}
+            <VideosEnRedes testimonio={testimonio} className="mt-4" />
         </div>
     );
 }
 
-/** Una historia en grande: foto del conductor, su comentario y su vehículo. */
-function Historia({ testimonio, posicion, total, activa }) {
+/**
+ * Una historia en grande: foto del conductor, su comentario y su vehículo.
+ * Con video subido, la foto lleva el botón de reproducir y el video se ve ahí mismo.
+ */
+function Historia({ testimonio, posicion, total, activa, reproduciendo, onReproducir }) {
+    const titulo = `La historia de ${testimonio.nombre}`;
+
     return (
         <article
             role="group"
@@ -109,7 +190,14 @@ function Historia({ testimonio, posicion, total, activa }) {
             )}
         >
             <div className="relative aspect-[4/3] sm:aspect-auto sm:min-h-[26rem]">
-                <FotoConductor testimonio={testimonio} alt={`Foto de ${testimonio.nombre}`} className="absolute inset-0 size-full object-top text-6xl" />
+                {reproduciendo ? (
+                    <VideoEnLinea src={testimonio.video_archivo_url} titulo={titulo} />
+                ) : (
+                    <>
+                        <PortadaHistoria testimonio={testimonio} alt={`Foto de ${testimonio.nombre}`} className="absolute inset-0 size-full object-top text-6xl" />
+                        {testimonio.video_archivo_url && <BotonReproducir onClick={onReproducir} etiqueta={`Reproducir el video: ${titulo}`} />}
+                    </>
+                )}
             </div>
             <figure className="flex flex-col p-6 sm:p-8">
                 <Comentario texto={testimonio.comentario} className="mt-3" />
@@ -152,13 +240,19 @@ function Flecha({ direccion, onClick, className }) {
  */
 export default function TestimoniosSection({ seccion, testimonios = [], total = 0 }) {
     const [actual, setActual] = useState(0);
+    // Historia cuyo video se está viendo: al pasar a otra se detiene
+    const [reproduciendo, setReproduciendo] = useState(null);
     const toque = useRef(null);
 
     if (!testimonios.length) return null;
 
     const cantidad = testimonios.length;
     const varias = cantidad > 1;
-    const ir = (paso) => setActual((i) => (i + paso + cantidad) % cantidad);
+    const mostrar = (i) => {
+        setActual(i);
+        setReproduciendo(null);
+    };
+    const ir = (paso) => mostrar((actual + paso + cantidad) % cantidad);
     const verMas = seccion?.boton_url && total > cantidad;
 
     const alSoltar = (e) => {
@@ -186,7 +280,15 @@ export default function TestimoniosSection({ seccion, testimonios = [], total = 
                         {/* Todas las historias en la misma celda: el alto lo define la más larga */}
                         <div className="grid grid-cols-1" onTouchStart={(e) => (toque.current = e.touches[0].clientX)} onTouchEnd={alSoltar}>
                             {testimonios.map((testimonio, i) => (
-                                <Historia key={testimonio.id} testimonio={testimonio} posicion={i + 1} total={cantidad} activa={i === actual} />
+                                <Historia
+                                    key={testimonio.id}
+                                    testimonio={testimonio}
+                                    posicion={i + 1}
+                                    total={cantidad}
+                                    activa={i === actual}
+                                    reproduciendo={reproduciendo === testimonio.id}
+                                    onReproducir={() => setReproduciendo(testimonio.id)}
+                                />
                             ))}
                         </div>
 
@@ -207,7 +309,7 @@ export default function TestimoniosSection({ seccion, testimonios = [], total = 
                                     <li key={testimonio.id} className="shrink-0">
                                         <button
                                             type="button"
-                                            onClick={() => setActual(i)}
+                                            onClick={() => mostrar(i)}
                                             aria-label={`Ver la historia de ${testimonio.nombre}`}
                                             aria-current={i === actual ? 'true' : undefined}
                                             className={cn(

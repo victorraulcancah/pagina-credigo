@@ -1,11 +1,11 @@
-import { ExternalLink, Film, MessageSquareQuote, PlayCircle, Plus, RotateCcw, Save, ShieldAlert, Star, Trash2 } from 'lucide-react';
+import { CircleCheck, ExternalLink, Film, Link2, MessageSquareQuote, PlayCircle, Plus, RotateCcw, Save, ShieldAlert, Star, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import ImageUpload from '@/components/admin/ImageUpload';
 import PageHeader from '@/components/admin/PageHeader';
-import VideoInput from '@/components/admin/VideoInput';
 import AdminLayout from '@/components/layout/AdminLayout';
 import ArchivoInput from '@/components/ui/ArchivoInput';
 import Button from '@/components/ui/Button';
@@ -15,10 +15,12 @@ import Modal from '@/components/ui/Modal';
 import Select from '@/components/ui/Select';
 import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
-import { FotoConductor } from '@/components/web/Testimonios';
-import Video from '@/components/web/Video';
+import { FotoConductor, REDES_VIDEO } from '@/components/web/Testimonios';
+import Video, { VentanaVideo } from '@/components/web/Video';
 import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
+import { cn } from '@/lib/utils';
+import { esEnlaceCortoTiktok, parsearVideo } from '@/lib/video';
 
 const MAX_COMENTARIO = 400;
 const VIDEO_MAX_MB = 100;
@@ -33,7 +35,9 @@ const VACIO = {
     quitar_foto_vehiculo: false,
     vehiculo: '',
     calificacion: '',
-    video_url: '',
+    tiktok_url: '',
+    youtube_url: '',
+    facebook_url: '',
     video: null,
     quitar_video: false,
     autorizado: false,
@@ -42,6 +46,87 @@ const VACIO = {
 };
 
 const CALIFICACIONES = [5, 4, 3, 2, 1].map((n) => ({ value: n, label: `${n} ${n === 1 ? 'estrella' : 'estrellas'}` }));
+
+// Qué enlace sirve en cada red (el de Compartir del celular sirve en TikTok y YouTube)
+const AYUDA_RED = {
+    tiktok_url: 'Sirve el de Compartir del celular (vm.tiktok.com/…): al guardar se completa solo.',
+    youtube_url: 'Sirve el de Compartir (youtu.be/…), el del navegador o el de un short.',
+    facebook_url: 'Abre el video en el navegador y copia el enlace (los de fb.watch no sirven).',
+};
+
+/**
+ * Enlace del video en una red, con su ícono. Avisa al instante si el enlace es de otra red o no
+ * se reconoce, y si está bien deja verlo en una ventana antes de guardar. El servidor valida igual (VideoRegla).
+ */
+function EnlaceRed({ red, value, onChange, error }) {
+    const [probando, setProbando] = useState(false);
+    const video = parsearVideo(value);
+    const deEstaRed = video?.proveedor === red.nombre;
+    const corto = red.campo === 'tiktok_url' && esEnlaceCortoTiktok(value);
+
+    let estado = null;
+    if (error) estado = <p className="text-sm text-red-600" role="alert">{error}</p>;
+    else if (deEstaRed)
+        estado = (
+            <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+                <CircleCheck className="size-4 shrink-0" aria-hidden="true" /> Video de {red.nombre} listo: en la historia sale su ícono.
+            </p>
+        );
+    else if (corto) estado = <p className="text-sm text-primary-700">Enlace corto de TikTok: al guardar se completa solo.</p>;
+    else if (value && video) estado = <p className="text-sm text-amber-700">Este enlace es de {video.proveedor}, no de {red.nombre}. Pégalo en su casilla.</p>;
+    else if (value) estado = <p className="text-sm text-amber-700">No reconocemos este enlace. Abre el video y copia el enlace completo.</p>;
+    else estado = <p className="text-sm text-primary-400">{AYUDA_RED[red.campo]}</p>;
+
+    return (
+        <div className="flex flex-col gap-1.5">
+            <label htmlFor={red.campo} className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <span className={cn('flex size-7 items-center justify-center rounded-full bg-white ring-1 ring-gray-200', red.color)}>
+                    <red.icono className="size-3.5" aria-hidden="true" />
+                </span>
+                {red.nombre}
+            </label>
+            <div className="flex gap-2">
+                <Input
+                    id={red.campo}
+                    inputMode="url"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    error={error}
+                    placeholder={red.placeholder}
+                    className="min-w-0"
+                />
+                {deEstaRed && (
+                    <Button type="button" variant="ghost" icon={PlayCircle} onClick={() => setProbando(true)} className="shrink-0 border border-gray-200 bg-white">
+                        Ver
+                    </Button>
+                )}
+            </div>
+            {estado}
+            {deEstaRed && <VentanaVideo url={value} titulo={`Vista previa · ${red.nombre}`} abierto={probando} onClose={() => setProbando(false)} />}
+        </div>
+    );
+}
+
+/** En la lista: qué videos tiene cada historia (íconos de las redes y el subido). */
+function VideosDeLaHistoria({ testimonio }) {
+    const redes = REDES_VIDEO.filter((red) => testimonio[red.campo]);
+    if (!redes.length && !testimonio.video_archivo_url) return null;
+
+    return (
+        <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Videos">
+            {testimonio.video_archivo_url && (
+                <li className="inline-flex h-6 items-center gap-1 rounded-full bg-primary px-2 text-[0.6875rem] font-semibold text-white">
+                    <Film className="size-3" aria-hidden="true" /> Video propio
+                </li>
+            )}
+            {redes.map((red) => (
+                <li key={red.campo} title={red.nombre} className={cn('flex size-6 items-center justify-center rounded-full bg-gray-100', red.color)}>
+                    <red.icono className="size-3" aria-label={red.nombre} />
+                </li>
+            ))}
+        </ul>
+    );
+}
 
 /** Historias de conductores (testimonios): los pide a la API (GET /api/admin/testimonios). */
 export default function TestimoniosIndex() {
@@ -56,7 +141,9 @@ export default function TestimoniosIndex() {
             ...t,
             ciudad: t.ciudad ?? '',
             vehiculo: t.vehiculo ?? '',
-            video_url: t.video_url ?? '',
+            tiktok_url: t.tiktok_url ?? '',
+            youtube_url: t.youtube_url ?? '',
+            facebook_url: t.facebook_url ?? '',
             video: null,
             quitar_video: false,
             calificacion: t.calificacion ?? '',
@@ -126,6 +213,7 @@ export default function TestimoniosIndex() {
                                 </h3>
                                 <p className="line-clamp-2 text-sm text-gray-500">“{testimonio.comentario}”</p>
                                 {testimonio.vehiculo && <p className="mt-1 text-xs text-gray-400">{testimonio.vehiculo}</p>}
+                                <VideosDeLaHistoria testimonio={testimonio} />
                             </div>
                             {testimonio.foto_vehiculo_url && (
                                 <img src={testimonio.foto_vehiculo_url} alt="" className="hidden h-16 w-24 shrink-0 rounded-lg object-contain sm:block" />
@@ -229,25 +317,23 @@ export default function TestimoniosIndex() {
                         />
                     </FormField>
 
-                    {/* Video: enlace (TikTok, YouTube…) o subido. Si hay los dos, se muestra el subido */}
-                    <div className="flex flex-col gap-4 rounded-xl bg-gray-50 p-4 sm:col-span-2">
+                    {/* Videos: un enlace por red (en la historia sale un ícono por cada uno) y el video propio, que se ve dentro de la historia */}
+                    <div className="flex flex-col gap-5 rounded-xl bg-gray-50 p-4 sm:col-span-2 sm:p-5">
                         <div>
                             <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                                <PlayCircle className="size-4 text-primary" aria-hidden="true" /> Video (opcional)
+                                <Link2 className="size-4 text-primary" aria-hidden="true" /> Su video en redes (opcional)
                             </p>
-                            <p className="mt-0.5 text-xs text-gray-500">Agrega "Ver su historia en video". Pega el enlace de TikTok o súbelo directamente.</p>
+                            <p className="mt-0.5 text-xs text-gray-500">Pega el enlace de su video en cada red. En la historia sale un ícono por cada una y el video se abre ahí mismo.</p>
                         </div>
+                        {REDES_VIDEO.map((red) => (
+                            <EnlaceRed key={red.campo} red={red} value={data[red.campo]} onChange={(valor) => setData(red.campo, valor)} error={errors[red.campo]} />
+                        ))}
 
-                        <VideoInput
-                            label="Enlace de TikTok, YouTube, Facebook o Vimeo"
-                            value={data.video_url}
-                            onChange={(valor) => setData('video_url', valor)}
-                            error={errors.video_url}
-                            hint="Sirve el enlace del botón Compartir del celular (vm.tiktok.com/…): al guardar se completa solo."
-                        />
-
-                        <div>
-                            <p className="mb-1.5 text-sm font-medium text-gray-700">O sube el video</p>
+                        <div className="border-t border-gray-200 pt-5">
+                            <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                <Film className="size-4 text-primary" aria-hidden="true" /> Video propio (opcional)
+                            </p>
+                            <p className="mt-0.5 mb-3 text-xs text-gray-500">El que grabaste o te mandó el conductor. Se reproduce dentro de la misma historia, sobre su foto.</p>
                             {crud.editando?.video_archivo_url && !data.video && (
                                 <div className="mb-3 flex flex-wrap items-start gap-4">
                                     {data.quitar_video ? (
@@ -263,7 +349,7 @@ export default function TestimoniosIndex() {
                                         </p>
                                     ) : (
                                         <>
-                                            <Video key={crud.editando.video_archivo_url} url={crud.editando.video_archivo_url} titulo="Video subido" className="ml-0 max-w-[10rem]" />
+                                            <Video key={crud.editando.video_archivo_url} url={crud.editando.video_archivo_url} titulo="Video subido" className="ml-0 max-w-[13rem]" />
                                             <Button type="button" variant="ghost" size="sm" icon={Trash2} onClick={() => setData('quitar_video', true)} className="border border-gray-200">
                                                 Quitar video
                                             </Button>
@@ -281,6 +367,8 @@ export default function TestimoniosIndex() {
                                 value={data.video}
                                 onChange={(archivo) => setData('video', archivo)}
                                 error={errors.video}
+                                // A su medida: con h-full se estiraba al alto de todo el formulario y tapaba los campos de abajo
+                                className="h-auto"
                             />
                             {processing && data.video && (
                                 <p className="mt-2 text-sm text-gray-500">

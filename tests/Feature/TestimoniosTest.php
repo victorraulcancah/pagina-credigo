@@ -86,13 +86,38 @@ it('no deja publicar una historia sin la autorización del conductor', function 
     $this->postJson('/api/admin/testimonios', [...$datos, 'activo' => false, 'autorizado' => false])->assertCreated();
 });
 
-it('valida la calificación y el enlace del video', function () {
+it('valida la calificación y que cada enlace sea de un video de su red', function () {
     $this->actingAs(User::factory()->create());
 
     $this->postJson('/api/admin/testimonios', [
         'nombre' => 'X', 'comentario' => 'Y', 'orden' => 0, 'activo' => false,
-        'calificacion' => 6, 'video_url' => 'https://ejemplo.com/video',
-    ])->assertJsonValidationErrors(['calificacion', 'video_url']);
+        'calificacion' => 6,
+        'tiktok_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', // de otra red
+        'youtube_url' => 'https://ejemplo.com/video',
+        'facebook_url' => 'https://www.tiktok.com/@credigo/video/7312345678901234567',
+    ])->assertJsonValidationErrors(['calificacion', 'tiktok_url' => 'video de TikTok', 'youtube_url' => 'video de YouTube', 'facebook_url' => 'video de Facebook']);
+});
+
+it('guarda un enlace por red (TikTok, YouTube y Facebook) y el sitio los muestra', function () {
+    $this->actingAs(User::factory()->create());
+    $enlaces = [
+        'tiktok_url' => 'https://www.tiktok.com/@credigo/video/7312345678901234567',
+        'youtube_url' => 'https://youtu.be/dQw4w9WgXcQ?si=abc',
+        'facebook_url' => 'https://www.facebook.com/reel/1234567890',
+    ];
+
+    $this->postJson('/api/admin/testimonios', [
+        'nombre' => 'En redes', 'comentario' => 'Texto.', 'orden' => 0, 'activo' => true, 'autorizado' => true,
+        // con espacios de más al pegar
+        ...array_map(fn ($url) => "  {$url} ", $enlaces),
+    ])->assertCreated()->assertJson(['data' => $enlaces]);
+
+    paginaApi('historias', fn (AssertableJson $page) => $page
+        ->where('testimonios.0.tiktok_url', $enlaces['tiktok_url'])
+        ->where('testimonios.0.youtube_url', $enlaces['youtube_url'])
+        ->where('testimonios.0.facebook_url', $enlaces['facebook_url'])
+        ->missing('testimonios.0.video_url')
+        ->etc());
 });
 
 it('el inicio muestra solo las historias publicadas, en orden y sin datos internos', function () {
@@ -152,14 +177,14 @@ it('completa el enlace corto de TikTok (botón Compartir del celular) al guardar
 
     $this->postJson('/api/admin/testimonios', [
         'nombre' => 'Con TikTok', 'comentario' => 'Texto.', 'orden' => 0, 'activo' => false,
-        'video_url' => 'https://vm.tiktok.com/ZMabc123/',
-    ])->assertCreated()->assertJsonPath('data.video_url', 'https://www.tiktok.com/@credigo/video/7312345678901234567');
+        'tiktok_url' => 'https://vm.tiktok.com/ZMabc123/',
+    ])->assertCreated()->assertJsonPath('data.tiktok_url', 'https://www.tiktok.com/@credigo/video/7312345678901234567');
 
     // Si TikTok no lleva a un video, se avisa que el enlace no sirve
     $this->postJson('/api/admin/testimonios', [
         'nombre' => 'Enlace roto', 'comentario' => 'Texto.', 'orden' => 0, 'activo' => false,
-        'video_url' => 'https://vt.tiktok.com/ZSroto99/',
-    ])->assertJsonValidationErrors('video_url');
+        'tiktok_url' => 'https://vt.tiktok.com/ZSroto99/',
+    ])->assertJsonValidationErrors('tiktok_url');
 });
 
 it('sube el video de un testimonio, lo muestra en el sitio y lo quita', function () {

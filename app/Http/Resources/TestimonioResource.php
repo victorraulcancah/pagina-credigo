@@ -22,7 +22,9 @@ class TestimonioResource extends JsonResource
             'foto_vehiculo_url' => $this->foto_vehiculo_url,
             'vehiculo' => $this->vehiculo,
             'calificacion' => $this->calificacion,
-            'video_url' => $this->video_url,
+            'tiktok_url' => $this->tiktok_url,
+            'youtube_url' => $this->youtube_url,
+            'facebook_url' => $this->facebook_url,
             'video_archivo_url' => $this->video_archivo_url,
             $this->mergeWhen($request->is('api/admin/*'), fn () => [
                 'autorizado' => (bool) $this->autorizado,

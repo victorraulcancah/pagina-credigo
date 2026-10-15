@@ -10,6 +10,9 @@ class TestimonioRequest extends FormRequest
     // Tope de un video subido (el servidor lo permite en public/.user.ini)
     public const VIDEO_MAX_MB = 100;
 
+    /** Un enlace de video por red: campo => red. En la historia sale un ícono por cada uno. */
+    public const REDES = ['tiktok_url' => 'tiktok', 'youtube_url' => 'youtube', 'facebook_url' => 'facebook'];
+
     public function authorize(): bool
     {
         return true;
@@ -18,7 +21,9 @@ class TestimonioRequest extends FormRequest
     /** Un enlace corto de TikTok (botón "Compartir" del celular) se completa antes de validar. */
     protected function prepareForValidation(): void
     {
-        VideoRegla::completar($this);
+        foreach (array_keys(self::REDES) as $campo) {
+            VideoRegla::completar($this, $campo);
+        }
     }
 
     public function rules(): array
@@ -33,8 +38,8 @@ class TestimonioRequest extends FormRequest
             'quitar_foto_vehiculo' => ['boolean'],
             'vehiculo' => ['nullable', 'string', 'max:80'],
             'calificacion' => ['nullable', 'integer', 'between:1,5'],
-            'video_url' => VideoRegla::reglas(),
-            // O el video subido (del celular o la PC). MP4 se ve en todos los navegadores
+            ...collect(self::REDES)->map(fn ($red) => VideoRegla::reglas($red))->all(),
+            // Su video subido (del celular o la PC): se ve dentro de la historia. MP4 se ve en todos los navegadores
             'video' => ['nullable', 'file', 'mimetypes:video/mp4,video/quicktime,video/webm', 'max:'.(self::VIDEO_MAX_MB * 1024)],
             'quitar_video' => ['boolean'],
             // Su nombre, foto y comentario son datos personales: sin su autorización no se publica
@@ -47,7 +52,7 @@ class TestimonioRequest extends FormRequest
     public function messages(): array
     {
         return [
-            ...VideoRegla::mensajes('video_url'),
+            ...collect(self::REDES)->flatMap(fn ($red, $campo) => VideoRegla::mensajes($campo, $red))->all(),
             'video.mimetypes' => 'El video debe ser MP4, MOV o WEBM.',
             'video.max' => 'El video no puede pesar más de '.self::VIDEO_MAX_MB.' MB.',
             'autorizado.accepted' => 'Para publicarlo necesitas la autorización del conductor. Si aún no la tienes, guárdalo como oculto.',

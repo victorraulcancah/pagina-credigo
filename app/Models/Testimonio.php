@@ -17,7 +17,7 @@ class Testimonio extends Model
 
     protected $fillable = [
         'nombre', 'ciudad', 'comentario', 'foto', 'foto_vehiculo', 'vehiculo',
-        'calificacion', 'video_url', 'video', 'autorizado', 'orden', 'activo',
+        'calificacion', 'tiktok_url', 'youtube_url', 'facebook_url', 'video', 'autorizado', 'orden', 'activo',
     ];
 
     protected $appends = ['foto_url', 'foto_vehiculo_url', 'video_archivo_url'];
@@ -48,7 +48,7 @@ class Testimonio extends Model
         return Attribute::get(fn () => app(ImagenService::class)->url($this->foto_vehiculo));
     }
 
-    /** Video subido (en vez de un enlace de YouTube, TikTok…). */
+    /** Video subido: se ve dentro de la historia (los de TikTok, YouTube y Facebook van como íconos). */
     protected function videoArchivoUrl(): Attribute
     {
         return Attribute::get(fn () => app(ImagenService::class)->url($this->video));

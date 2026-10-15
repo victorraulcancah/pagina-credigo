@@ -15,8 +15,9 @@ const aceptaTipo = (archivo, accept) =>
  * Tarjeta para adjuntar archivos: clic o arrastrar y soltar. Muestra los elegidos
  * y avisa antes de enviar si alguno pesa más de lo permitido o no es del formato.
  * `multiple`: value es un arreglo de File; si no, un File o null.
+ * Llena el alto de su celda (para igualar tarjetas en una grilla); `className="h-auto"` lo deja a su medida.
  */
-export default function ArchivoInput({ id, icon: Icono = Paperclip, titulo, formatos, accept, maxMb, multiple = false, max = 5, value, onChange, error }) {
+export default function ArchivoInput({ id, icon: Icono = Paperclip, titulo, formatos, accept, maxMb, multiple = false, max = 5, value, onChange, error, className }) {
     const inputRef = useRef(null);
     const [aviso, setAviso] = useState(null);
     const [arrastrando, setArrastrando] = useState(false);
@@ -53,7 +54,7 @@ export default function ArchivoInput({ id, icon: Icono = Paperclip, titulo, form
     };
 
     return (
-        <div className="flex h-full flex-col gap-2">
+        <div className={cn('flex h-full flex-col gap-2', className)}>
             <div
                 onDragOver={(e) => {
                     e.preventDefault();

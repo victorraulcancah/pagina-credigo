@@ -1,4 +1,5 @@
 import { ArrowRight, Car, MapPin, MessageSquareQuote, Quote } from 'lucide-react';
+import { useState } from 'react';
 import PageHero from '@/components/layout/PageHero';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Button from '@/components/ui/Button';
@@ -6,42 +7,57 @@ import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import CtaSection from '@/components/web/CtaSection';
 import PaginaApi from '@/components/web/PaginaApi';
-import { Estrellas, FotoConductor } from '@/components/web/Testimonios';
-import { BotonVideo } from '@/components/web/Video';
+import { Estrellas, PortadaHistoria, VideosEnRedes } from '@/components/web/Testimonios';
+import { BotonReproducir, VideoEnLinea } from '@/components/web/Video';
 import { cn } from '@/lib/utils';
 
 /**
  * Una historia como tarjeta: la foto del conductor arriba (con la de su vehículo encima, en
- * una esquina), su comentario y al pie su nombre, ciudad y vehículo.
+ * una esquina), su comentario y al pie su nombre, vehículo y los íconos de sus videos en
+ * TikTok, YouTube y Facebook. Si tiene video subido, la foto lleva el botón de reproducir y
+ * el video se ve ahí mismo, dentro de la tarjeta.
  * Entran una tras otra desde los costados; al pasar el mouse la foto se acerca, el vehículo
  * se levanta, las comillas giran y se dibuja la línea amarilla del pie.
  */
 function TarjetaHistoria({ testimonio, indice }) {
+    const [reproduciendo, setReproduciendo] = useState(false);
+    const titulo = `La historia de ${testimonio.nombre}`;
+    const conVideo = Boolean(testimonio.video_archivo_url);
+
     return (
         <Revelar as="li" desde={indice % 2 ? 'derecha' : 'izquierda'} retraso={escalonar(indice, 110)} className="h-full">
             <figure className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-white ring-1 ring-primary-100 transition duration-300 hover:ring-2 hover:ring-primary">
                 <div className="relative aspect-[4/3] overflow-hidden bg-primary">
-                    <FotoConductor
-                        testimonio={testimonio}
-                        alt={`Foto de ${testimonio.nombre}`}
-                        className="size-full object-top text-7xl transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
-                    {/* Sin foto: las iniciales llevan el resplandor amarillo de la marca */}
-                    {!testimonio.foto_url && (
-                        <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 size-96 resplandor-acento transition-transform duration-700 group-hover:scale-110" />
-                    )}
-                    {testimonio.ciudad && (
-                        <span className="absolute top-5 left-5 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-primary">
-                            <MapPin className="size-3.5" aria-hidden="true" /> {testimonio.ciudad}
-                        </span>
-                    )}
-                    {testimonio.foto_vehiculo_url && (
-                        <img
-                            src={testimonio.foto_vehiculo_url}
-                            alt={testimonio.vehiculo ? `Vehículo: ${testimonio.vehiculo}` : `Vehículo de ${testimonio.nombre}`}
-                            loading="lazy"
-                            className="absolute right-5 bottom-5 aspect-[4/3] w-[38%] max-w-56 rounded-2xl bg-white object-cover shadow-xl shadow-primary/30 ring-4 ring-white transition duration-500 ease-out group-hover:-translate-y-2 group-hover:-rotate-2"
-                        />
+                    {reproduciendo ? (
+                        <VideoEnLinea src={testimonio.video_archivo_url} titulo={titulo} />
+                    ) : (
+                        <>
+                            <PortadaHistoria
+                                testimonio={testimonio}
+                                alt={`Foto de ${testimonio.nombre}`}
+                                className="size-full object-top text-7xl transition-transform duration-700 ease-out group-hover:scale-105"
+                            />
+                            {/* Sin foto ni video: las iniciales llevan el resplandor amarillo de la marca */}
+                            {!testimonio.foto_url && !conVideo && (
+                                <div aria-hidden="true" className="pointer-events-none absolute -top-24 -right-24 size-96 resplandor-acento transition-transform duration-700 group-hover:scale-110" />
+                            )}
+                            {conVideo && (
+                                <BotonReproducir onClick={() => setReproduciendo(true)} etiqueta={`Reproducir el video: ${titulo}`} esquina />
+                            )}
+                            {testimonio.ciudad && (
+                                <span className="pointer-events-none absolute top-5 left-5 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-primary">
+                                    <MapPin className="size-3.5" aria-hidden="true" /> {testimonio.ciudad}
+                                </span>
+                            )}
+                            {testimonio.foto_vehiculo_url && (
+                                <img
+                                    src={testimonio.foto_vehiculo_url}
+                                    alt={testimonio.vehiculo ? `Vehículo: ${testimonio.vehiculo}` : `Vehículo de ${testimonio.nombre}`}
+                                    loading="lazy"
+                                    className="pointer-events-none absolute right-5 bottom-5 aspect-[4/3] w-[38%] max-w-56 rounded-2xl bg-white object-cover shadow-xl shadow-primary/30 ring-4 ring-white transition duration-500 ease-out group-hover:-translate-y-2 group-hover:-rotate-2"
+                                />
+                            )}
+                        </>
                     )}
                 </div>
 
@@ -68,11 +84,7 @@ function TarjetaHistoria({ testimonio, indice }) {
                                     </p>
                                 )}
                             </div>
-                            {(testimonio.video_archivo_url || testimonio.video_url) && (
-                                <BotonVideo url={testimonio.video_archivo_url || testimonio.video_url} titulo={`La historia de ${testimonio.nombre}`} enlace className="mt-3 shrink-0 text-sm font-semibold sm:mt-0">
-                                    Ver su video
-                                </BotonVideo>
-                            )}
+                            <VideosEnRedes testimonio={testimonio} className="mt-4 shrink-0 sm:mt-0" />
                         </div>
                     </figcaption>
 

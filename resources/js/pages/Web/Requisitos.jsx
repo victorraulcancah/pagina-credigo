@@ -34,7 +34,7 @@ function RequisitosContenido({ secciones, documentos: pdfs }) {
 
     return (
         <PublicLayout title="Requisitos" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Requisitos'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} colorTitulo={hero?.color_titulo} colorTexto={hero?.color_texto} title={hero?.titulo || 'Requisitos'} description={hero?.contenido} />
 
             {/* Documentos que se piden y, debajo, la lista en PDF para descargar */}
             {documentos ? (

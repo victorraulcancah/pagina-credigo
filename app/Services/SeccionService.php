@@ -15,7 +15,7 @@ class SeccionService
     private const CAMPOS_TEXTO = ['subtitulo', 'titulo', 'contenido'];
 
     /** Orden de las páginas en el panel */
-    private const ORDEN_PAGINAS = ['inicio', 'nosotros', 'servicios', 'requisitos', 'pagos', 'talleres', 'beneficios', 'cotizador', 'contacto', 'general', 'legal'];
+    private const ORDEN_PAGINAS = ['inicio', 'nosotros', 'servicios', 'requisitos', 'pagos', 'talleres', 'beneficios', 'historias', 'cotizador', 'contacto', 'general', 'legal'];
 
     public function __construct(private ImagenService $imagenes) {}
 
@@ -60,6 +60,12 @@ class SeccionService
 
         if ($seccion->usaCampo('video')) {
             $cambios['video_url'] = $datos['video_url'] ?? null;
+        }
+
+        if ($seccion->usaCampo('colores')) {
+            // Vacío = el color por defecto del diseño (blanco en los encabezados)
+            $cambios['color_titulo'] = $datos['color_titulo'] ?? null;
+            $cambios['color_texto'] = $datos['color_texto'] ?? null;
         }
 
         if ($seccion->usaCampo('items')) {

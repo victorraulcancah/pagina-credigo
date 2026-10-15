@@ -54,7 +54,7 @@ function NosotrosContenido({ secciones }) {
 
     return (
         <PublicLayout title="Nosotros" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Nosotros'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} colorTitulo={hero?.color_titulo} colorTexto={hero?.color_texto} title={hero?.titulo || 'Nosotros'} description={hero?.contenido} />
 
             <TextoConImagen seccion={secciones['nosotros.historia']} />
 

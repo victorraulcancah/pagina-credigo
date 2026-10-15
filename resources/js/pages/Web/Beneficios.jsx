@@ -215,7 +215,7 @@ function BeneficiosContenido({ secciones, cuotaSemanal, comercios, cupones }) {
 
     return (
         <PublicLayout title="Beneficios" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Beneficios'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} colorTitulo={hero?.color_titulo} colorTexto={hero?.color_texto} title={hero?.titulo || 'Beneficios'} description={hero?.contenido} />
 
             <SemanaSection seccion={secciones['beneficios.semana']} cuotaSemanal={cuotaSemanal} />
 

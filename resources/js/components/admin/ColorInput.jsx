@@ -1,7 +1,11 @@
 import Input from '@/components/ui/Input';
 
-/** Selector de color + campo hexadecimal sincronizados. */
-export default function ColorInput({ id, value, onChange, error }) {
+/**
+ * Selector de color + campo hexadecimal sincronizados.
+ * `porDefecto`: color que se ve en el selector mientras el campo está vacío (ej. el blanco
+ * de un encabezado); `placeholder` lo explica en el campo.
+ */
+export default function ColorInput({ id, value, onChange, error, porDefecto = '#000000', placeholder }) {
     const valido = /^#[0-9a-fA-F]{6}$/.test(value);
 
     return (
@@ -9,7 +13,7 @@ export default function ColorInput({ id, value, onChange, error }) {
             <input
                 type="color"
                 aria-label="Elegir color"
-                value={valido ? value : '#000000'}
+                value={valido ? value : porDefecto}
                 onChange={(e) => onChange(e.target.value)}
                 className="h-11 w-14 shrink-0 cursor-pointer rounded-lg border border-gray-300 bg-white p-1 sm:h-12"
             />
@@ -19,7 +23,8 @@ export default function ColorInput({ id, value, onChange, error }) {
                 onChange={(e) => onChange(e.target.value)}
                 error={error}
                 maxLength={7}
-                className="font-mono uppercase"
+                placeholder={placeholder}
+                className="font-mono uppercase placeholder:font-sans placeholder:normal-case"
             />
         </div>
     );

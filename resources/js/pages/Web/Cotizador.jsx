@@ -70,7 +70,7 @@ function CotizadorContenido({ secciones, planes }) {
 
     return (
         <PublicLayout title="Cotizador" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Cotizador'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} colorTitulo={hero?.color_titulo} colorTexto={hero?.color_texto} title={hero?.titulo || 'Cotizador'} description={hero?.contenido} />
 
             <Section background="muted">
                 {!plan ? (

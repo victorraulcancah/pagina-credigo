@@ -290,6 +290,8 @@ function TalleresContenido({ secciones, talleres, documentos }) {
         <PublicLayout title="Talleres aliados" description={hero?.contenido}>
             <PageHero
                 imagen={hero?.imagen_url}
+                colorTitulo={hero?.color_titulo}
+                colorTexto={hero?.color_texto}
                 title={hero?.titulo || 'Talleres aliados'}
                 description={hero?.contenido}
             />

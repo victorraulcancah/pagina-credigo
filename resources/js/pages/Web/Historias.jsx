@@ -69,7 +69,7 @@ function HistoriasContenido({ secciones, testimonios }) {
 
     return (
         <PublicLayout title={hero?.titulo || 'Historias de conductores'}>
-            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Historias de conductores'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} colorTitulo={hero?.color_titulo} colorTexto={hero?.color_texto} title={hero?.titulo || 'Historias de conductores'} description={hero?.contenido} />
 
             <Section>
                 {testimonios.length > 0 ? (

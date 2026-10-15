@@ -209,6 +209,34 @@ describe('con sesión iniciada', function () {
         expect($seccion->fresh()->items)->toBe([]);
     });
 
+    it('cambia los colores del título y del texto de un encabezado (vacío = blanco)', function () {
+        $this->seed(ContenidoSeeder::class);
+        $hero = Seccion::where('pagina', 'nosotros')->where('clave', 'hero')->sole();
+        $datos = ['titulo' => 'Somos CrediGo', 'contenido' => 'Texto', 'activo' => true];
+
+        $this->put("/api/admin/secciones/{$hero->id}", [...$datos, 'color_titulo' => '#0F1037', 'color_texto' => '#21254a'])->assertSuccessful();
+
+        paginaApi('nosotros', fn (AssertableJson $page) => $page
+            ->where('secciones', fn ($s) => $s['nosotros.hero']['color_titulo'] === '#0F1037' && $s['nosotros.hero']['color_texto'] === '#21254a')
+            ->etc());
+
+        // Vacíos vuelven al blanco por defecto
+        $this->put("/api/admin/secciones/{$hero->id}", [...$datos, 'color_titulo' => '', 'color_texto' => ''])->assertSuccessful();
+        expect($hero->fresh())->color_titulo->toBeNull()->color_texto->toBeNull();
+
+        $this->putJson("/api/admin/secciones/{$hero->id}", [...$datos, 'color_titulo' => 'rojo'])->assertJsonValidationErrors('color_titulo');
+    });
+
+    it('los colores solo se guardan en los encabezados', function () {
+        $this->seed(ContenidoSeeder::class);
+        $valores = Seccion::where('pagina', 'nosotros')->where('clave', 'valores')->sole();
+
+        $this->put("/api/admin/secciones/{$valores->id}", ['titulo' => 'Valores', 'color_titulo' => '#ff0000', 'activo' => true])->assertSuccessful();
+
+        expect($valores->fresh()->color_titulo)->toBeNull()
+            ->and(Seccion::where('clave', 'hero')->get()->every(fn (Seccion $s) => $s->usaCampo('colores')))->toBeTrue();
+    });
+
     it('pone imagen de fondo al encabezado de contacto y la muestra en la página', function () {
         Storage::fake('public');
         $this->seed(ContenidoSeeder::class);

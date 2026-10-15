@@ -19,6 +19,8 @@ class SeccionResource extends JsonResource
             'subtitulo' => $this->subtitulo,
             'titulo' => $this->titulo,
             'contenido' => $this->contenido,
+            'color_titulo' => $this->color_titulo,
+            'color_texto' => $this->color_texto,
             'imagen_url' => $this->imagen_url,
             'boton_texto' => $this->boton_texto,
             'boton_url' => $this->boton_url,

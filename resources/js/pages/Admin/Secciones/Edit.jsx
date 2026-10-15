@@ -1,5 +1,7 @@
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, ExternalLink, Save } from 'lucide-react';
+import { ArrowLeft, ExternalLink, RotateCcw, Save } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
+import ColorInput from '@/components/admin/ColorInput';
 import ImageUpload from '@/components/admin/ImageUpload';
 import ItemsRepeater from '@/components/admin/ItemsRepeater';
 import PageHeader from '@/components/admin/PageHeader';
@@ -14,6 +16,7 @@ import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
 import { useFormApi } from '@/hooks/useFormApi';
 import { PAGINAS } from '@/data/paginas';
+import { cn, SOMBRA_TEXTO } from '@/lib/utils';
 
 const URLS_LEGALES = { terminos: '/terminos-y-condiciones', privacidad: '/politica-de-privacidad' };
 
@@ -46,6 +49,65 @@ const LISTAS = {
     },
 };
 
+const COLORES = [
+    ['color_titulo', 'Color del título'],
+    ['color_texto', 'Color del texto'],
+];
+
+/**
+ * Colores del título y del texto de un encabezado, con la vista previa sobre su fondo
+ * (la imagen elegida o el azul de marca). Vacío = blanco, como en el sitio.
+ */
+function ColoresEncabezado({ data, setData, errors, imagenUrl }) {
+    const imagenNueva = useMemo(() => (data.imagen ? URL.createObjectURL(data.imagen) : null), [data.imagen]);
+    useEffect(() => () => imagenNueva && URL.revokeObjectURL(imagenNueva), [imagenNueva]);
+    const fondo = imagenNueva ?? (data.quitar_imagen ? null : imagenUrl);
+
+    return (
+        <Panel title="Colores del texto" description="Por defecto el título y el texto van en blanco. Cámbialos si no se leen bien sobre la imagen de fondo.">
+            <div className="flex flex-col gap-5">
+                <div className="relative overflow-hidden rounded-xl bg-primary px-4 py-6" aria-label="Vista previa del encabezado">
+                    {fondo && <img src={fondo} alt="" className="absolute inset-0 size-full object-cover" />}
+                    <div className="relative">
+                        <p className={cn('text-xl leading-tight font-bold text-white', fondo && SOMBRA_TEXTO)} style={data.color_titulo ? { color: data.color_titulo } : undefined}>
+                            {data.titulo || 'Título'}
+                        </p>
+                        <p
+                            className={cn('mt-1.5 line-clamp-2 text-sm text-white/80', fondo && SOMBRA_TEXTO)}
+                            style={data.color_texto ? { color: data.color_texto } : undefined}
+                        >
+                            {data.contenido || 'Texto del encabezado'}
+                        </p>
+                    </div>
+                </div>
+
+                {COLORES.map(([campo, etiqueta]) => (
+                    <FormField key={campo} label={etiqueta} htmlFor={campo} error={errors[campo]}>
+                        <ColorInput
+                            id={campo}
+                            value={data[campo]}
+                            onChange={(valor) => setData(campo, valor)}
+                            error={errors[campo]}
+                            porDefecto="#ffffff"
+                            placeholder="Blanco (por defecto)"
+                        />
+                    </FormField>
+                ))}
+
+                {(data.color_titulo || data.color_texto) && (
+                    <button
+                        type="button"
+                        onClick={() => setData((d) => ({ ...d, color_titulo: '', color_texto: '' }))}
+                        className="inline-flex items-center gap-2 self-start text-sm font-medium text-gray-600 hover:text-primary"
+                    >
+                        <RotateCcw className="size-4" aria-hidden="true" /> Volver al blanco
+                    </button>
+                )}
+            </div>
+        </Panel>
+    );
+}
+
 function SeccionFormulario({ seccion }) {
     const usa = (campo) => seccion.campos.includes(campo);
     const esEncabezado = seccion.clave === 'hero';
@@ -60,6 +122,8 @@ function SeccionFormulario({ seccion }) {
         subtitulo: seccion.subtitulo ?? '',
         titulo: seccion.titulo ?? '',
         contenido: seccion.contenido ?? '',
+        color_titulo: seccion.color_titulo ?? '',
+        color_texto: seccion.color_texto ?? '',
         imagen: null,
         quitar_imagen: false,
         boton_texto: seccion.boton_texto ?? '',
@@ -187,6 +251,8 @@ function SeccionFormulario({ seccion }) {
                             />
                         </Panel>
                     )}
+
+                    {usa('colores') && <ColoresEncabezado data={data} setData={setData} errors={errors} imagenUrl={seccion.imagen_url} />}
 
                     {usa('video') && (
                         <Panel title="Video" description={esTextoConImagen ? 'Si pones un video, se muestra en lugar de la imagen.' : 'Se muestra debajo del título de la sección.'}>

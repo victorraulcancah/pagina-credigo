@@ -6,8 +6,9 @@ import { cn, SOMBRA_TEXTO } from '@/lib/utils';
  * Encabezado azul para páginas internas: título grande a la izquierda (sin etiqueta encima)
  * y su texto. `imagen`: foto de fondo opcional del panel, se muestra tal cual (el texto lleva
  * sombra suave). `children` se muestra debajo como fila de botones.
+ * `colorTitulo` / `colorTexto`: colores elegidos en el panel (vacío = blanco).
  */
-export default function PageHero({ title, description, imagen, align = 'left', children }) {
+export default function PageHero({ title, description, imagen, colorTitulo, colorTexto, align = 'left', children }) {
     const centered = align === 'center';
 
     return (
@@ -18,6 +19,7 @@ export default function PageHero({ title, description, imagen, align = 'left', c
                 <div className={cn('max-w-3xl', centered && 'mx-auto')}>
                     <Revelar
                         as="h1"
+                        style={colorTitulo ? { color: colorTitulo } : undefined}
                         className={cn('text-4xl leading-[1.04] font-bold tracking-[-0.035em] text-balance sm:text-5xl lg:text-6xl', imagen && SOMBRA_TEXTO)}
                     >
                         {title}
@@ -26,6 +28,7 @@ export default function PageHero({ title, description, imagen, align = 'left', c
                         <Revelar
                             as="p"
                             retraso={100}
+                            style={colorTexto ? { color: colorTexto } : undefined}
                             className={cn('mt-5 max-w-2xl text-lg text-pretty text-white/80 sm:text-xl', centered && 'mx-auto', imagen && SOMBRA_TEXTO)}
                         >
                             {description}

@@ -97,13 +97,13 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Historias de conductores ────────────────────────────
-            ['historias', 'hero', 'Historias · Encabezado', ['titulo', 'contenido', 'imagen'], [
+            ['historias', 'hero', 'Historias · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Historias de conductores',
                 'contenido' => 'Conductores de Yango e InDrive que ya trabajan con su propio vehículo cuentan cómo lo lograron.',
             ]],
 
             // ── Nosotros ────────────────────────────────────────────
-            ['nosotros', 'hero', 'Nosotros · Encabezado', ['titulo', 'contenido', 'imagen'], [
+            ['nosotros', 'hero', 'Nosotros · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Somos CrediGo',
                 'contenido' => 'Financiamiento para conductores de aplicativo, con atención cercana y condiciones claras.',
             ]],
@@ -133,13 +133,13 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Servicios ───────────────────────────────────────────
-            ['servicios', 'hero', 'Servicios · Encabezado', ['titulo', 'contenido', 'imagen'], [
+            ['servicios', 'hero', 'Servicios · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Todo lo que necesitas para trabajar',
                 'contenido' => 'Financiamiento vehicular, celulares y productos en cuotas para conductores de aplicativo.',
             ]],
 
             // ── Requisitos ──────────────────────────────────────────
-            ['requisitos', 'hero', 'Requisitos · Encabezado', ['titulo', 'contenido', 'imagen'], [
+            ['requisitos', 'hero', 'Requisitos · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Qué necesitas para inscribirte',
                 'contenido' => 'Ten a la mano estos documentos y datos. Un asesor te acompaña en todo el proceso.',
             ]],
@@ -184,7 +184,7 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Cómo pagar ──────────────────────────────────────────
-            ['pagos', 'hero', 'Cómo pagar · Encabezado', ['titulo', 'contenido', 'imagen'], [
+            ['pagos', 'hero', 'Cómo pagar · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Cómo pagar tus cuotas',
                 'contenido' => 'Elige el medio que te quede más cómodo y paga seguro en nuestras cuentas oficiales.',
             ]],
@@ -225,7 +225,7 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Talleres aliados (la lista viene del ERP) ────────────
-            ['talleres', 'hero', 'Talleres aliados · Encabezado', ['titulo', 'contenido', 'imagen'], [
+            ['talleres', 'hero', 'Talleres aliados · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Mantén tu vehículo y págalo en cuotas',
                 'contenido' => 'Mecánica, llantas, baterías, aceite y más en nuestra red de talleres aliados, con una inicial y el resto en cuotas.',
             ]],
@@ -241,7 +241,7 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Beneficios (puntaje y niveles según el ERP; comercios y cupones vienen del ERP) ──
-            ['beneficios', 'hero', 'Beneficios · Encabezado', ['titulo', 'contenido', 'imagen'], [
+            ['beneficios', 'hero', 'Beneficios · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Mientras más cumples, más ganas',
                 'contenido' => 'Tu puntaje y tu nivel te abren más opciones. Además, descuentos en comercios aliados.',
             ]],
@@ -297,13 +297,13 @@ class ContenidoSeeder extends Seeder
             ]],
 
             // ── Cotizador ───────────────────────────────────────────
-            ['cotizador', 'hero', 'Cotizador · Encabezado', ['titulo', 'contenido', 'imagen'], [
+            ['cotizador', 'hero', 'Cotizador · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Cotiza tu plan en segundos',
                 'contenido' => 'Elige el plan y la opción que te interesa, revisa las cuotas referenciales y un asesor te contacta.',
             ]],
 
             // ── Soporte (página /soporte; en la BD sigue siendo "contacto") ──
-            ['contacto', 'hero', 'Soporte · Encabezado', ['titulo', 'contenido', 'imagen'], [
+            ['contacto', 'hero', 'Soporte · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Hablemos',
                 'contenido' => 'Escríbenos y un asesor te responderá a la brevedad.',
             ]],

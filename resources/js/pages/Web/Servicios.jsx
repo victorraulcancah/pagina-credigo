@@ -15,7 +15,7 @@ function ServiciosContenido({ secciones, servicios, documentos }) {
 
     return (
         <PublicLayout title="Servicios" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Servicios'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} colorTitulo={hero?.color_titulo} colorTexto={hero?.color_texto} title={hero?.titulo || 'Servicios'} description={hero?.contenido} />
 
             <Section>
                 {servicios.length > 0 ? (

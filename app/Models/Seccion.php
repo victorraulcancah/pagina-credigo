@@ -14,7 +14,7 @@ class Seccion extends Model
     protected $table = 'secciones';
 
     protected $fillable = [
-        'pagina', 'clave', 'nombre', 'subtitulo', 'titulo', 'contenido', 'imagen',
+        'pagina', 'clave', 'nombre', 'subtitulo', 'titulo', 'contenido', 'color_titulo', 'color_texto', 'imagen',
         'boton_texto', 'boton_url', 'video_url', 'items', 'campos', 'orden', 'activo',
     ];
 

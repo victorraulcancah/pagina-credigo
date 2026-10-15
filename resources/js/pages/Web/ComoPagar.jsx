@@ -96,7 +96,7 @@ function ComoPagarContenido({ secciones, documentos }) {
 
     return (
         <PublicLayout title="Cómo pagar" description={hero?.contenido}>
-            <PageHero imagen={hero?.imagen_url} title={hero?.titulo || 'Cómo pagar'} description={hero?.contenido} />
+            <PageHero imagen={hero?.imagen_url} colorTitulo={hero?.color_titulo} colorTexto={hero?.color_texto} title={hero?.titulo || 'Cómo pagar'} description={hero?.contenido} />
 
             {/* Medios de pago: título a la izquierda; video, medios y guías en PDF a la derecha */}
             {medios ? (

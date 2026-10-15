@@ -1,7 +1,7 @@
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
 import Video from '@/components/web/Video';
-import { parsearVideo } from '@/lib/video';
+import { esEnlaceCortoTiktok, parsearVideo } from '@/lib/video';
 
 /**
  * Campo para pegar el enlace de un video (YouTube, TikTok, Facebook o Vimeo) con vista previa.
@@ -20,7 +20,10 @@ export default function VideoInput({ id = 'video_url', label = 'Video (enlace)',
             >
                 <Input id={id} inputMode="url" value={value ?? ''} onChange={(e) => onChange(e.target.value)} error={error} placeholder="https://www.youtube.com/watch?v=..." />
             </FormField>
-            {value && !error && !video && (
+            {value && !error && !video && esEnlaceCortoTiktok(value) && (
+                <p className="mt-1.5 text-sm text-primary-700">Enlace corto de TikTok: al guardar se completa solo y se muestra el video.</p>
+            )}
+            {value && !error && !video && !esEnlaceCortoTiktok(value) && (
                 <p className="mt-1.5 text-sm text-amber-700">No reconocemos este enlace. Abre el video y copia el enlace completo desde el navegador.</p>
             )}
             {/* Vista previa chica: los videos verticales (shorts, TikTok, reels) más angostos */}

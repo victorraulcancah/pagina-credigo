@@ -68,8 +68,8 @@ function TarjetaHistoria({ testimonio, indice }) {
                                     </p>
                                 )}
                             </div>
-                            {testimonio.video_url && (
-                                <BotonVideo url={testimonio.video_url} titulo={`La historia de ${testimonio.nombre}`} enlace className="mt-3 shrink-0 text-sm font-semibold sm:mt-0">
+                            {(testimonio.video_archivo_url || testimonio.video_url) && (
+                                <BotonVideo url={testimonio.video_archivo_url || testimonio.video_url} titulo={`La historia de ${testimonio.nombre}`} enlace className="mt-3 shrink-0 text-sm font-semibold sm:mt-0">
                                     Ver su video
                                 </BotonVideo>
                             )}

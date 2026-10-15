@@ -6,6 +6,7 @@ use App\Services\PaginaService;
 use Database\Seeders\ConfiguracionSeeder;
 use Database\Seeders\ContenidoSeeder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\Fluent\AssertableJson;
 
@@ -139,4 +140,53 @@ it('la página /historias siempre abre; a Google se le muestra solo cuando hay h
         ->has('testimonios', 1)
         ->where('secciones', fn ($s) => collect($s)->has('historias.hero')));
     $this->get('/sitemap.xml')->assertSee(url('/historias'), false);
+});
+
+it('completa el enlace corto de TikTok (botón Compartir del celular) al guardar', function () {
+    Http::fake([
+        'vm.tiktok.com/*' => Http::response('', 301, ['Location' => 'https://www.tiktok.com/@credigo/video/7312345678901234567?_t=8abc&_r=1']),
+        'vt.tiktok.com/*' => Http::response('', 404),
+        '*' => Http::response('', 200),
+    ]);
+    $this->actingAs(User::factory()->create());
+
+    $this->postJson('/api/admin/testimonios', [
+        'nombre' => 'Con TikTok', 'comentario' => 'Texto.', 'orden' => 0, 'activo' => false,
+        'video_url' => 'https://vm.tiktok.com/ZMabc123/',
+    ])->assertCreated()->assertJsonPath('data.video_url', 'https://www.tiktok.com/@credigo/video/7312345678901234567');
+
+    // Si TikTok no lleva a un video, se avisa que el enlace no sirve
+    $this->postJson('/api/admin/testimonios', [
+        'nombre' => 'Enlace roto', 'comentario' => 'Texto.', 'orden' => 0, 'activo' => false,
+        'video_url' => 'https://vt.tiktok.com/ZSroto99/',
+    ])->assertJsonValidationErrors('video_url');
+});
+
+it('sube el video de un testimonio, lo muestra en el sitio y lo quita', function () {
+    Storage::fake('public');
+    $this->actingAs(User::factory()->create());
+
+    $id = $this->post('/api/admin/testimonios', [
+        'nombre' => 'Con video', 'comentario' => 'Texto.', 'orden' => 0, 'activo' => true, 'autorizado' => true,
+        'video' => UploadedFile::fake()->create('historia.mp4', 3000, 'video/mp4'),
+    ])->assertCreated()->json('data.id');
+
+    $testimonio = Testimonio::findOrFail($id);
+    Storage::disk('public')->assertExists($testimonio->video);
+    paginaApi('historias', fn (AssertableJson $page) => $page->where('testimonios.0.video_archivo_url', Storage::disk('public')->url($testimonio->video))->etc());
+
+    $this->post("/api/admin/testimonios/{$id}", [
+        '_method' => 'put', 'nombre' => 'Con video', 'comentario' => 'Texto.', 'orden' => 0, 'activo' => true, 'autorizado' => true, 'quitar_video' => true,
+    ])->assertOk()->assertJsonPath('data.video_archivo_url', null);
+    Storage::disk('public')->assertMissing($testimonio->video);
+});
+
+it('rechaza videos de otro formato o demasiado pesados', function () {
+    $this->actingAs(User::factory()->create());
+    $datos = ['nombre' => 'X', 'comentario' => 'Y', 'orden' => 0, 'activo' => false];
+
+    $this->post('/api/admin/testimonios', [...$datos, 'video' => UploadedFile::fake()->create('video.avi', 100, 'video/x-msvideo')], ['Accept' => 'application/json'])
+        ->assertJsonValidationErrors(['video' => 'MP4, MOV o WEBM']);
+    $this->post('/api/admin/testimonios', [...$datos, 'video' => UploadedFile::fake()->create('grande.mp4', 103000, 'video/mp4')], ['Accept' => 'application/json'])
+        ->assertJsonValidationErrors(['video' => '100 MB']);
 });

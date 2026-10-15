@@ -17,10 +17,10 @@ class Testimonio extends Model
 
     protected $fillable = [
         'nombre', 'ciudad', 'comentario', 'foto', 'foto_vehiculo', 'vehiculo',
-        'calificacion', 'video_url', 'autorizado', 'orden', 'activo',
+        'calificacion', 'video_url', 'video', 'autorizado', 'orden', 'activo',
     ];
 
-    protected $appends = ['foto_url', 'foto_vehiculo_url'];
+    protected $appends = ['foto_url', 'foto_vehiculo_url', 'video_archivo_url'];
 
     protected function casts(): array
     {
@@ -46,5 +46,11 @@ class Testimonio extends Model
     protected function fotoVehiculoUrl(): Attribute
     {
         return Attribute::get(fn () => app(ImagenService::class)->url($this->foto_vehiculo));
+    }
+
+    /** Video subido (en vez de un enlace de YouTube, TikTok…). */
+    protected function videoArchivoUrl(): Attribute
+    {
+        return Attribute::get(fn () => app(ImagenService::class)->url($this->video));
     }
 }

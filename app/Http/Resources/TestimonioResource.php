@@ -23,6 +23,7 @@ class TestimonioResource extends JsonResource
             'vehiculo' => $this->vehiculo,
             'calificacion' => $this->calificacion,
             'video_url' => $this->video_url,
+            'video_archivo_url' => $this->video_archivo_url,
             $this->mergeWhen($request->is('api/admin/*'), fn () => [
                 'autorizado' => (bool) $this->autorizado,
                 'orden' => $this->orden,

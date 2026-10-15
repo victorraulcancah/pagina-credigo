@@ -1,4 +1,4 @@
-import { ExternalLink, MessageSquareQuote, Plus, Save, ShieldAlert, Star } from 'lucide-react';
+import { ExternalLink, Film, MessageSquareQuote, PlayCircle, Plus, RotateCcw, Save, ShieldAlert, Star, Trash2 } from 'lucide-react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
@@ -7,6 +7,7 @@ import ImageUpload from '@/components/admin/ImageUpload';
 import PageHeader from '@/components/admin/PageHeader';
 import VideoInput from '@/components/admin/VideoInput';
 import AdminLayout from '@/components/layout/AdminLayout';
+import ArchivoInput from '@/components/ui/ArchivoInput';
 import Button from '@/components/ui/Button';
 import FormField from '@/components/ui/FormField';
 import Input from '@/components/ui/Input';
@@ -15,10 +16,12 @@ import Select from '@/components/ui/Select';
 import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
 import { FotoConductor } from '@/components/web/Testimonios';
+import Video from '@/components/web/Video';
 import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
 
 const MAX_COMENTARIO = 400;
+const VIDEO_MAX_MB = 100;
 
 const VACIO = {
     nombre: '',
@@ -31,6 +34,8 @@ const VACIO = {
     vehiculo: '',
     calificacion: '',
     video_url: '',
+    video: null,
+    quitar_video: false,
     autorizado: false,
     orden: 0,
     activo: true,
@@ -52,6 +57,8 @@ export default function TestimoniosIndex() {
             ciudad: t.ciudad ?? '',
             vehiculo: t.vehiculo ?? '',
             video_url: t.video_url ?? '',
+            video: null,
+            quitar_video: false,
             calificacion: t.calificacion ?? '',
             foto: null,
             quitar_foto: false,
@@ -222,13 +229,66 @@ export default function TestimoniosIndex() {
                         />
                     </FormField>
 
-                    <VideoInput
-                        value={data.video_url}
-                        onChange={(valor) => setData('video_url', valor)}
-                        error={errors.video_url}
-                        hint='Opcional. Agrega "Ver su historia en video". Pega el enlace de YouTube, TikTok, Facebook o Vimeo.'
-                        className="sm:col-span-2"
-                    />
+                    {/* Video: enlace (TikTok, YouTube…) o subido. Si hay los dos, se muestra el subido */}
+                    <div className="flex flex-col gap-4 rounded-xl bg-gray-50 p-4 sm:col-span-2">
+                        <div>
+                            <p className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                <PlayCircle className="size-4 text-primary" aria-hidden="true" /> Video (opcional)
+                            </p>
+                            <p className="mt-0.5 text-xs text-gray-500">Agrega "Ver su historia en video". Pega el enlace de TikTok o súbelo directamente.</p>
+                        </div>
+
+                        <VideoInput
+                            label="Enlace de TikTok, YouTube, Facebook o Vimeo"
+                            value={data.video_url}
+                            onChange={(valor) => setData('video_url', valor)}
+                            error={errors.video_url}
+                            hint="Sirve el enlace del botón Compartir del celular (vm.tiktok.com/…): al guardar se completa solo."
+                        />
+
+                        <div>
+                            <p className="mb-1.5 text-sm font-medium text-gray-700">O sube el video</p>
+                            {crud.editando?.video_archivo_url && !data.video && (
+                                <div className="mb-3 flex flex-wrap items-start gap-4">
+                                    {data.quitar_video ? (
+                                        <p className="flex items-center gap-2 text-sm text-amber-700">
+                                            El video subido se quitará al guardar.
+                                            <button
+                                                type="button"
+                                                onClick={() => setData('quitar_video', false)}
+                                                className="inline-flex items-center gap-1 font-semibold text-primary hover:underline"
+                                            >
+                                                <RotateCcw className="size-3.5" aria-hidden="true" /> Deshacer
+                                            </button>
+                                        </p>
+                                    ) : (
+                                        <>
+                                            <Video key={crud.editando.video_archivo_url} url={crud.editando.video_archivo_url} titulo="Video subido" className="ml-0 max-w-[10rem]" />
+                                            <Button type="button" variant="ghost" size="sm" icon={Trash2} onClick={() => setData('quitar_video', true)} className="border border-gray-200">
+                                                Quitar video
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                            <ArchivoInput
+                                id="video"
+                                icon={Film}
+                                titulo={crud.editando?.video_archivo_url ? 'Reemplazar el video' : 'Elige o arrastra el video'}
+                                formatos={`MP4 (recomendado), MOV o WEBM. Máx. ${VIDEO_MAX_MB} MB.`}
+                                accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm"
+                                maxMb={VIDEO_MAX_MB}
+                                value={data.video}
+                                onChange={(archivo) => setData('video', archivo)}
+                                error={errors.video}
+                            />
+                            {processing && data.video && (
+                                <p className="mt-2 text-sm text-gray-500">
+                                    Subiendo el video{crud.form.progress ? ` (${crud.form.progress.percentage ?? Math.round((crud.form.progress.loaded / crud.form.progress.total) * 100)} %)` : ''}… no cierres la ventana.
+                                </p>
+                            )}
+                        </div>
+                    </div>
 
                     <FormField label="Orden" htmlFor="orden" error={errors.orden} hint="Menor número = aparece primero.">
                         <Input id="orden" type="number" min={0} value={data.orden} onChange={(e) => setData('orden', e.target.value)} error={errors.orden} />

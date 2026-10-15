@@ -85,8 +85,8 @@ export function DatosConductor({ testimonio, className }) {
             )}
             <Estrellas valor={testimonio.calificacion} className="mt-2" />
             {testimonio.vehiculo && <p className="mt-2 text-sm font-semibold">{testimonio.vehiculo}</p>}
-            {testimonio.video_url && (
-                <BotonVideo url={testimonio.video_url} titulo={`La historia de ${testimonio.nombre}`} enlace className="mt-3 text-sm font-semibold">
+            {(testimonio.video_archivo_url || testimonio.video_url) && (
+                <BotonVideo url={testimonio.video_archivo_url || testimonio.video_url} titulo={`La historia de ${testimonio.nombre}`} enlace className="mt-3 text-sm font-semibold">
                     Ver su historia en video
                 </BotonVideo>
             )}

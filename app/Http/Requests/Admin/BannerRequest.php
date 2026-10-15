@@ -12,6 +12,12 @@ class BannerRequest extends FormRequest
         return true;
     }
 
+    /** Un enlace corto de TikTok (botón "Compartir" del celular) se completa antes de validar. */
+    protected function prepareForValidation(): void
+    {
+        VideoRegla::completar($this);
+    }
+
     public function rules(): array
     {
         return [

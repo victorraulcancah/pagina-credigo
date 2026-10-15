@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Services\EnlaceVideoService;
+use Illuminate\Foundation\Http\FormRequest;
+
 /**
  * Enlaces de video que la web sabe insertar (resources/js/lib/video.js):
  * YouTube (video, shorts o en vivo), TikTok, Facebook (video, watch o reel) y Vimeo.
- * Los enlaces cortos de TikTok (vm.tiktok.com) y Facebook (fb.watch) no traen el
- * identificador del video: se pide el enlace completo.
+ * Los enlaces cortos de TikTok (vm.tiktok.com, botón "Compartir" del celular) se completan
+ * solos antes de validar (completar()). Los de Facebook (fb.watch) no traen el video: se pide el completo.
  */
 final class VideoRegla
 {
@@ -26,7 +29,15 @@ final class VideoRegla
     public static function mensajes(string $campo): array
     {
         return [
-            "{$campo}.regex" => 'Pega el enlace completo de un video de YouTube, TikTok, Facebook o Vimeo (empieza con https://). Los enlaces cortos de TikTok (vm.tiktok.com) o Facebook (fb.watch) no sirven: abre el video y copia el enlace del navegador.',
+            "{$campo}.regex" => 'Pega el enlace de un video de YouTube, TikTok, Facebook o Vimeo (empieza con https://). Los enlaces cortos de Facebook (fb.watch) no sirven: abre el video y copia el enlace del navegador.',
         ];
+    }
+
+    /** Antes de validar: un enlace corto de TikTok pasa a ser el enlace completo del video. */
+    public static function completar(FormRequest $request, string $campo = 'video_url'): void
+    {
+        if ($request->filled($campo)) {
+            $request->merge([$campo => app(EnlaceVideoService::class)->completar(trim((string) $request->input($campo)))]);
+        }
     }
 }

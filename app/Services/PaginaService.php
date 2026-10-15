@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Http\Resources\ArticuloResource;
 use App\Http\Resources\BannerResource;
+use App\Http\Resources\CategoriaBlogResource;
 use App\Http\Resources\DocumentoResource;
 use App\Http\Resources\PreguntaFrecuenteResource;
 use App\Http\Resources\ServicioResource;
@@ -34,6 +36,7 @@ class PaginaService
         'talleres' => [['talleres', 'general'], 'talleres.hero', 'Talleres aliados'],
         'beneficios' => [['beneficios', 'general'], 'beneficios.hero', 'Beneficios'],
         'historias' => [['historias', 'general'], 'historias.hero', 'Historias de conductores'],
+        'blog' => [['blog', 'general'], 'blog.hero', 'Blog'],
         'soporte' => [['contacto', 'general'], 'contacto.hero', 'Soporte'],
         'cotizador' => [['cotizador'], 'cotizador.hero', 'Cotizador'],
         'terminos' => [['legal'], null, null],
@@ -49,6 +52,8 @@ class PaginaService
         private PreguntaFrecuenteService $preguntas,
         private BannerService $banners,
         private TestimonioService $testimonios,
+        private ArticuloService $articulos,
+        private CategoriaBlogService $categoriasBlog,
     ) {}
 
     public function existe(string $pagina): bool
@@ -79,6 +84,11 @@ class PaginaService
             'historias' => [
                 'secciones' => $secciones,
                 'testimonios' => TestimonioResource::collection($this->testimonios->publicados())->resolve(),
+            ],
+            'blog' => [
+                'secciones' => $secciones,
+                'articulos' => ArticuloResource::collection($this->articulos->visibles())->resolve(),
+                'categorias' => CategoriaBlogResource::collection($this->categoriasBlog->conArticulos())->resolve(),
             ],
             'nosotros' => ['secciones' => $secciones],
             'servicios' => [
@@ -141,21 +151,32 @@ class PaginaService
         ];
     }
 
-    /** Página de una historia publicada (por su dirección), o null si no existe o está oculta. */
-    public function historia(string $slug): ?array
+    /** Página de un artículo del blog (por su dirección), o null si no existe o aún no se publica. */
+    public function articulo(string $slug): ?array
     {
-        $testimonio = $this->testimonios->publicadoPorSlug($slug);
+        $articulo = $this->articulos->visiblePorSlug($slug);
 
-        if (! $testimonio) {
+        if (! $articulo) {
             return null;
         }
 
         return [
-            'secciones' => $this->secciones->publicas(['historias', 'general']),
-            // Solo la historia principal lleva el texto completo (las de "Más historias" no lo necesitan)
-            'testimonio' => [...(new TestimonioResource($testimonio))->resolve(), 'historia' => $testimonio->historia],
-            'otros' => TestimonioResource::collection($this->testimonios->otros($testimonio))->resolve(),
+            'secciones' => $this->secciones->publicas(['blog', 'general']),
+            'articulo' => (new ArticuloResource($articulo))->conContenido()->resolve(),
+            'relacionados' => ArticuloResource::collection($this->articulos->relacionados($articulo))->resolve(),
         ];
+    }
+
+    /** Al compartir un artículo se ve su título, su resumen y su portada. */
+    public function seoArticulo(string $slug): ?array
+    {
+        $articulo = $this->articulos->visiblePorSlug($slug);
+
+        return $articulo ? array_filter([
+            'titulo' => $articulo->titulo,
+            'descripcion' => $articulo->resumen,
+            'imagen' => $articulo->portada_url,
+        ]) : null;
     }
 
     /** Título, descripción e imagen para el HTML del servidor (vista previa al compartir y buscadores). */
@@ -174,18 +195,6 @@ class PaginaService
             'descripcion' => $hero['contenido'] ?? null,
             'imagen' => $hero['imagen_url'] ?? null,
         ]);
-    }
-
-    /** Al compartir una historia por WhatsApp o Facebook se ve su titular, el comentario y la foto. */
-    public function seoHistoria(string $slug): ?array
-    {
-        $testimonio = $this->testimonios->publicadoPorSlug($slug);
-
-        return $testimonio ? array_filter([
-            'titulo' => $testimonio->titulo ?: "La historia de {$testimonio->nombre}",
-            'descripcion' => $testimonio->comentario,
-            'imagen' => $testimonio->foto_url ?? $testimonio->foto_vehiculo_url,
-        ]) : null;
     }
 
     public function seoPlan(string $slug): ?array

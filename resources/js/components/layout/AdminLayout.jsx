@@ -13,6 +13,7 @@ import {
     LayoutTemplate,
     Megaphone,
     Menu,
+    Newspaper,
     MessageSquareQuote,
     Palette,
     PanelLeftClose,
@@ -34,6 +35,7 @@ const menu = [
         items: [
             { label: 'Banners', href: '/admin/banners', icon: Images },
             { label: 'Testimonios', href: '/admin/testimonios', icon: MessageSquareQuote },
+            { label: 'Blog', href: '/admin/blog', icon: Newspaper },
             { label: 'Secciones', href: '/admin/secciones', icon: LayoutTemplate },
             { label: 'Servicios', href: '/admin/servicios', icon: Briefcase },
             { label: 'Cotizador', href: '/admin/cotizador', icon: Calculator },

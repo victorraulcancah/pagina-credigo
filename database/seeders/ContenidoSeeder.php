@@ -102,6 +102,12 @@ class ContenidoSeeder extends Seeder
                 'contenido' => 'Conductores de Yango e InDrive que ya trabajan con su propio vehículo cuentan cómo lo lograron.',
             ]],
 
+            // ── Blog ────────────────────────────────────────────────
+            ['blog', 'hero', 'Blog · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
+                'titulo' => 'Blog',
+                'contenido' => 'Noticias, consejos y novedades de CrediGo para los conductores de aplicativo.',
+            ]],
+
             // ── Nosotros ────────────────────────────────────────────
             ['nosotros', 'hero', 'Nosotros · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Somos CrediGo',

@@ -24,6 +24,7 @@ class PaginaController extends Controller
         'talleres' => 'Web/Talleres',
         'beneficios' => 'Web/Beneficios',
         'historias' => 'Web/Historias',
+        'blog' => 'Web/Blog',
         'soporte' => 'Web/Contacto',
         'cotizador' => 'Web/Cotizador',
         'terminos' => 'Web/Legal',
@@ -80,12 +81,17 @@ class PaginaController extends Controller
         return $this->pagina('historias');
     }
 
-    /** Página de una historia: 404 real si no existe o no está publicada. */
-    public function historia(string $slug): Response
+    public function blog(): Response
     {
-        $seo = $this->paginas->seoHistoria($slug) ?? abort(404);
+        return $this->pagina('blog');
+    }
 
-        return Inertia::render('Web/Historia', ['slug' => $slug, 'seo' => $seo]);
+    /** Un artículo del blog: 404 real si no existe o aún no se publica. */
+    public function articulo(string $slug): Response
+    {
+        $seo = $this->paginas->seoArticulo($slug) ?? abort(404);
+
+        return Inertia::render('Web/Articulo', ['slug' => $slug, 'seo' => $seo]);
     }
 
     public function contacto(): Response

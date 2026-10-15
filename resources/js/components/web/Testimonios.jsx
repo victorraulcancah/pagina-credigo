@@ -1,8 +1,7 @@
-import { Link } from '@inertiajs/react';
-import { ArrowRight, ChevronLeft, ChevronRight, MapPin, PlayCircle, Quote, Star } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, MapPin, Quote, Star } from 'lucide-react';
 import { useRef, useState } from 'react';
 import Button from '@/components/ui/Button';
-import Revelar, { escalonar } from '@/components/ui/Revelar';
+import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import { BotonVideo } from '@/components/web/Video';
 import { cn } from '@/lib/utils';
@@ -15,9 +14,6 @@ const iniciales = (nombre = '') =>
         .map((parte) => parte[0])
         .join('')
         .toUpperCase();
-
-/** Titular de una historia: el del panel o "La historia de {nombre}". */
-export const tituloHistoria = (testimonio) => testimonio.titulo || `La historia de ${testimonio.nombre}`;
 
 /** Título de sección: si empieza con una cifra ("+150 conductores…") la cifra va resaltada. */
 export function TituloConCifra({ titulo, as: Tag = 'h2', className }) {
@@ -47,11 +43,8 @@ export function FotoConductor({ testimonio, alt = '', className }) {
     );
 }
 
-/**
- * Calificación que dio el propio conductor (1 a 5). Sin calificación no se muestra nada.
- * `claro`: sobre fondo azul.
- */
-export function Estrellas({ valor, claro = false, className }) {
+/** Calificación que dio el propio conductor (1 a 5). Sin calificación no se muestra nada. */
+export function Estrellas({ valor, className }) {
     if (!valor) return null;
 
     return (
@@ -61,10 +54,7 @@ export function Estrellas({ valor, claro = false, className }) {
                     key={i}
                     aria-hidden="true"
                     strokeWidth={1.5}
-                    className={cn(
-                        'size-4',
-                        i <= valor ? cn('fill-accent', claro ? 'text-accent' : 'text-primary') : cn('fill-transparent', claro ? 'text-white/30' : 'text-primary-200'),
-                    )}
+                    className={cn('size-4', i <= valor ? 'fill-accent text-primary' : 'fill-transparent text-primary-200')}
                 />
             ))}
         </span>
@@ -124,18 +114,7 @@ function Historia({ testimonio, posicion, total, activa }) {
             <figure className="flex flex-col p-6 sm:p-8">
                 <Comentario texto={testimonio.comentario} className="mt-3" />
                 <figcaption className="mt-6 flex flex-1 flex-wrap items-end justify-between gap-x-4 gap-y-5">
-                    <div>
-                        <DatosConductor testimonio={testimonio} />
-                        {testimonio.slug && (
-                            <Link
-                                href={`/historias/${testimonio.slug}`}
-                                className="group mt-4 inline-flex items-center gap-1.5 text-sm font-bold underline decoration-accent decoration-2 underline-offset-4"
-                            >
-                                Leer su historia
-                                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-                            </Link>
-                        )}
-                    </div>
+                    <DatosConductor testimonio={testimonio} />
                     {testimonio.foto_vehiculo_url && (
                         <img
                             src={testimonio.foto_vehiculo_url}
@@ -147,54 +126,6 @@ function Historia({ testimonio, posicion, total, activa }) {
                 </figcaption>
             </figure>
         </article>
-    );
-}
-
-/**
- * Tarjeta de una historia para el blog (/historias y "Más historias"): foto con zoom al pasar
- * el mouse, titular, el comentario y "Leer su historia". Toda la tarjeta lleva a su página.
- */
-export function TarjetaHistoria({ testimonio, indice = 0 }) {
-    return (
-        <Revelar as="li" retraso={escalonar(indice, 90)} className="h-full">
-            <Link
-                href={`/historias/${testimonio.slug}`}
-                className="group flex h-full flex-col overflow-hidden rounded-[1.5rem] bg-white ring-1 ring-primary-100 transition duration-300 hover:ring-2 hover:ring-primary"
-            >
-                <div className="relative aspect-[4/3] overflow-hidden bg-primary-50">
-                    <FotoConductor
-                        testimonio={testimonio}
-                        className="size-full object-top text-5xl transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
-                    <div className="absolute inset-x-4 top-4 flex justify-between gap-2">
-                        {testimonio.ciudad ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-primary">
-                                <MapPin className="size-3.5" aria-hidden="true" /> {testimonio.ciudad}
-                            </span>
-                        ) : (
-                            <span />
-                        )}
-                        {testimonio.video_url && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white">
-                                <PlayCircle className="size-3.5" aria-hidden="true" /> Video
-                            </span>
-                        )}
-                    </div>
-                </div>
-                <div className="flex flex-1 flex-col p-6">
-                    <Estrellas valor={testimonio.calificacion} />
-                    <h3 className="mt-2 text-xl leading-snug font-bold tracking-[-0.01em] text-balance">{tituloHistoria(testimonio)}</h3>
-                    <p className="mt-2 line-clamp-3 text-primary-700/80">“{testimonio.comentario}”</p>
-                    <div className="mt-auto flex items-center justify-between gap-3 pt-6">
-                        <span className="truncate font-semibold">{testimonio.nombre}</span>
-                        <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-bold">
-                            Leer su historia
-                            <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
-                        </span>
-                    </div>
-                </div>
-            </Link>
-        </Revelar>
     );
 }
 

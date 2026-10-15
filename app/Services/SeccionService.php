@@ -15,7 +15,7 @@ class SeccionService
     private const CAMPOS_TEXTO = ['subtitulo', 'titulo', 'contenido'];
 
     /** Orden de las páginas en el panel */
-    private const ORDEN_PAGINAS = ['inicio', 'nosotros', 'servicios', 'requisitos', 'pagos', 'talleres', 'beneficios', 'historias', 'cotizador', 'contacto', 'general', 'legal'];
+    private const ORDEN_PAGINAS = ['inicio', 'nosotros', 'servicios', 'requisitos', 'pagos', 'talleres', 'beneficios', 'historias', 'blog', 'cotizador', 'contacto', 'general', 'legal'];
 
     public function __construct(private ImagenService $imagenes) {}
 

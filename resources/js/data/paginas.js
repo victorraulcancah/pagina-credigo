@@ -9,6 +9,7 @@ export const PAGINAS = {
     beneficios: { label: 'Beneficios', url: '/beneficios', descripcion: 'Comercios GO y cupones vienen del ERP' },
     cotizador: { label: 'Cotizador', url: '/cotizador' },
     historias: { label: 'Historias de conductores', url: '/historias', descripcion: 'Las historias se cargan en Testimonios' },
+    blog: { label: 'Blog', url: '/blog', descripcion: 'Los artículos se escriben en Blog' },
     contacto: { label: 'Soporte', url: '/soporte' },
     general: { label: 'Bloques compartidos', descripcion: 'Aparecen en varias páginas' },
     legal: { label: 'Páginas legales', descripcion: 'Términos y condiciones · Política de privacidad' },

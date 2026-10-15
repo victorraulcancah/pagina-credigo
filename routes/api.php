@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\ArticuloController;
 use App\Http\Controllers\Api\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Api\Admin\CategoriaBlogController;
 use App\Http\Controllers\Api\Admin\ConfiguracionController;
 use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\DocumentoController as AdminDocumentoController;
@@ -43,7 +45,7 @@ Route::name('api.')->group(function () {
     Route::middleware('throttle:60,1')->group(function () {
         // Todo lo que muestra cada página del sitio en una sola respuesta
         Route::get('/paginas/planes/{slug}', [PaginaController::class, 'plan'])->name('paginas.plan');
-        Route::get('/paginas/historias/{slug}', [PaginaController::class, 'historia'])->name('paginas.historia');
+        Route::get('/paginas/blog/{slug}', [PaginaController::class, 'articulo'])->name('paginas.articulo');
         Route::get('/paginas/{pagina}', [PaginaController::class, 'show'])->name('paginas.show');
 
         Route::get('/sitio', [SitioController::class, 'ajustes'])->name('sitio');
@@ -88,6 +90,11 @@ Route::name('api.')->group(function () {
 
         Route::apiResource('banners', AdminBannerController::class);
         Route::apiResource('testimonios', AdminTestimonioController::class);
+        Route::post('/articulos/imagenes', [ArticuloController::class, 'imagen'])->name('articulos.imagen');
+        Route::apiResource('articulos', ArticuloController::class);
+        Route::apiResource('categorias-blog', CategoriaBlogController::class)
+            ->except(['show'])
+            ->parameters(['categorias-blog' => 'categoria']);
         Route::apiResource('servicios', ServicioController::class);
         Route::apiResource('documentos', AdminDocumentoController::class);
         Route::apiResource('preguntas', PreguntaFrecuenteController::class)->parameters(['preguntas' => 'pregunta']);

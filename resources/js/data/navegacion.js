@@ -6,6 +6,7 @@ export const navLinks = [
     { label: 'Talleres aliados', href: '/talleres' },
     { label: 'Beneficios', href: '/beneficios' },
     { label: 'Historias', href: '/historias' },
+    { label: 'Blog', href: '/blog' },
     { label: 'Requisitos', href: '/requisitos' },
     { label: 'Cómo pagar', href: '/como-pagar' },
     { label: 'Cotizador', href: '/cotizador' },
@@ -18,12 +19,15 @@ export const navLinks = [
  * (`whatsapp: true` usa el WhatsApp configurado en el panel).
  * `planes: true`: antes de sus opciones van los planes visibles (cada uno a su página).
  * `exacto: true`: la opción se marca solo en esa página, no en sus subpáginas.
+ * `ocultarEnLg: true`: entre 1024 y 1279 px no entra todo en una línea; "Inicio" se oculta
+ * porque el logo ya lleva al inicio (en el menú del celular sí aparece).
  */
 export const menuPrincipal = [
-    { label: 'Inicio', href: '/' },
+    { label: 'Inicio', href: '/', ocultarEnLg: true },
     { label: 'Nosotros', href: '/nosotros' },
     { label: 'Beneficios', href: '/beneficios' },
     { label: 'Historias', href: '/historias' },
+    { label: 'Blog', href: '/blog' },
     {
         label: 'Planes',
         grupo: 'Nuestros planes',

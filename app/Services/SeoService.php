@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Articulo;
 use App\Models\Seccion;
 use App\Models\Servicio;
 use App\Models\Testimonio;
@@ -35,9 +36,10 @@ class SeoService
             $paginas[] = ['/historias', 0.6, max($ultimaEdicion(['historias']), Testimonio::publicado()->max('updated_at'))];
         }
 
-        // Página de cada historia publicada
-        foreach (Testimonio::publicado()->ordenado()->get(['slug', 'updated_at']) as $historia) {
-            $paginas[] = [$historia->url(), 0.5, $historia->updated_at];
+        // Blog: la portada y cada artículo publicado
+        $paginas[] = ['/blog', 0.6, max($ultimaEdicion(['blog']), Articulo::visible()->max('updated_at'))];
+        foreach (Articulo::visible()->recientes()->get(['slug', 'updated_at']) as $articulo) {
+            $paginas[] = [$articulo->url(), 0.6, $articulo->updated_at];
         }
 
         // Página de cada plan visible

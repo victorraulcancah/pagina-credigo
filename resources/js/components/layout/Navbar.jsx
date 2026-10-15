@@ -200,7 +200,7 @@ export default function Navbar() {
                                     href={item.href}
                                     onPointerEnter={(e) => e.pointerType === 'mouse' && !fijado.current && cerrar()}
                                     aria-current={esActivo(item.href) ? 'page' : undefined}
-                                    className={claseOpcion(esActivo(item.href))}
+                                    className={cn(claseOpcion(esActivo(item.href)), item.ocultarEnLg && 'lg:hidden xl:inline-flex')}
                                 >
                                     {item.label}
                                 </Enlace>

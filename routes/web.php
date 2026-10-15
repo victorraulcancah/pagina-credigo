@@ -29,7 +29,8 @@ Route::controller(PaginaController::class)->middleware(ContarVisita::class)->gro
     Route::get('/talleres', 'talleres')->name('talleres');
     Route::get('/beneficios', 'beneficios')->name('beneficios');
     Route::get('/historias', 'historias')->name('historias');
-    Route::get('/historias/{slug}', 'historia')->name('historia');
+    Route::get('/blog', 'blog')->name('blog');
+    Route::get('/blog/{slug}', 'articulo')->name('articulo');
     Route::get('/soporte', 'contacto')->name('soporte');
     Route::get('/cotizador', 'cotizador')->name('cotizador');
     Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');
@@ -61,6 +62,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::inertia('/', 'Admin/Dashboard')->name('dashboard');
 
     Route::inertia('/testimonios', 'Admin/Testimonios/Index')->name('testimonios');
+    Route::inertia('/blog', 'Admin/Blog/Index')->name('blog');
     Route::inertia('/configuracion/empresa', 'Admin/Configuracion/Empresa')->name('configuracion.empresa');
     Route::inertia('/configuracion/apariencia', 'Admin/Configuracion/Apariencia')->name('configuracion.apariencia');
     Route::inertia('/configuracion/seo', 'Admin/Configuracion/Seo')->name('configuracion.seo');

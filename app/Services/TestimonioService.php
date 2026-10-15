@@ -25,18 +25,6 @@ class TestimonioService
         return Testimonio::publicado()->ordenado()->when($limite, fn ($q) => $q->limit($limite))->get();
     }
 
-    /** Una historia publicada por su dirección (null si no existe o está oculta). */
-    public function publicadoPorSlug(string $slug): ?Testimonio
-    {
-        return Testimonio::publicado()->where('slug', $slug)->first();
-    }
-
-    /** Otras historias publicadas para "Más historias" al pie de una. */
-    public function otros(Testimonio $testimonio, int $cantidad = 3): Collection
-    {
-        return Testimonio::publicado()->whereKeyNot($testimonio->id)->ordenado()->limit($cantidad)->get();
-    }
-
     public function totalPublicados(): int
     {
         return Testimonio::publicado()->count();

@@ -29,6 +29,7 @@ Route::controller(PaginaController::class)->middleware(ContarVisita::class)->gro
     Route::get('/talleres', 'talleres')->name('talleres');
     Route::get('/beneficios', 'beneficios')->name('beneficios');
     Route::get('/historias', 'historias')->name('historias');
+    Route::get('/historias/{slug}', 'historia')->name('historia');
     Route::get('/soporte', 'contacto')->name('soporte');
     Route::get('/cotizador', 'cotizador')->name('cotizador');
     Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');

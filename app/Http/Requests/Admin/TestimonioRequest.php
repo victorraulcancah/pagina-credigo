@@ -16,8 +16,11 @@ class TestimonioRequest extends FormRequest
     {
         return [
             'nombre' => ['required', 'string', 'max:80'],
+            'slug' => ['nullable', 'string', 'max:120', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('testimonios', 'slug')->ignore($this->route('testimonio'))],
+            'titulo' => ['nullable', 'string', 'max:150'],
             'ciudad' => ['nullable', 'string', 'max:60'],
             'comentario' => ['required', 'string', 'max:400'],
+            'historia' => ['nullable', 'string', 'max:10000'],
             'foto' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
             'quitar_foto' => ['boolean'],
             'foto_vehiculo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
@@ -36,6 +39,8 @@ class TestimonioRequest extends FormRequest
     {
         return [
             ...VideoRegla::mensajes('video_url'),
+            'slug.regex' => 'La dirección solo puede tener minúsculas, números y guiones. Ej. edimar-rios',
+            'slug.unique' => 'Otra historia ya usa esta dirección.',
             'autorizado.accepted' => 'Para publicarlo necesitas la autorización del conductor. Si aún no la tienes, guárdalo como oculto.',
         ];
     }
@@ -46,6 +51,9 @@ class TestimonioRequest extends FormRequest
             'foto' => 'foto del conductor',
             'foto_vehiculo' => 'foto del vehículo',
             'calificacion' => 'calificación',
+            'slug' => 'dirección en la web',
+            'titulo' => 'titular',
+            'historia' => 'historia completa',
         ];
     }
 }

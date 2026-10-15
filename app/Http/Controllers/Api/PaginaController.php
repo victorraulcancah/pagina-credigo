@@ -23,6 +23,16 @@ class PaginaController extends BaseApiController
             : $this->successResponse($contenido, 'Página');
     }
 
+    /** GET /api/paginas/historias/{slug}: la página de la historia de un conductor. */
+    public function historia(string $slug): JsonResponse
+    {
+        $contenido = $this->paginas->historia($slug);
+
+        return $contenido === null
+            ? $this->notFoundResponse('Esa historia no existe o no está publicada')
+            : $this->successResponse($contenido, 'Historia');
+    }
+
     /** GET /api/paginas/planes/{slug}: la página de un plan. */
     public function plan(string $slug): JsonResponse
     {

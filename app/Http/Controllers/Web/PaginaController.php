@@ -80,6 +80,14 @@ class PaginaController extends Controller
         return $this->pagina('historias');
     }
 
+    /** Página de una historia: 404 real si no existe o no está publicada. */
+    public function historia(string $slug): Response
+    {
+        $seo = $this->paginas->seoHistoria($slug) ?? abort(404);
+
+        return Inertia::render('Web/Historia', ['slug' => $slug, 'seo' => $seo]);
+    }
+
     public function contacto(): Response
     {
         return $this->pagina('soporte');

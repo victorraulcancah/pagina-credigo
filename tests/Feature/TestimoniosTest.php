@@ -8,6 +8,7 @@ use Database\Seeders\ContenidoSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /** Historia publicable (con la autorización del conductor), con datos de prueba. */
 function historia(array $datos = []): Testimonio
@@ -139,4 +140,51 @@ it('la página /historias siempre abre; a Google se le muestra solo cuando hay h
         ->has('testimonios', 1)
         ->where('secciones', fn ($s) => collect($s)->has('historias.hero')));
     $this->get('/sitemap.xml')->assertSee(url('/historias'), false);
+});
+
+it('cada historia publicada tiene su propia página con la historia completa', function () {
+    $edimar = historia(['nombre' => 'Edimar Ríos', 'titulo' => 'Del aplicativo a mi propio auto', 'historia' => "Primer párrafo.\n\nSegundo párrafo."]);
+    $otras = collect(range(1, 4))->map(fn () => historia());
+
+    expect($edimar->slug)->toBe('edimar-rios');
+
+    $this->get('/historias/edimar-rios')->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Web/Historia')
+            ->where('slug', 'edimar-rios')
+            ->where('seo.titulo', 'Del aplicativo a mi propio auto')
+            ->where('seo.descripcion', 'Comentario de prueba.'));
+
+    $this->getJson('/api/paginas/historias/edimar-rios')->assertOk()
+        ->assertJsonPath('data.testimonio.historia', "Primer párrafo.\n\nSegundo párrafo.")
+        ->assertJsonCount(3, 'data.otros')
+        ->assertJsonMissingPath('data.otros.0.historia')
+        ->assertJsonMissingPath('data.testimonio.autorizado');
+
+    // En las listas no va el texto largo
+    paginaApi('historias', fn (AssertableJson $page) => $page->missing('testimonios.0.historia')->etc());
+
+    $this->get('/sitemap.xml')->assertSee(url('/historias/edimar-rios'), false)->assertSee(url($otras->first()->url()), false);
+});
+
+it('una historia oculta o sin autorización no tiene página', function () {
+    historia(['nombre' => 'Oculta', 'activo' => false]);
+    $sinPermiso = historia(['nombre' => 'Sin permiso']);
+    Testimonio::whereKey($sinPermiso->id)->update(['autorizado' => false]);
+
+    $this->get('/historias/oculta')->assertNotFound();
+    $this->get('/historias/sin-permiso')->assertNotFound();
+    $this->get('/historias/no-existe')->assertNotFound();
+    $this->getJson('/api/paginas/historias/oculta')->assertNotFound();
+});
+
+it('arma la dirección con el nombre sin repetirla y se puede elegir otra', function () {
+    $this->actingAs(User::factory()->create());
+    $datos = ['nombre' => 'Edimar', 'comentario' => 'Texto.', 'orden' => 0, 'activo' => false];
+
+    $this->postJson('/api/admin/testimonios', $datos)->assertCreated()->assertJsonPath('data.slug', 'edimar');
+    $this->postJson('/api/admin/testimonios', $datos)->assertCreated()->assertJsonPath('data.slug', 'edimar-2');
+    $this->postJson('/api/admin/testimonios', [...$datos, 'slug' => 'mi-historia'])->assertCreated()->assertJsonPath('data.slug', 'mi-historia');
+
+    $this->postJson('/api/admin/testimonios', [...$datos, 'slug' => 'edimar'])->assertJsonValidationErrors('slug');
+    $this->postJson('/api/admin/testimonios', [...$datos, 'slug' => 'Con Espacios'])->assertJsonValidationErrors('slug');
 });

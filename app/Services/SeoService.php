@@ -35,6 +35,11 @@ class SeoService
             $paginas[] = ['/historias', 0.6, max($ultimaEdicion(['historias']), Testimonio::publicado()->max('updated_at'))];
         }
 
+        // Página de cada historia publicada
+        foreach (Testimonio::publicado()->ordenado()->get(['slug', 'updated_at']) as $historia) {
+            $paginas[] = [$historia->url(), 0.5, $historia->updated_at];
+        }
+
         // Página de cada plan visible
         foreach (Servicio::activo()->ordenado()->get(['slug', 'updated_at']) as $plan) {
             $paginas[] = [$plan->url(), 0.8, $plan->updated_at];

@@ -154,7 +154,7 @@ export default function Navbar() {
     const claseOpcion = (activo, desplegado = false) =>
         cn(
             // Más compacto en 1024 px para que entre todo en una línea
-            'inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap transition-colors xl:px-4',
+            'inline-flex items-center gap-1 rounded-full px-2.5 py-2 text-sm font-semibold whitespace-nowrap transition-colors xl:px-4',
             activo ? 'bg-accent text-primary' : desplegado ? 'bg-white/10 text-white' : 'text-white/85 hover:bg-white/10 hover:text-white',
         );
 

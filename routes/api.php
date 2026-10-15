@@ -43,6 +43,7 @@ Route::name('api.')->group(function () {
     Route::middleware('throttle:60,1')->group(function () {
         // Todo lo que muestra cada página del sitio en una sola respuesta
         Route::get('/paginas/planes/{slug}', [PaginaController::class, 'plan'])->name('paginas.plan');
+        Route::get('/paginas/historias/{slug}', [PaginaController::class, 'historia'])->name('paginas.historia');
         Route::get('/paginas/{pagina}', [PaginaController::class, 'show'])->name('paginas.show');
 
         Route::get('/sitio', [SitioController::class, 'ajustes'])->name('sitio');

@@ -141,6 +141,23 @@ class PaginaService
         ];
     }
 
+    /** Página de una historia publicada (por su dirección), o null si no existe o está oculta. */
+    public function historia(string $slug): ?array
+    {
+        $testimonio = $this->testimonios->publicadoPorSlug($slug);
+
+        if (! $testimonio) {
+            return null;
+        }
+
+        return [
+            'secciones' => $this->secciones->publicas(['historias', 'general']),
+            // Solo la historia principal lleva el texto completo (las de "Más historias" no lo necesitan)
+            'testimonio' => [...(new TestimonioResource($testimonio))->resolve(), 'historia' => $testimonio->historia],
+            'otros' => TestimonioResource::collection($this->testimonios->otros($testimonio))->resolve(),
+        ];
+    }
+
     /** Título, descripción e imagen para el HTML del servidor (vista previa al compartir y buscadores). */
     public function seo(string $pagina): array
     {
@@ -157,6 +174,18 @@ class PaginaService
             'descripcion' => $hero['contenido'] ?? null,
             'imagen' => $hero['imagen_url'] ?? null,
         ]);
+    }
+
+    /** Al compartir una historia por WhatsApp o Facebook se ve su titular, el comentario y la foto. */
+    public function seoHistoria(string $slug): ?array
+    {
+        $testimonio = $this->testimonios->publicadoPorSlug($slug);
+
+        return $testimonio ? array_filter([
+            'titulo' => $testimonio->titulo ?: "La historia de {$testimonio->nombre}",
+            'descripcion' => $testimonio->comentario,
+            'imagen' => $testimonio->foto_url ?? $testimonio->foto_vehiculo_url,
+        ]) : null;
     }
 
     public function seoPlan(string $slug): ?array

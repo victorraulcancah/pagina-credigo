@@ -1,4 +1,4 @@
-import { ExternalLink, MessageSquareQuote, Plus, Save, ShieldAlert, Star } from 'lucide-react';
+import { ExternalLink, Eye, MessageSquareQuote, Plus, Save, ShieldAlert, Star } from 'lucide-react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
@@ -20,8 +20,13 @@ import { useCrudModal } from '@/hooks/useCrudModal';
 
 const MAX_COMENTARIO = 400;
 
+const MAX_HISTORIA = 10000;
+
 const VACIO = {
     nombre: '',
+    slug: '',
+    titulo: '',
+    historia: '',
     ciudad: '',
     comentario: '',
     foto: null,
@@ -50,6 +55,9 @@ export default function TestimoniosIndex() {
             ...VACIO,
             ...t,
             ciudad: t.ciudad ?? '',
+            slug: t.slug ?? '',
+            titulo: t.titulo ?? '',
+            historia: t.historia ?? '',
             vehiculo: t.vehiculo ?? '',
             video_url: t.video_url ?? '',
             calificacion: t.calificacion ?? '',
@@ -71,7 +79,7 @@ export default function TestimoniosIndex() {
         <AdminLayout title="Testimonios">
             <PageHeader
                 title="Testimonios"
-                description="Historias de conductores que recibieron su vehículo. Las primeras 8 van en el inicio y todas en la página Historias. Solo se publican las que tienen la autorización del conductor."
+                description="Historias de conductores que recibieron su vehículo. Cada una tiene su propia página (como un blog); las primeras 8 van además en el carrusel del inicio. Solo se publican las que tienen la autorización del conductor."
                 actions={
                     <>
                         {testimonios.some((t) => t.activo && t.autorizado) && (
@@ -122,6 +130,11 @@ export default function TestimoniosIndex() {
                             </div>
                             {testimonio.foto_vehiculo_url && (
                                 <img src={testimonio.foto_vehiculo_url} alt="" className="hidden h-16 w-24 shrink-0 rounded-lg object-contain sm:block" />
+                            )}
+                            {testimonio.activo && testimonio.autorizado && (
+                                <Button href={`/historias/${testimonio.slug}`} newTab variant="ghost" size="sm" icon={Eye} className="shrink-0 border border-gray-200">
+                                    Ver
+                                </Button>
                             )}
                             <AccionesFila onEditar={() => crud.abrirEditar(testimonio)} onEliminar={() => crud.eliminar(testimonio, `la historia de ${testimonio.nombre}`)} />
                         </li>
@@ -190,11 +203,21 @@ export default function TestimoniosIndex() {
                     </FormField>
 
                     <FormField
+                        label="Titular (opcional)"
+                        htmlFor="titulo"
+                        error={errors.titulo}
+                        hint='Título de su página. Vacío = "La historia de {nombre}".'
+                        className="sm:col-span-2"
+                    >
+                        <Input id="titulo" value={data.titulo} onChange={(e) => setData('titulo', e.target.value)} error={errors.titulo} placeholder="Del aplicativo a mi propio auto" />
+                    </FormField>
+
+                    <FormField
                         label="Comentario"
                         htmlFor="comentario"
                         error={errors.comentario}
                         required
-                        hint={`Con sus propias palabras. ${data.comentario.length}/${MAX_COMENTARIO} caracteres.`}
+                        hint={`Frase corta con sus propias palabras: va en el carrusel del inicio y en las tarjetas. ${data.comentario.length}/${MAX_COMENTARIO} caracteres.`}
                         className="sm:col-span-2"
                     >
                         <Textarea
@@ -205,6 +228,24 @@ export default function TestimoniosIndex() {
                             onChange={(e) => setData('comentario', e.target.value)}
                             error={errors.comentario}
                             placeholder="Me siento feliz de haber recibido mi carro y poder cumplir mi sueño gracias a CrediGo."
+                        />
+                    </FormField>
+
+                    <FormField
+                        label="Historia completa (opcional)"
+                        htmlFor="historia"
+                        error={errors.historia}
+                        hint={`Se lee en su página. Deja una línea en blanco entre párrafos. ${data.historia.length}/${MAX_HISTORIA} caracteres.`}
+                        className="sm:col-span-2"
+                    >
+                        <Textarea
+                            id="historia"
+                            rows={8}
+                            maxLength={MAX_HISTORIA}
+                            value={data.historia}
+                            onChange={(e) => setData('historia', e.target.value)}
+                            error={errors.historia}
+                            placeholder="Cómo conoció CrediGo, cómo fue ahorrar cada semana, el día que recibió su vehículo..."
                         />
                     </FormField>
 
@@ -229,6 +270,19 @@ export default function TestimoniosIndex() {
                         hint='Opcional. Agrega "Ver su historia en video". Pega el enlace de YouTube, TikTok, Facebook o Vimeo.'
                         className="sm:col-span-2"
                     />
+
+                    <FormField
+                        label="Dirección en la web"
+                        htmlFor="slug"
+                        error={errors.slug}
+                        hint="Vacío = se arma con el nombre. Solo minúsculas, números y guiones."
+                        className="sm:col-span-2"
+                    >
+                        <div className="flex items-center gap-2">
+                            <span className="shrink-0 text-sm text-gray-500">/historias/</span>
+                            <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} error={errors.slug} placeholder="edimar-rios" />
+                        </div>
+                    </FormField>
 
                     <FormField label="Orden" htmlFor="orden" error={errors.orden} hint="Menor número = aparece primero.">
                         <Input id="orden" type="number" min={0} value={data.orden} onChange={(e) => setData('orden', e.target.value)} error={errors.orden} />

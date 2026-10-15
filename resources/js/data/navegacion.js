@@ -5,6 +5,7 @@ export const navLinks = [
     { label: 'Servicios', href: '/servicios' },
     { label: 'Talleres aliados', href: '/talleres' },
     { label: 'Beneficios', href: '/beneficios' },
+    { label: 'Historias', href: '/historias' },
     { label: 'Requisitos', href: '/requisitos' },
     { label: 'Cómo pagar', href: '/como-pagar' },
     { label: 'Cotizador', href: '/cotizador' },
@@ -22,6 +23,7 @@ export const menuPrincipal = [
     { label: 'Inicio', href: '/' },
     { label: 'Nosotros', href: '/nosotros' },
     { label: 'Beneficios', href: '/beneficios' },
+    { label: 'Historias', href: '/historias' },
     {
         label: 'Planes',
         grupo: 'Nuestros planes',

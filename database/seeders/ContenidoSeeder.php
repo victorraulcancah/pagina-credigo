@@ -105,7 +105,7 @@ class ContenidoSeeder extends Seeder
             // ── Blog ────────────────────────────────────────────────
             ['blog', 'hero', 'Blog · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Blog',
-                'contenido' => 'Noticias, consejos y novedades de CrediGo para los conductores de aplicativo.',
+                'contenido' => 'Eventos, noticias y tendencias de CrediGo para los conductores de aplicativo.',
             ]],
 
             // ── Nosotros ────────────────────────────────────────────

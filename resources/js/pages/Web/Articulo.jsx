@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ArrowLeft, ArrowRight, Link2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import PublicLayout from '@/components/layout/PublicLayout';
 import Button from '@/components/ui/Button';
@@ -58,6 +58,39 @@ function Encabezado({ articulo }) {
     );
 }
 
+/**
+ * Barra amarilla bajo el menú que avanza mientras se lee el artículo (`objetivo`: el texto).
+ * Solo cambia su escala (no recalcula el diseño de la página).
+ */
+function ProgresoLectura({ objetivo }) {
+    const barra = useRef(null);
+
+    useEffect(() => {
+        const actualizar = () => {
+            const texto = objetivo.current;
+            if (!texto || !barra.current) return;
+            const { top, height } = texto.getBoundingClientRect();
+            const recorrido = Math.max(height - window.innerHeight * 0.5, 1);
+            const avance = Math.min(1, Math.max(0, (window.innerHeight * 0.3 - top) / recorrido));
+            barra.current.style.transform = `scaleX(${avance})`;
+        };
+
+        actualizar();
+        window.addEventListener('scroll', actualizar, { passive: true });
+        window.addEventListener('resize', actualizar);
+        return () => {
+            window.removeEventListener('scroll', actualizar);
+            window.removeEventListener('resize', actualizar);
+        };
+    }, [objetivo]);
+
+    return (
+        <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-14 z-40 h-1 sm:top-16 print:hidden">
+            <div ref={barra} className="h-full origin-left scale-x-0 bg-accent" />
+        </div>
+    );
+}
+
 /** Compartir por WhatsApp o copiar el enlace. */
 function Compartir({ articulo }) {
     const [copiado, setCopiado] = useState(false);
@@ -89,8 +122,11 @@ function Compartir({ articulo }) {
 }
 
 function ArticuloContenido({ secciones, articulo, relacionados }) {
+    const texto = useRef(null);
+
     return (
         <PublicLayout title={articulo.titulo} description={articulo.resumen}>
+            <ProgresoLectura objetivo={texto} />
             <Encabezado articulo={articulo} />
 
             {/* La portada se monta sobre el encabezado y se descubre de abajo hacia arriba */}
@@ -104,8 +140,9 @@ function ArticuloContenido({ secciones, articulo, relacionados }) {
             </Container>
 
             <Section className="pt-12 sm:pt-16 lg:pt-16">
-                <article className="mx-auto max-w-[68ch]">
+                <article ref={texto} className="mx-auto max-w-[68ch]">
                     <TextoFormateado
+                        animar
                         texto={articulo.contenido}
                         className="gap-6 text-lg leading-relaxed text-primary-800 sm:text-xl"
                         primerParrafo="first-letter:float-left first-letter:mr-3 first-letter:text-7xl first-letter:leading-[0.8] first-letter:font-bold first-letter:text-primary"

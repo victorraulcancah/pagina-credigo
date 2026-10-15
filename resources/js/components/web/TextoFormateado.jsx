@@ -1,7 +1,13 @@
+import Revelar from '@/components/ui/Revelar';
 import { cn } from '@/lib/utils';
 
 // Una línea "![texto](https://...)" es una imagen (las inserta el editor del blog)
 const IMAGEN = /^!\[([^\]]*)\]\(((?:https?:\/\/|\/)[^\s)]+)\)$/;
+
+/** Cada bloque del texto: con `animar` aparece al bajar (Revelar); si no, la etiqueta tal cual. */
+function Bloque({ animar, as: Tag, desde, ...props }) {
+    return animar ? <Revelar as={Tag} desde={desde} {...props} /> : <Tag {...props} />;
+}
 
 /**
  * Muestra texto largo editado en el panel con un formato simple:
@@ -11,8 +17,9 @@ const IMAGEN = /^!\[([^\]]*)\]\(((?:https?:\/\/|\/)[^\s)]+)\)$/;
  * - línea en blanco → nuevo párrafo
  * `subtitulo`: etiqueta de los subtítulos (h3 si el texto va debajo de otro título h2).
  * `primerParrafo`: clases extra del primer párrafo (ej. letra capital en un artículo).
+ * `animar`: cada párrafo, subtítulo, lista e imagen aparece al bajar (las imágenes con un acercamiento).
  */
-export default function TextoFormateado({ texto = '', subtitulo: Subtitulo = 'h2', className, primerParrafo }) {
+export default function TextoFormateado({ texto = '', subtitulo: Subtitulo = 'h2', className, primerParrafo, animar = false }) {
     const bloques = texto
         .replace(/\r\n/g, '\n')
         .split(/\n{2,}/)
@@ -29,9 +36,9 @@ export default function TextoFormateado({ texto = '', subtitulo: Subtitulo = 'h2
                 // Un subtítulo puede venir pegado al párrafo que lo sigue
                 if (lineas[0].startsWith('## ')) {
                     elementos.push(
-                        <Subtitulo key={`${i}-h`} className="mt-4 text-xl font-bold text-primary sm:text-2xl">
+                        <Bloque key={`${i}-h`} animar={animar} as={Subtitulo} className="mt-4 text-xl font-bold text-primary sm:text-2xl">
                             {lineas.shift().slice(3)}
-                        </Subtitulo>,
+                        </Bloque>,
                     );
                 }
 
@@ -41,24 +48,24 @@ export default function TextoFormateado({ texto = '', subtitulo: Subtitulo = 'h2
 
                 if (imagen) {
                     elementos.push(
-                        <figure key={`${i}-img`} className="my-4">
+                        <Bloque key={`${i}-img`} animar={animar} as="figure" desde="zoom" className="my-4">
                             <img src={imagen[2]} alt={imagen[1]} loading="lazy" className="w-full rounded-[1.5rem] bg-primary-50 object-cover" />
                             {imagen[1] && <figcaption className="mt-2 text-center text-sm text-primary-700/70">{imagen[1]}</figcaption>}
-                        </figure>,
+                        </Bloque>,
                     );
                 } else if (lineas.every((linea) => linea.startsWith('- '))) {
                     elementos.push(
-                        <ul key={`${i}-ul`} className="ml-5 flex list-disc flex-col gap-2 marker:text-primary">
+                        <Bloque key={`${i}-ul`} animar={animar} as="ul" className="ml-5 flex list-disc flex-col gap-2 marker:text-primary">
                             {lineas.map((linea, j) => (
                                 <li key={j}>{linea.slice(2)}</li>
                             ))}
-                        </ul>,
+                        </Bloque>,
                     );
                 } else {
                     elementos.push(
-                        <p key={`${i}-p`} className={cn('whitespace-pre-line', !hayParrafo && primerParrafo)}>
+                        <Bloque key={`${i}-p`} animar={animar} as="p" className={cn('whitespace-pre-line', !hayParrafo && primerParrafo)}>
                             {lineas.join('\n')}
-                        </p>,
+                        </Bloque>,
                     );
                     hayParrafo = true;
                 }

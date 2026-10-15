@@ -10,10 +10,12 @@ use App\Http\Controllers\Api\Admin\OpcionPlanController;
 use App\Http\Controllers\Api\Admin\PerfilController;
 use App\Http\Controllers\Api\Admin\PreguntaFrecuenteController;
 use App\Http\Controllers\Api\Admin\ReclamacionController as AdminReclamacionController;
+use App\Http\Controllers\Api\Admin\ReservaController as AdminReservaController;
 use App\Http\Controllers\Api\Admin\SeccionController;
 use App\Http\Controllers\Api\Admin\ServicioController;
 use App\Http\Controllers\Api\Admin\SolicitudController as AdminSolicitudController;
 use App\Http\Controllers\Api\Admin\TestimonioController as AdminTestimonioController;
+use App\Http\Controllers\Api\Admin\TipoReservaController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CatalogoErpController;
 use App\Http\Controllers\Api\DocumentoController;
@@ -21,6 +23,7 @@ use App\Http\Controllers\Api\EstadisticaController;
 use App\Http\Controllers\Api\PaginaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\ReclamacionController;
+use App\Http\Controllers\Api\ReservaController;
 use App\Http\Controllers\Api\SitioController;
 use App\Http\Controllers\Api\SolicitudController;
 use App\Http\Middleware\VerificarClaveEstadisticas;
@@ -66,6 +69,7 @@ Route::name('api.')->group(function () {
 
     // Formularios del sitio (con límite para evitar abuso)
     Route::post('/solicitudes', [SolicitudController::class, 'store'])->middleware('throttle:5,1')->name('solicitudes.store');
+    Route::post('/reservas', [ReservaController::class, 'store'])->middleware('throttle:5,1')->name('reservas.store');
     Route::post('/reclamaciones', [ReclamacionController::class, 'store'])->middleware('throttle:5,1')->name('reclamaciones.store');
     Route::post('/reclamaciones/consultar', [ReclamacionController::class, 'consultar'])->middleware('throttle:10,1')->name('reclamaciones.consultar');
     // Datos de la constancia: solo con la dirección firmada que da la página de la constancia
@@ -115,6 +119,13 @@ Route::name('api.')->group(function () {
             Route::patch('/{mensaje}/leido', 'leido')->name('leido');
             Route::delete('/{mensaje}', 'destroy')->name('destroy');
         });
+
+        // Reservas de la web y lo que se puede reservar (tipos)
+        Route::apiResource('reservas/tipos', TipoReservaController::class)
+            ->except(['show'])
+            ->parameters(['tipos' => 'tipo'])
+            ->names('reservas.tipos');
+        Route::apiResource('reservas', AdminReservaController::class)->except(['store']);
 
         Route::controller(AdminReclamacionController::class)->prefix('reclamaciones')->name('reclamaciones.')->group(function () {
             Route::get('/', 'index')->name('index');

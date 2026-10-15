@@ -17,6 +17,11 @@ class SeccionRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         VideoRegla::completar($this);
+
+        // Un botón sin texto no se muestra: su enlace se descarta
+        if ($this->has('boton_texto') && blank($this->input('boton_texto'))) {
+            $this->merge(['boton_url' => null]);
+        }
     }
 
     public function rules(): array

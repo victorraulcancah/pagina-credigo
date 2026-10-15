@@ -1,6 +1,7 @@
 import { ImageOff, Images, Plus, Save, Smartphone } from 'lucide-react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import Cargando from '@/components/admin/Cargando';
+import DestinoEnlace, { describirDestino } from '@/components/admin/DestinoEnlace';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -15,6 +16,27 @@ import Switch from '@/components/ui/Switch';
 import Textarea from '@/components/ui/Textarea';
 import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
+
+/** Un botón del banner: su texto y, si tiene texto, a dónde lleva (página, reservar, WhatsApp…). */
+function BotonBanner({ titulo, ayuda, placeholder, campos: [campoTexto, campoEnlace], data, setData, errors }) {
+    return (
+        <div className="flex flex-col gap-4 rounded-xl bg-gray-50 p-4 sm:col-span-2">
+            <FormField label={titulo} htmlFor={campoTexto} error={errors[campoTexto]} hint={ayuda}>
+                <Input
+                    id={campoTexto}
+                    value={data[campoTexto]}
+                    onChange={(e) => setData(campoTexto, e.target.value)}
+                    error={errors[campoTexto]}
+                    maxLength={60}
+                    placeholder={placeholder}
+                />
+            </FormField>
+            {data[campoTexto]?.trim() && (
+                <DestinoEnlace id={campoEnlace} value={data[campoEnlace]} onChange={(valor) => setData(campoEnlace, valor)} error={errors[campoEnlace]} />
+            )}
+        </div>
+    );
+}
 
 const VACIO = {
     etiqueta: '',
@@ -104,7 +126,12 @@ export default function BannersIndex() {
                                 {!banner.solo_imagen && banner.subtitulo && <p className="line-clamp-2 text-sm text-gray-500">{banner.subtitulo}</p>}
                                 {banner.boton_url && (
                                     <p className="mt-1 text-xs text-gray-400">
-                                        {banner.solo_imagen ? 'Al hacer clic' : `Botón: ${banner.boton_texto}`} → {banner.boton_url}
+                                        {banner.solo_imagen ? 'Al hacer clic' : `Botón: ${banner.boton_texto}`} → {describirDestino(banner.boton_url)}
+                                    </p>
+                                )}
+                                {!banner.solo_imagen && banner.boton2_url && (
+                                    <p className="text-xs text-gray-400">
+                                        Segundo botón: {banner.boton2_texto} → {describirDestino(banner.boton2_url)}
                                     </p>
                                 )}
                             </div>
@@ -205,29 +232,34 @@ export default function BannersIndex() {
                     )}
 
                     {soloImagen ? (
-                        <FormField
-                            label="Enlace al hacer clic (opcional)"
-                            htmlFor="boton_url"
+                        <DestinoEnlace
+                            id="boton_url"
+                            label="Al hacer clic en la imagen (opcional)"
+                            value={data.boton_url}
+                            onChange={(valor) => setData('boton_url', valor)}
                             error={errors.boton_url}
-                            hint="Toda la imagen lleva a esta página. Ej. /soporte o /#como-funciona"
                             className="sm:col-span-2"
-                        >
-                            <Input id="boton_url" value={data.boton_url} onChange={(e) => setData('boton_url', e.target.value)} error={errors.boton_url} placeholder="/soporte" />
-                        </FormField>
+                        />
                     ) : (
                         <>
-                            <FormField label="Botón principal (amarillo)" htmlFor="boton_texto" error={errors.boton_texto}>
-                                <Input id="boton_texto" value={data.boton_texto} onChange={(e) => setData('boton_texto', e.target.value)} error={errors.boton_texto} placeholder="Empieza tu ahorro" />
-                            </FormField>
-                            <FormField label="Enlace del botón principal" htmlFor="boton_url" error={errors.boton_url} hint="Ej. /soporte o https://...">
-                                <Input id="boton_url" value={data.boton_url} onChange={(e) => setData('boton_url', e.target.value)} error={errors.boton_url} placeholder="/soporte" />
-                            </FormField>
-                            <FormField label="Segundo botón (borde blanco)" htmlFor="boton2_texto" error={errors.boton2_texto} hint="Vacío = se muestra el botón de WhatsApp.">
-                                <Input id="boton2_texto" value={data.boton2_texto} onChange={(e) => setData('boton2_texto', e.target.value)} error={errors.boton2_texto} placeholder="Ver cómo funciona" />
-                            </FormField>
-                            <FormField label="Enlace del segundo botón" htmlFor="boton2_url" error={errors.boton2_url} hint="Ej. /#como-funciona (baja a esa sección del inicio)">
-                                <Input id="boton2_url" value={data.boton2_url} onChange={(e) => setData('boton2_url', e.target.value)} error={errors.boton2_url} placeholder="/#como-funciona" />
-                            </FormField>
+                            <BotonBanner
+                                titulo="Botón principal (amarillo)"
+                                ayuda="Vacío = sin botón."
+                                placeholder="Reservar viaje"
+                                campos={['boton_texto', 'boton_url']}
+                                data={data}
+                                setData={setData}
+                                errors={errors}
+                            />
+                            <BotonBanner
+                                titulo="Segundo botón (borde blanco)"
+                                ayuda="Vacío = se muestra el botón de WhatsApp."
+                                placeholder="Ver servicios"
+                                campos={['boton2_texto', 'boton2_url']}
+                                data={data}
+                                setData={setData}
+                                errors={errors}
+                            />
                             <VideoInput
                                 value={data.video_url}
                                 onChange={(valor) => setData('video_url', valor)}

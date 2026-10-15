@@ -6,6 +6,7 @@ use App\Models\Banner;
 use App\Models\MensajeContacto;
 use App\Models\PreguntaFrecuente;
 use App\Models\Reclamacion;
+use App\Models\Reserva;
 use App\Models\Servicio;
 use App\Services\Erp\CatalogosErp;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,6 +21,7 @@ class DashboardService
         return [
             'solicitudes_nuevas' => MensajeContacto::where('estado', 'nuevo')->count(),
             'reclamaciones_pendientes' => Reclamacion::pendiente()->count(),
+            'reservas_pendientes' => Reserva::pendiente()->count(),
             'mensajes_total' => MensajeContacto::count(),
             'servicios_activos' => Servicio::activo()->count(),
             'banners_activos' => Banner::activo()->count(),
@@ -33,6 +35,7 @@ class DashboardService
         return [
             'mensajes_no_leidos' => MensajeContacto::noLeido()->count(),
             'reclamaciones_pendientes' => Reclamacion::pendiente()->count(),
+            'reservas_pendientes' => Reserva::pendiente()->count(),
         ];
     }
 

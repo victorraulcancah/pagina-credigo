@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { ArrowLeft, ExternalLink, RotateCcw, Save } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import ColorInput from '@/components/admin/ColorInput';
+import DestinoEnlace from '@/components/admin/DestinoEnlace';
 import ImageUpload from '@/components/admin/ImageUpload';
 import ItemsRepeater from '@/components/admin/ItemsRepeater';
 import PageHeader from '@/components/admin/PageHeader';
@@ -263,12 +264,12 @@ function SeccionFormulario({ seccion }) {
                     {usa('boton') && (
                         <Panel title="Botón">
                             <div className="flex flex-col gap-5">
-                                <FormField label="Texto" htmlFor="boton_texto" error={errors.boton_texto}>
-                                    <Input id="boton_texto" value={data.boton_texto} onChange={(e) => setData('boton_texto', e.target.value)} error={errors.boton_texto} />
+                                <FormField label="Texto" htmlFor="boton_texto" error={errors.boton_texto} hint="Vacío = sin botón.">
+                                    <Input id="boton_texto" value={data.boton_texto} onChange={(e) => setData('boton_texto', e.target.value)} error={errors.boton_texto} maxLength={60} />
                                 </FormField>
-                                <FormField label="Enlace" htmlFor="boton_url" error={errors.boton_url} hint="Ej. /soporte o https://... Déjalo vacío para ocultar el botón.">
-                                    <Input id="boton_url" value={data.boton_url} onChange={(e) => setData('boton_url', e.target.value)} error={errors.boton_url} />
-                                </FormField>
+                                {data.boton_texto?.trim() && (
+                                    <DestinoEnlace id="boton_url" value={data.boton_url} onChange={(valor) => setData('boton_url', valor)} error={errors.boton_url} />
+                                )}
                             </div>
                         </Panel>
                     )}

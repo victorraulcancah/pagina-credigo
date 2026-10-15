@@ -3,7 +3,7 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa6';
 import Badge from '@/components/ui/Badge';
-import Button, { usaEnlaceNativo } from '@/components/ui/Button';
+import Button, { esEnlaceWhatsapp, usaEnlaceNativo } from '@/components/ui/Button';
 import Container from '@/components/ui/Container';
 import { BotonVideo } from '@/components/web/Video';
 import { useSitio } from '@/hooks/useSitio';
@@ -172,13 +172,18 @@ export default function HeroBanner({ banners = [], cifras = [] }) {
                                 )}
                                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                                     {slide.boton_texto && slide.boton_url && (
-                                        <Button href={slide.boton_url} size="lg" icon={ArrowRight} iconPosition="right">
+                                        <Button
+                                            href={slide.boton_url}
+                                            size="lg"
+                                            icon={esEnlaceWhatsapp(slide.boton_url) ? FaWhatsapp : ArrowRight}
+                                            iconPosition={esEnlaceWhatsapp(slide.boton_url) ? 'left' : 'right'}
+                                        >
                                             {slide.boton_texto}
                                         </Button>
                                     )}
                                     {/* Segundo botón del banner; si no tiene, WhatsApp */}
                                     {slide.boton2_texto && slide.boton2_url ? (
-                                        <Button href={slide.boton2_url} variant="outline-light" size="lg">
+                                        <Button href={slide.boton2_url} variant="outline-light" size="lg" icon={esEnlaceWhatsapp(slide.boton2_url) ? FaWhatsapp : undefined}>
                                             {slide.boton2_texto}
                                         </Button>
                                     ) : (

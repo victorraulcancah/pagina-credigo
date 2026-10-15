@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ArrowRight, BookOpenText, Briefcase, Building, CircleQuestionMark, Images, Inbox, LayoutTemplate, Palette, RefreshCw } from 'lucide-react';
+import { ArrowRight, BookOpenText, Briefcase, Building, CalendarCheck, CircleQuestionMark, Images, Inbox, LayoutTemplate, Palette, RefreshCw } from 'lucide-react';
 import PageHeader from '@/components/admin/PageHeader';
 import PantallaApi from '@/components/admin/PantallaApi';
 import Panel from '@/components/admin/Panel';
@@ -80,6 +80,13 @@ function DashboardContenido({ resumen, ultimosMensajes, erp, recargar }) {
             href: '/admin/reclamaciones?estado=pendiente',
             alerta: resumen.reclamaciones_pendientes > 0,
         },
+        {
+            label: 'Reservas pendientes',
+            valor: resumen.reservas_pendientes,
+            icon: CalendarCheck,
+            href: '/admin/reservas?estado=pendiente',
+            alerta: resumen.reservas_pendientes > 0,
+        },
         { label: 'Servicios visibles', valor: resumen.servicios_activos, icon: Briefcase, href: '/admin/servicios' },
         { label: 'Banners visibles', valor: resumen.banners_activos, icon: Images, href: '/admin/banners' },
         { label: 'Preguntas frecuentes', valor: resumen.preguntas_activas, icon: CircleQuestionMark, href: '/admin/preguntas' },
@@ -95,7 +102,7 @@ function DashboardContenido({ resumen, ultimosMensajes, erp, recargar }) {
         <AdminLayout title="Dashboard">
             <PageHeader title="Dashboard" description="Resumen del sitio web." />
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-6">
                 {tarjetas.map((t) => (
                     <Link
                         key={t.label}

@@ -9,6 +9,7 @@ use App\Http\Resources\DocumentoResource;
 use App\Http\Resources\PreguntaFrecuenteResource;
 use App\Http\Resources\ServicioResource;
 use App\Http\Resources\TestimonioResource;
+use App\Http\Resources\TipoReservaResource;
 use App\Models\MensajeContacto;
 use App\Models\Reclamacion;
 use App\Models\Servicio;
@@ -39,6 +40,7 @@ class PaginaService
         'blog' => [['blog', 'general'], 'blog.hero', 'Blog'],
         'soporte' => [['contacto', 'general'], 'contacto.hero', 'Soporte'],
         'cotizador' => [['cotizador'], 'cotizador.hero', 'Cotizador'],
+        'reservar' => [['reservar', 'general'], 'reservar.hero', 'Reservar'],
         'terminos' => [['legal'], null, null],
         'privacidad' => [['legal'], null, null],
         'libro-de-reclamaciones' => [[], null, 'Libro de Reclamaciones'],
@@ -115,6 +117,11 @@ class PaginaService
             'cotizador' => [
                 'secciones' => $secciones,
                 'planes' => ServicioResource::collection($this->servicios->cotizables())->resolve(),
+            ],
+            'reservar' => [
+                'secciones' => $secciones,
+                'tipos' => TipoReservaResource::collection(app(TipoReservaService::class)->activos())->resolve(),
+                'hoy' => now(ReservaService::ZONA)->toDateString(),
             ],
             'terminos', 'privacidad' => [
                 'seccion' => $this->seccionLegal($pagina),

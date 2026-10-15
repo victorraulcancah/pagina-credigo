@@ -27,6 +27,7 @@ class PaginaController extends Controller
         'blog' => 'Web/Blog',
         'soporte' => 'Web/Contacto',
         'cotizador' => 'Web/Cotizador',
+        'reservar' => 'Web/Reservar',
         'terminos' => 'Web/Legal',
         'privacidad' => 'Web/Legal',
     ];
@@ -110,6 +111,11 @@ class PaginaController extends Controller
     public function cotizador(): Response
     {
         return $this->pagina('cotizador');
+    }
+
+    public function reservar(): Response
+    {
+        return $this->pagina('reservar');
     }
 
     public function terminos(): Response

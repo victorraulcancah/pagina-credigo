@@ -4,6 +4,7 @@ import {
     Briefcase,
     Building,
     Calculator,
+    CalendarCheck,
     CircleQuestionMark,
     ExternalLink,
     FileText,
@@ -47,6 +48,7 @@ const menu = [
         grupo: 'Contacto',
         items: [
             { label: 'Solicitudes', href: '/admin/mensajes', icon: Inbox, contador: 'mensajes_no_leidos' },
+            { label: 'Reservas', href: '/admin/reservas', icon: CalendarCheck, contador: 'reservas_pendientes' },
             { label: 'Reclamaciones', href: '/admin/reclamaciones', icon: BookOpenText, contador: 'reclamaciones_pendientes' },
         ],
     },

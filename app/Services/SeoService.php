@@ -7,6 +7,7 @@ use App\Models\CategoriaBlog;
 use App\Models\Seccion;
 use App\Models\Servicio;
 use App\Models\Testimonio;
+use App\Models\TipoReserva;
 use Illuminate\Support\Carbon;
 
 /** sitemap.xml y robots.txt para buscadores (usan la URL del sitio del .env). */
@@ -31,6 +32,11 @@ class SeoService
             ['/terminos-y-condiciones', 0.2, $ultimaEdicion(['legal'])],
             ['/politica-de-privacidad', 0.2, $ultimaEdicion(['legal'])],
         ];
+
+        // Reservar: solo si hay algo que reservar
+        if (TipoReserva::activo()->exists()) {
+            $paginas[] = ['/reservar', 0.7, max($ultimaEdicion(['reservar']), TipoReserva::max('updated_at'))];
+        }
 
         // Historias de conductores: a Google solo se le muestra cuando ya hay historias (vacía no aporta)
         if (Testimonio::publicado()->exists()) {

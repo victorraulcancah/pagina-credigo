@@ -16,8 +16,11 @@ const sizes = {
     lg: 'h-12 px-7 text-base sm:h-14 sm:px-8 sm:text-lg',
 };
 
-// Externos y anclas (#seccion, /#seccion) van con <a> normal para que el navegador haga el scroll
-export const usaEnlaceNativo = (href) => /^(https?:|mailto:|tel:)/.test(href) || href.includes('#');
+/** Botón "WhatsApp con mensaje" del panel (/whatsapp?texto=…): el servidor lo lleva al WhatsApp de la empresa. */
+export const esEnlaceWhatsapp = (href = '') => /^\/whatsapp(\?|$)/.test(href);
+
+// Externos, anclas (#seccion, /#seccion) y WhatsApp van con <a> normal (el navegador hace el scroll o sale del sitio)
+export const usaEnlaceNativo = (href) => /^(https?:|mailto:|tel:)/.test(href) || href.includes('#') || esEnlaceWhatsapp(href);
 
 /**
  * Botón de la web. Con `href` se renderiza como enlace:
@@ -65,7 +68,7 @@ export default function Button({
             <a
                 href={href}
                 className={classes}
-                {...(newTab && { target: '_blank', rel: 'noopener noreferrer' })}
+                {...((newTab || esEnlaceWhatsapp(href)) && { target: '_blank', rel: 'noopener noreferrer' })}
                 {...props}
             >
                 {content}

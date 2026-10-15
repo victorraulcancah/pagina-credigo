@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\LibroReclamacionesController;
 use App\Http\Controllers\Web\PaginaController;
 use App\Http\Controllers\Web\SeoController;
+use App\Http\Controllers\Web\WhatsappController;
 use App\Http\Middleware\ContarVisita;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -34,6 +35,7 @@ Route::controller(PaginaController::class)->middleware(ContarVisita::class)->gro
     Route::get('/blog/{categoria}/{slug}', 'articulo')->name('articulo');
     Route::get('/soporte', 'contacto')->name('soporte');
     Route::get('/cotizador', 'cotizador')->name('cotizador');
+    Route::get('/reservar', 'reservar')->name('reservar');
     Route::get('/terminos-y-condiciones', 'terminos')->name('terminos');
     Route::get('/politica-de-privacidad', 'privacidad')->name('privacidad');
 });
@@ -43,6 +45,9 @@ Route::permanentRedirect('/contacto', '/soporte');
 
 // Para buscadores: deben estar en la raíz del sitio (no en /api)
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+
+// Botones "WhatsApp con mensaje" del panel: lleva al WhatsApp de la empresa con el texto ya escrito
+Route::get('/whatsapp', WhatsappController::class)->middleware('throttle:60,1')->name('whatsapp');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 // Libro de Reclamaciones virtual (Indecopi)
@@ -79,6 +84,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::inertia('/documentos', 'Admin/Documentos/Index')->name('documentos.index');
     Route::inertia('/mensajes', 'Admin/Mensajes/Index')->name('mensajes.index');
     Route::inertia('/reclamaciones', 'Admin/Reclamaciones/Index')->name('reclamaciones.index');
+    Route::inertia('/reservas', 'Admin/Reservas/Index')->name('reservas.index');
     Route::inertia('/perfil', 'Admin/Perfil')->name('perfil.edit');
 });
 

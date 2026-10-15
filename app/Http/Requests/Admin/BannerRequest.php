@@ -12,10 +12,20 @@ class BannerRequest extends FormRequest
         return true;
     }
 
-    /** Un enlace corto de TikTok (botón "Compartir" del celular) se completa antes de validar. */
+    /**
+     * Un enlace corto de TikTok (botón "Compartir" del celular) se completa antes de validar.
+     * Un botón sin texto no se muestra: su enlace se descarta (salvo en "solo imagen", donde el enlace es la imagen).
+     */
     protected function prepareForValidation(): void
     {
         VideoRegla::completar($this);
+
+        if (blank($this->input('boton_texto')) && ! $this->boolean('solo_imagen')) {
+            $this->merge(['boton_url' => null]);
+        }
+        if (blank($this->input('boton2_texto'))) {
+            $this->merge(['boton2_url' => null]);
+        }
     }
 
     public function rules(): array

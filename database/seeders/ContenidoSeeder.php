@@ -102,6 +102,12 @@ class ContenidoSeeder extends Seeder
                 'contenido' => 'Conductores de Yango e InDrive que ya trabajan con su propio vehículo cuentan cómo lo lograron.',
             ]],
 
+            // ── Reservar ────────────────────────────────────────────
+            ['reservar', 'hero', 'Reservar · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
+                'titulo' => 'Reserva tu viaje',
+                'contenido' => 'Cuéntanos a dónde vas y cuándo. Te confirmamos por WhatsApp.',
+            ]],
+
             // ── Blog ────────────────────────────────────────────────
             ['blog', 'hero', 'Blog · Encabezado', ['titulo', 'contenido', 'imagen', 'colores'], [
                 'titulo' => 'Blog',

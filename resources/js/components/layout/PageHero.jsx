@@ -12,7 +12,9 @@ export default function PageHero({ title, description, imagen, colorTitulo, colo
     const centered = align === 'center';
 
     return (
-        <section className="relative overflow-clip bg-primary text-white">
+        // Con imagen, en pantalla grande el encabezado toma la proporción recomendada de la foto (1920×700) para que se vea
+        // completa, no recortada; el texto queda centrado encima y, si es más alto, el encabezado crece
+        <section className={cn('relative overflow-clip bg-primary text-white', imagen && 'lg:flex lg:aspect-[1920/700] lg:items-center')}>
             {/* Imagen tal cual se subió (sin capa oscura) */}
             {imagen && <img src={imagen} alt="" aria-hidden="true" fetchPriority="high" className="absolute inset-0 size-full object-cover" />}
             <Container className={cn('relative py-14 sm:py-16 lg:py-20', imagen && 'lg:py-28', centered && 'text-center')}>

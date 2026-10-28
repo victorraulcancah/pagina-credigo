@@ -6,6 +6,7 @@ use App\Models\Articulo;
 use App\Models\CategoriaBlog;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
+use Stevebauman\Purify\Facades\Purify;
 
 /** Artículos del blog de la empresa: se escriben en el panel y se leen en /blog. */
 class ArticuloService
@@ -57,12 +58,12 @@ class ArticuloService
 
     public function crear(array $datos): Articulo
     {
-        return Articulo::create($this->conPortada($datos))->load('categoria:id,nombre,slug');
+        return Articulo::create($this->conPortada($this->contenidoLimpio($datos)))->load('categoria:id,nombre,slug');
     }
 
     public function actualizar(Articulo $articulo, array $datos): Articulo
     {
-        $articulo->update($this->conPortada($datos, $articulo));
+        $articulo->update($this->conPortada($this->contenidoLimpio($datos), $articulo));
 
         return $articulo->refresh()->load('categoria:id,nombre,slug');
     }
@@ -85,12 +86,22 @@ class ArticuloService
         return $this->imagenes->url($this->imagenes->guardar($archivo, self::CARPETA.'/contenido'));
     }
 
-    /** Rutas en el disco de las imágenes subidas que usa el contenido. */
+    /** Rutas en el disco de las imágenes subidas que usa el contenido (texto simple o HTML). */
     private function imagenesDelContenido(?string $contenido): array
     {
-        preg_match_all('#/storage/('.self::CARPETA.'/contenido/[^)\s]+)#', (string) $contenido, $coincidencias);
+        preg_match_all('#/storage/('.self::CARPETA.'/contenido/[^)\s"\'<>]+)#', (string) $contenido, $coincidencias);
 
         return array_unique($coincidencias[1]);
+    }
+
+    /** El HTML del editor se limpia al guardar: solo queda el formato permitido (config/purify.php → articulo). */
+    private function contenidoLimpio(array $datos): array
+    {
+        if (isset($datos['contenido']) && Articulo::esHtml($datos['contenido'])) {
+            $datos['contenido'] = Purify::config('articulo')->clean($datos['contenido']);
+        }
+
+        return $datos;
     }
 
     private function conPortada(array $datos, ?Articulo $articulo = null): array

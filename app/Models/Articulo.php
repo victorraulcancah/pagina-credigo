@@ -89,11 +89,23 @@ class Articulo extends Model
         return $this->publicado_at?->isFuture() ? 'programado' : 'publicado';
     }
 
+    /**
+     * El contenido nuevo lo escribe el editor del panel (HTML limpio); los artículos anteriores
+     * guardan texto simple ("## subtítulo", "![pie](dirección)") y se siguen mostrando igual.
+     */
+    public static function esHtml(?string $contenido): bool
+    {
+        return str_starts_with(ltrim((string) $contenido), '<');
+    }
+
     /** Minutos de lectura aproximados (mínimo 1). */
     public function minutosLectura(): int
     {
-        // Sin contar las imágenes; se separa por espacios (str_word_count corta las palabras con tilde)
-        $texto = trim(preg_replace('/!\[[^\]]*\]\([^)]*\)/', '', (string) $this->contenido));
+        // Sin contar las imágenes ni las etiquetas; se separa por espacios (str_word_count corta las palabras con tilde)
+        $texto = static::esHtml($this->contenido)
+            ? html_entity_decode(preg_replace('/<[^>]*>/', ' ', (string) $this->contenido))
+            : preg_replace('/!\[[^\]]*\]\([^)]*\)/', '', (string) $this->contenido);
+        $texto = trim($texto);
         $palabras = $texto === '' ? 0 : count(preg_split('/\s+/u', $texto));
 
         return max(1, (int) ceil($palabras / self::PALABRAS_POR_MINUTO));

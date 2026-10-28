@@ -175,3 +175,52 @@ it('sin artículos el blog abre igual (con su aviso) y el panel exige sesión', 
 
     $this->getJson('/api/admin/articulos')->assertUnauthorized();
 });
+
+describe('contenido escrito con el editor (HTML)', function () {
+    beforeEach(function () {
+        $this->actingAs(User::factory()->create());
+        $this->noticias = CategoriaBlog::where('slug', 'noticias')->value('id');
+    });
+
+    it('guarda el formato del editor y descarta lo peligroso', function () {
+        $html = '<p style="text-align: center">Hola <strong>mundo</strong> <span style="color: #ff0000; position: fixed">rojo</span></p>'
+            .'<h2>Subtítulo</h2><script>alert(1)</script>'
+            .'<p><a href="javascript:alert(1)" onclick="robar()">enlace malo</a> <a href="https://credigo.pe" target="_blank">bueno</a></p>'
+            .'<img src="/storage/blog/contenido/a.jpg" alt="Pie" onerror="alert(1)">'
+            .'<div class="galeria evil"><img src="/storage/blog/contenido/b.jpg" alt=""><iframe src="https://malo.com"></iframe></div>';
+
+        $guardado = $this->postJson('/api/admin/articulos', ['titulo' => 'Con formato', 'contenido' => $html, 'categoria_blog_id' => $this->noticias])
+            ->assertCreated()->json('data.contenido');
+
+        expect($guardado)
+            ->toContain('text-align:center')->toContain('<strong>mundo</strong>')->toContain('color:#ff0000')->toContain('<h2>Subtítulo</h2>')
+            ->toContain('href="https://credigo.pe"')->toContain('class="galeria"')->toContain('src="/storage/blog/contenido/a.jpg"')
+            ->not->toContain('<script')->not->toContain('alert(1)')->not->toContain('javascript:')->not->toContain('onclick')
+            ->not->toContain('onerror')->not->toContain('position')->not->toContain('<iframe')->not->toContain('evil');
+    });
+
+    it('el texto simple de los artículos anteriores no se toca', function () {
+        $texto = "Antes.\n\n## Subtítulo\n\n![pie](/storage/blog/contenido/x.jpg)";
+
+        $this->postJson('/api/admin/articulos', ['titulo' => 'Antiguo', 'contenido' => $texto, 'categoria_blog_id' => $this->noticias])
+            ->assertCreated()->assertJsonPath('data.contenido', $texto);
+    });
+
+    it('calcula el tiempo de lectura sin contar etiquetas ni imágenes', function () {
+        $articulo = articulo(['contenido' => '<p>'.str_repeat('palabra ', 450).'</p><img src="/storage/blog/contenido/a.jpg" alt="una foto larga de prueba">']);
+
+        expect($articulo->minutosLectura())->toBe(3);
+    });
+
+    it('al eliminar el artículo borra las imágenes del editor', function () {
+        Storage::fake('public');
+        $url = $this->post('/api/admin/articulos/imagenes', ['imagen' => UploadedFile::fake()->image('foto.jpg')])->json('data.url');
+        $ruta = 'blog/contenido/'.basename($url);
+
+        $id = $this->postJson('/api/admin/articulos', ['titulo' => 'Con foto', 'contenido' => "<p>Texto</p><img src=\"{$url}\" alt=\"\">", 'categoria_blog_id' => $this->noticias])
+            ->json('data.id');
+        $this->deleteJson("/api/admin/articulos/{$id}")->assertOk();
+
+        Storage::disk('public')->assertMissing($ruta);
+    });
+});

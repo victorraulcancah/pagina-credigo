@@ -1,8 +1,9 @@
-import { ExternalLink, Eye, Heading2, ImagePlus, List, Newspaper, Plus, Save, Star, Tags } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { ExternalLink, Eye, Newspaper, Plus, Save, Star, Tags } from 'lucide-react';
+import { useState } from 'react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
+import EditorRico from '@/components/admin/EditorRico';
 import ImageUpload from '@/components/admin/ImageUpload';
 import PageHeader from '@/components/admin/PageHeader';
 import VideoInput from '@/components/admin/VideoInput';
@@ -17,9 +18,7 @@ import Textarea from '@/components/ui/Textarea';
 import { fechaArticulo, urlArticulo } from '@/components/web/Blog';
 import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
-import api, { erroresDeValidacion, mensajeDeError } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { errorAlert } from '@/utils/sweetalert';
 
 const MAX_RESUMEN = 300;
 
@@ -51,82 +50,6 @@ const aHoraLocal = (iso) => {
     return new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
 const aIso = (local) => (local ? new Date(local).toISOString() : '');
-
-/**
- * Contenido del artículo con botones para dar formato: subtítulo, viñeta e imagen.
- * "Imagen" sube el archivo y escribe "![pie de foto](dirección)" donde está el cursor.
- */
-function EditorContenido({ value, onChange, error }) {
-    const area = useRef(null);
-    const archivo = useRef(null);
-    const [subiendo, setSubiendo] = useState(false);
-
-    /** Inserta `texto` donde está el cursor (en su propia línea si `bloque`). */
-    const insertar = (texto, bloque = true) => {
-        const el = area.current;
-        const inicio = el?.selectionStart ?? value.length;
-        const fin = el?.selectionEnd ?? value.length;
-        const antes = value.slice(0, inicio);
-        const despues = value.slice(fin);
-        const prefijo = bloque && antes && !antes.endsWith('\n\n') ? (antes.endsWith('\n') ? '\n' : '\n\n') : '';
-        const sufijo = bloque && despues && !despues.startsWith('\n\n') ? '\n\n' : '';
-        const nuevo = `${antes}${prefijo}${texto}${sufijo}${despues}`;
-        onChange(nuevo);
-
-        const cursor = (antes + prefijo + texto).length;
-        requestAnimationFrame(() => {
-            el?.focus();
-            el?.setSelectionRange(cursor, cursor);
-        });
-    };
-
-    const subirImagen = async (e) => {
-        const imagen = e.target.files?.[0];
-        e.target.value = '';
-        if (!imagen) return;
-
-        setSubiendo(true);
-        try {
-            const datos = new FormData();
-            datos.append('imagen', imagen);
-            const respuesta = await api.post('/admin/articulos/imagenes', datos);
-            insertar(`![Pie de foto (opcional)](${respuesta.data.data.url})`);
-        } catch (err) {
-            errorAlert('No se pudo subir la imagen', Object.values(erroresDeValidacion(err))[0] ?? mensajeDeError(err));
-        } finally {
-            setSubiendo(false);
-        }
-    };
-
-    const boton = 'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-white hover:text-primary disabled:opacity-50';
-
-    return (
-        <div className={cn('overflow-hidden rounded-xl border bg-white', error ? 'border-red-500' : 'border-primary-200 focus-within:border-primary')}>
-            <div className="flex flex-wrap gap-1 border-b border-gray-200 bg-gray-50 p-1.5">
-                <button type="button" className={boton} onClick={() => insertar('## Subtítulo')}>
-                    <Heading2 className="size-4" aria-hidden="true" /> Subtítulo
-                </button>
-                <button type="button" className={boton} onClick={() => insertar('- Primer punto\n- Segundo punto')}>
-                    <List className="size-4" aria-hidden="true" /> Lista
-                </button>
-                <button type="button" className={boton} onClick={() => archivo.current?.click()} disabled={subiendo}>
-                    <ImagePlus className="size-4" aria-hidden="true" /> {subiendo ? 'Subiendo...' : 'Imagen'}
-                </button>
-                <input ref={archivo} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={subirImagen} />
-            </div>
-            <textarea
-                id="contenido"
-                ref={area}
-                rows={16}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                aria-invalid={error ? true : undefined}
-                placeholder="Escribe el artículo. Deja una línea en blanco entre párrafos."
-                className="block w-full resize-y px-4 py-3 text-sm leading-relaxed text-primary placeholder:text-primary-300 focus:outline-none sm:text-base"
-            />
-        </div>
-    );
-}
 
 /** Blog de la empresa: artículos en Eventos, Noticias o Tendencias (GET /api/admin/articulos). */
 export default function BlogIndex() {
@@ -278,10 +201,10 @@ export default function BlogIndex() {
                         htmlFor="contenido"
                         error={errors.contenido}
                         required
-                        hint='Formato: "## " al inicio de una línea = subtítulo · "- " = viñeta · línea en blanco = nuevo párrafo · "Imagen" sube una foto y la pone donde está el cursor.'
+                        hint='Escribe como en un documento: selecciona el texto y usa la barra de arriba para cambiar su tamaño, color o alineación. "Fotos" sube hasta 6 a la vez; varias juntas forman una galería.'
                         className="sm:col-span-2"
                     >
-                        <EditorContenido value={data.contenido} onChange={(valor) => setData('contenido', valor)} error={errors.contenido} />
+                        <EditorRico value={data.contenido} onChange={(valor) => setData('contenido', valor)} error={errors.contenido} />
                     </FormField>
 
                     <FormField label="Categoría" htmlFor="categoria_blog_id" error={errors.categoria_blog_id} required>

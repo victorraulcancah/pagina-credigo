@@ -1,8 +1,14 @@
-import Revelar from '@/components/ui/Revelar';
+import Revelar, { escalonar } from '@/components/ui/Revelar';
 import { cn } from '@/lib/utils';
 
 // Una línea "![texto](https://...)" es una imagen (las inserta el editor del blog)
 const IMAGEN = /^!\[([^\]]*)\]\(((?:https?:\/\/|\/)[^\s)]+)\)$/;
+
+// El editor antiguo escribía este texto de ejemplo como pie de foto: no debe mostrarse
+const pieDe = (texto) => (texto === 'Pie de foto (opcional)' ? '' : texto);
+
+// Columnas de una galería (varias imágenes seguidas, una por línea) según cuántas son
+const COLUMNAS_GALERIA = { 2: 'sm:grid-cols-2', 3: 'sm:grid-cols-3', 4: 'sm:grid-cols-2', 5: 'sm:grid-cols-3', 6: 'sm:grid-cols-3' };
 
 /** Cada bloque del texto: con `animar` aparece al bajar (Revelar); si no, la etiqueta tal cual. */
 function Bloque({ animar, as: Tag, desde, ...props }) {
@@ -14,6 +20,7 @@ function Bloque({ animar, as: Tag, desde, ...props }) {
  * - "## Título" → subtítulo
  * - "- texto"   → viñeta
  * - "![texto](dirección)" en su propia línea → imagen (el texto va debajo, como pie de foto)
+ * - varias líneas "![…](…)" seguidas, sin línea en blanco → galería (se acomodan en columnas)
  * - línea en blanco → nuevo párrafo
  * `subtitulo`: etiqueta de los subtítulos (h3 si el texto va debajo de otro título h2).
  * `primerParrafo`: clases extra del primer párrafo (ej. letra capital en un artículo).
@@ -44,14 +51,36 @@ export default function TextoFormateado({ texto = '', subtitulo: Subtitulo = 'h2
 
                 if (!lineas.length) return elementos;
 
-                const imagen = lineas.length === 1 && lineas[0].match(IMAGEN);
+                const imagenes = lineas.map((linea) => linea.match(IMAGEN));
+                const soloImagenes = imagenes.every(Boolean);
 
-                if (imagen) {
+                if (soloImagenes && imagenes.length === 1) {
+                    const [, texto, direccion] = imagenes[0];
+
                     elementos.push(
                         <Bloque key={`${i}-img`} animar={animar} as="figure" desde="zoom" className="my-4">
-                            <img src={imagen[2]} alt={imagen[1]} loading="lazy" className="w-full rounded-[1.5rem] bg-primary-50 object-cover" />
-                            {imagen[1] && <figcaption className="mt-2 text-center text-sm text-primary-700/70">{imagen[1]}</figcaption>}
+                            <img src={direccion} alt={pieDe(texto)} loading="lazy" className="w-full rounded-[1.5rem] bg-primary-50 object-cover" />
+                            {pieDe(texto) && <figcaption className="mt-2 text-center text-sm text-primary-700/70">{pieDe(texto)}</figcaption>}
                         </Bloque>,
+                    );
+                } else if (soloImagenes) {
+                    // Galería: cada foto entra con su acercamiento, una tras otra, y se agranda un poco al pasar el mouse
+                    elementos.push(
+                        <div key={`${i}-gal`} className={cn('my-4 grid gap-3 sm:gap-4', COLUMNAS_GALERIA[imagenes.length] ?? 'sm:grid-cols-3')}>
+                            {imagenes.map(([, texto, direccion], j) => (
+                                <Bloque key={j} animar={animar} as="figure" desde="zoom" retraso={escalonar(j, 120)} className="group">
+                                    <div className="overflow-hidden rounded-[1.25rem] bg-primary-50">
+                                        <img
+                                            src={direccion}
+                                            alt={pieDe(texto)}
+                                            loading="lazy"
+                                            className="aspect-[4/3] w-full object-cover transition duration-500 ease-out group-hover:scale-105"
+                                        />
+                                    </div>
+                                    {pieDe(texto) && <figcaption className="mt-2 text-center text-sm text-primary-700/70">{pieDe(texto)}</figcaption>}
+                                </Bloque>
+                            ))}
+                        </div>,
                     );
                 } else if (lineas.every((linea) => linea.startsWith('- '))) {
                     elementos.push(

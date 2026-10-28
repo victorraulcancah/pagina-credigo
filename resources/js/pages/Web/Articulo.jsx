@@ -10,7 +10,7 @@ import Section from '@/components/ui/Section';
 import { ChipCategoria, MetaArticulo, PortadaArticulo, TarjetaArticulo } from '@/components/web/Blog';
 import CtaSection from '@/components/web/CtaSection';
 import PaginaApi from '@/components/web/PaginaApi';
-import TextoFormateado from '@/components/web/TextoFormateado';
+import ContenidoArticulo from '@/components/web/ContenidoArticulo';
 import Video from '@/components/web/Video';
 
 /** Encabezado azul con la categoría, el título, el resumen y la fecha; los textos entran uno tras otro. */
@@ -141,9 +141,9 @@ function ArticuloContenido({ secciones, articulo, relacionados }) {
 
             <Section className="pt-12 sm:pt-16 lg:pt-16">
                 <article ref={texto} className="mx-auto max-w-[68ch]">
-                    <TextoFormateado
+                    <ContenidoArticulo
                         animar
-                        texto={articulo.contenido}
+                        contenido={articulo.contenido}
                         className="gap-6 text-lg leading-relaxed text-primary-800 sm:text-xl"
                         primerParrafo="first-letter:float-left first-letter:mr-3 first-letter:text-7xl first-letter:leading-[0.8] first-letter:font-bold first-letter:text-primary"
                     />

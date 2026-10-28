@@ -19,6 +19,8 @@ class OpcionPlanRequest extends FormRequest
             // El vínculo con el ERP se crea desde "Precios del ERP"; aquí solo se puede mantener o quitar
             'erp_ref' => ['nullable', Rule::in(array_filter([$this->route('opcion')?->erp_ref]))],
             'servicio_id' => ['required', 'exists:servicios,id'],
+            // La sección debe ser del mismo plan que la opción
+            'grupo_opcion_id' => ['nullable', Rule::exists('grupos_opcion', 'id')->where('servicio_id', $this->input('servicio_id'))],
             'nombre' => ['required', 'string', 'max:120'],
             'nota' => ['nullable', 'string', 'max:255'],
             // `moneda` es la de la cuota; la inicial puede ir en otra (ej. inicial en US$ y cuotas en S/)
@@ -37,6 +39,7 @@ class OpcionPlanRequest extends FormRequest
     {
         return [
             'servicio_id' => 'plan',
+            'grupo_opcion_id' => 'sección',
             'nota' => 'nota',
             'moneda' => 'moneda de la cuota',
             'moneda_inicial' => 'moneda de la inicial',

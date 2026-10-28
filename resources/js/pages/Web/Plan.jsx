@@ -124,6 +124,16 @@ function FilaOpcion({ opcion, columnas }) {
     );
 }
 
+function ListaOpciones({ opciones, columnas }) {
+    return (
+        <ul className="divide-y divide-primary-100 border-y border-primary-100">
+            {opciones.map((opcion) => (
+                <FilaOpcion key={opcion.id} opcion={opcion} columnas={columnas} />
+            ))}
+        </ul>
+    );
+}
+
 /** Qué incluye el plan y sus opciones con montos (del panel → Cotizador). */
 function IncluyeYOpciones({ servicio, whatsapp }) {
     const sitio = useSitio();
@@ -136,6 +146,13 @@ function IncluyeYOpciones({ servicio, whatsapp }) {
         opciones.some((opcion) => datosOpcion(opcion, sitio).find((dato) => dato.clave === clave).valor),
     );
     if (!columnas.length) columnas.push('cuota');
+
+    // Secciones con logo (ej. "Descuentos con YANGO"); las opciones sin sección van primero, sin título
+    const grupos = servicio.grupos ?? [];
+    const secciones = grupos
+        .map((grupo) => ({ grupo, opciones: opciones.filter((opcion) => opcion.grupo_opcion_id === grupo.id) }))
+        .filter((seccion) => seccion.opciones.length > 0);
+    const sueltas = opciones.filter((opcion) => !grupos.some((grupo) => grupo.id === opcion.grupo_opcion_id));
 
     return (
         <Section>
@@ -160,11 +177,18 @@ function IncluyeYOpciones({ servicio, whatsapp }) {
                     <Titulo>Opciones y cuotas</Titulo>
                     {opciones.length > 0 ? (
                         <>
-                            <ul className="mt-8 divide-y divide-primary-100 border-y border-primary-100">
-                                {opciones.map((opcion) => (
-                                    <FilaOpcion key={opcion.id} opcion={opcion} columnas={columnas} />
+                            <div className="mt-8 flex flex-col gap-10">
+                                {sueltas.length > 0 && <ListaOpciones opciones={sueltas} columnas={columnas} />}
+                                {secciones.map(({ grupo, opciones: deLaSeccion }) => (
+                                    <section key={grupo.id} aria-label={grupo.titulo}>
+                                        <div className="mb-3 flex items-center gap-3">
+                                            {grupo.imagen_url && <img src={grupo.imagen_url} alt="" className="h-9 max-w-28 object-contain" loading="lazy" />}
+                                            <h3 className="text-xl font-bold tracking-tight">{grupo.titulo}</h3>
+                                        </div>
+                                        <ListaOpciones opciones={deLaSeccion} columnas={columnas} />
+                                    </section>
                                 ))}
-                            </ul>
+                            </div>
                             <p className="mt-4 text-sm text-primary-500">Montos referenciales. Las condiciones finales se definen en el contrato, luego de la evaluación.</p>
                             <Button href={`/cotizador?plan=${servicio.id}`} variant="secondary" icon={Calculator} className="mt-6">
                                 Cotizar este plan

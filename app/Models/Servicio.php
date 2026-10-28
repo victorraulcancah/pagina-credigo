@@ -66,6 +66,12 @@ class Servicio extends Model
         return $this->hasMany(OpcionPlan::class);
     }
 
+    /** Secciones con logo en las que se agrupan las opciones del plan (opcional). */
+    public function grupos(): HasMany
+    {
+        return $this->hasMany(GrupoOpcion::class);
+    }
+
     /** Cuenta las opciones visibles del cotizador (para mostrar el enlace "Cotizar"). */
     public function scopeConOpcionesActivas(Builder $query): Builder
     {

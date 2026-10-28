@@ -26,6 +26,7 @@ class ServicioResource extends JsonResource
             'orden' => $this->orden,
             'activo' => (bool) $this->activo,
             'opciones' => OpcionPlanResource::collection($this->whenLoaded('opciones')),
+            'grupos' => GrupoOpcionResource::collection($this->whenLoaded('grupos')),
             'opciones_count' => $this->whenCounted('opciones'),
         ];
     }

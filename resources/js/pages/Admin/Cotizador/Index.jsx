@@ -1,8 +1,9 @@
-import { Calculator, ExternalLink, Link2, Plus, RefreshCw, Save, Search, Unlink } from 'lucide-react';
+import { Calculator, ExternalLink, Layers, Link2, Plus, RefreshCw, Save, Search, Unlink } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import EmptyState from '@/components/admin/EmptyState';
 import EstadoBadge from '@/components/admin/EstadoBadge';
+import ImageUpload from '@/components/admin/ImageUpload';
 import PageHeader from '@/components/admin/PageHeader';
 import PantallaApi from '@/components/admin/PantallaApi';
 import AdminLayout from '@/components/layout/AdminLayout';
@@ -19,8 +20,17 @@ import { formatoFecha } from '@/lib/fechas';
 import { FRECUENCIAS, resumenOpcion } from '@/lib/moneda';
 import { cn } from '@/lib/utils';
 
+const VACIO_GRUPO = {
+    servicio_id: '',
+    titulo: '',
+    imagen: null,
+    quitar_imagen: false,
+    orden: 0,
+};
+
 const VACIO = {
     servicio_id: '',
+    grupo_opcion_id: '',
     erp_ref: '',
     nombre: '',
     nota: '',
@@ -216,6 +226,7 @@ function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
         aFormulario: (o) => ({
             ...VACIO,
             ...o,
+            grupo_opcion_id: o.grupo_opcion_id ?? '',
             erp_ref: o.erp_ref ?? '',
             nota: o.nota ?? '',
             moneda_inicial: o.moneda_inicial ?? o.moneda,
@@ -226,7 +237,18 @@ function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
     });
     const { data, setData, errors, processing } = crud.form;
 
+    // Secciones con logo dentro de un plan (ej. "Descuentos con YANGO")
+    const grupos = useCrudModal({
+        url: '/admin/cotizador/grupos',
+        recargar,
+        vacio: VACIO_GRUPO,
+        aFormulario: (g) => ({ ...VACIO_GRUPO, servicio_id: g.servicio_id, titulo: g.titulo, orden: g.orden }),
+    });
+    const formGrupo = grupos.form;
+
     const nuevaOpcion = (plan) => crud.abrirNuevo({ servicio_id: plan?.id ?? planes[0]?.id ?? '', orden: plan?.opciones.length ?? 0 });
+    const nuevoGrupo = (plan) => grupos.abrirNuevo({ servicio_id: plan.id, orden: plan.grupos.length });
+    const gruposDelPlan = planes.find((p) => String(p.id) === String(data.servicio_id))?.grupos ?? [];
 
     return (
         <AdminLayout title="Cotizador">
@@ -264,10 +286,32 @@ function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
                                         {!plan.activo && <span className="ml-2 text-xs font-medium text-gray-400">(plan oculto)</span>}
                                     </h2>
                                 </div>
+                                <Button variant="ghost" size="sm" icon={Layers} onClick={() => nuevoGrupo(plan)} className="border border-gray-200">
+                                    Agregar sección
+                                </Button>
                                 <Button variant="ghost" size="sm" icon={Plus} onClick={() => nuevaOpcion(plan)} className="border border-gray-200">
                                     Agregar opción
                                 </Button>
                             </header>
+
+                            {plan.grupos.length > 0 && (
+                                <div className="mb-4 rounded-xl bg-gray-50 p-3">
+                                    <p className="mb-2 text-xs font-bold tracking-wide text-gray-400 uppercase">Secciones de la lista (con su logo)</p>
+                                    <ul className="flex flex-col gap-1">
+                                        {plan.grupos.map((grupo) => (
+                                            <li key={grupo.id} className="flex items-center gap-3">
+                                                {grupo.imagen_url ? (
+                                                    <img src={grupo.imagen_url} alt="" className="h-8 w-14 rounded bg-white object-contain ring-1 ring-gray-200" />
+                                                ) : (
+                                                    <span className="flex h-8 w-14 items-center justify-center rounded bg-white text-[10px] text-gray-400 ring-1 ring-gray-200">Sin logo</span>
+                                                )}
+                                                <p className="min-w-0 flex-1 truncate text-sm font-semibold text-gray-900">{grupo.titulo}</p>
+                                                <AccionesFila onEditar={() => grupos.abrirEditar(grupo)} onEliminar={() => grupos.eliminar(grupo, `la sección "${grupo.titulo}" (sus opciones quedan sueltas)`)} />
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
 
                             {plan.opciones.length === 0 ? (
                                 <p className="rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-500">Sin opciones: este plan no aparece en el cotizador.</p>
@@ -279,6 +323,11 @@ function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <p className="font-semibold text-gray-900">{opcion.nombre}</p>
                                                     <EstadoBadge activo={opcion.activo} />
+                                                    {opcion.grupo_opcion_id && (
+                                                        <span className="inline-flex items-center gap-1 rounded-full bg-accent/40 px-2 py-0.5 text-xs font-semibold text-primary">
+                                                            <Layers className="size-3" aria-hidden="true" /> {plan.grupos.find((g) => g.id === opcion.grupo_opcion_id)?.titulo}
+                                                        </span>
+                                                    )}
                                                     {opcion.erp_ref && (
                                                         <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 text-xs font-semibold text-primary">
                                                             <Link2 className="size-3" aria-hidden="true" /> Precio del ERP
@@ -338,11 +387,26 @@ function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
                         <Select
                             id="servicio_id"
                             value={data.servicio_id}
-                            onChange={(e) => setData('servicio_id', e.target.value)}
+                            onChange={(e) => {
+                                setData('servicio_id', e.target.value);
+                                setData('grupo_opcion_id', ''); // las secciones son de cada plan
+                            }}
                             error={errors.servicio_id}
                             options={planes.map((p) => ({ value: p.id, label: p.titulo }))}
                         />
                     </FormField>
+                    {gruposDelPlan.length > 0 && (
+                        <FormField label="Sección" htmlFor="grupo_opcion_id" error={errors.grupo_opcion_id} hint="Opcional: en la web la opción aparece bajo el título y logo de esa sección." className="sm:col-span-2">
+                            <Select
+                                id="grupo_opcion_id"
+                                value={data.grupo_opcion_id}
+                                onChange={(e) => setData('grupo_opcion_id', e.target.value)}
+                                error={errors.grupo_opcion_id}
+                                placeholder="Sin sección"
+                                options={gruposDelPlan.map((g) => ({ value: g.id, label: g.titulo }))}
+                            />
+                        </FormField>
+                    )}
                     <FormField label="Nombre de la opción" htmlFor="nombre" error={errors.nombre} required className="sm:col-span-2">
                         <Input id="nombre" value={data.nombre} onChange={(e) => setData('nombre', e.target.value)} error={errors.nombre} placeholder="Ej. Auto · certificado 15k USD" />
                     </FormField>
@@ -401,6 +465,56 @@ function CotizadorContenido({ planes, monedas, frecuencias, erp, recargar }) {
                     <div className="rounded-xl bg-gray-50 px-4 py-3 sm:col-span-2">
                         <Switch label="Visible en el cotizador" checked={data.activo} onChange={(valor) => setData('activo', valor)} />
                     </div>
+                </form>
+            </Modal>
+
+            <Modal
+                open={grupos.abierto}
+                onClose={grupos.cerrar}
+                title={grupos.editando ? 'Editar sección' : 'Nueva sección'}
+                footer={
+                    <>
+                        <Button variant="ghost" onClick={grupos.cerrar}>
+                            Cancelar
+                        </Button>
+                        <Button type="submit" form="form-grupo" variant="secondary" icon={Save} disabled={formGrupo.processing}>
+                            {formGrupo.processing ? 'Guardando...' : 'Guardar'}
+                        </Button>
+                    </>
+                }
+            >
+                <form id="form-grupo" onSubmit={grupos.guardar} className="grid gap-5">
+                    <FormField label="Título" htmlFor="titulo_grupo" error={formGrupo.errors.titulo} required>
+                        <Input
+                            id="titulo_grupo"
+                            value={formGrupo.data.titulo}
+                            onChange={(e) => formGrupo.setData('titulo', e.target.value)}
+                            error={formGrupo.errors.titulo}
+                            placeholder="Ej. Descuentos con YANGO"
+                        />
+                    </FormField>
+                    <ImageUpload
+                        label="Logo (opcional)"
+                        actualUrl={grupos.editando?.imagen_url}
+                        archivo={formGrupo.data.imagen}
+                        onArchivo={(archivo) => formGrupo.setData('imagen', archivo)}
+                        quitada={formGrupo.data.quitar_imagen}
+                        onQuitar={(valor) => formGrupo.setData('quitar_imagen', valor)}
+                        error={formGrupo.errors.imagen}
+                        aspect="aspect-[3/1]"
+                        fondo="bg-white"
+                        hint="Se muestra junto al título. PNG con fondo transparente, JPG o WEBP, máx. 2 MB."
+                    />
+                    <FormField label="Orden" htmlFor="orden_grupo" error={formGrupo.errors.orden} hint="Las secciones se muestran de menor a mayor.">
+                        <Input
+                            id="orden_grupo"
+                            type="number"
+                            min={0}
+                            value={formGrupo.data.orden}
+                            onChange={(e) => formGrupo.setData('orden', e.target.value)}
+                            error={formGrupo.errors.orden}
+                        />
+                    </FormField>
                 </form>
             </Modal>
         </AdminLayout>

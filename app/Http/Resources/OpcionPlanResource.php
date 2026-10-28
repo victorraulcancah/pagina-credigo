@@ -16,6 +16,7 @@ class OpcionPlanResource extends JsonResource
         return [
             'id' => $this->id,
             'servicio_id' => $this->servicio_id,
+            'grupo_opcion_id' => $this->grupo_opcion_id,
             'erp_ref' => $this->erp_ref,
             'nombre' => $this->nombre,
             'nota' => $this->nota,

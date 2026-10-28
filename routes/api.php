@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Admin\ConfiguracionController;
 use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\DocumentoController as AdminDocumentoController;
 use App\Http\Controllers\Api\Admin\ErpController;
+use App\Http\Controllers\Api\Admin\GrupoOpcionController;
 use App\Http\Controllers\Api\Admin\OpcionPlanController;
 use App\Http\Controllers\Api\Admin\PerfilController;
 use App\Http\Controllers\Api\Admin\PreguntaFrecuenteController;
@@ -110,6 +111,10 @@ Route::name('api.')->group(function () {
             ->except(['index'])
             ->parameters(['opciones' => 'opcion'])
             ->names('cotizador.opciones');
+        Route::apiResource('cotizador/grupos', GrupoOpcionController::class)
+            ->except(['index'])
+            ->parameters(['grupos' => 'grupo'])
+            ->names('cotizador.grupos');
 
         Route::controller(AdminSolicitudController::class)->prefix('solicitudes')->name('solicitudes.')->group(function () {
             Route::get('/', 'index')->name('index');

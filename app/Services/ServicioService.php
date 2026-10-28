@@ -12,7 +12,7 @@ class ServicioService
     private const CARPETA = 'servicios';
 
     /** Columnas de las opciones que necesita la web para "Cuota desde" y la tabla del plan */
-    private const COLUMNAS_OPCION = ['id', 'servicio_id', 'nombre', 'nota', 'moneda', 'moneda_inicial', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia'];
+    private const COLUMNAS_OPCION = ['id', 'servicio_id', 'grupo_opcion_id', 'nombre', 'nota', 'moneda', 'moneda_inicial', 'inicial', 'cuota', 'numero_cuotas', 'frecuencia'];
 
     public function __construct(private ImagenService $imagenes) {}
 
@@ -48,13 +48,16 @@ class ServicioService
         return Servicio::activo()->ordenado()->limit($limite)->get(['titulo', 'slug']);
     }
 
-    /** Plan visible por su dirección, con sus opciones visibles; null si no existe o está oculto. */
+    /** Plan visible por su dirección, con sus opciones visibles y sus secciones; null si no existe o está oculto. */
     public function publicoPorSlug(string $slug): ?Servicio
     {
         return Servicio::activo()
             ->where('slug', $slug)
             ->conOpcionesActivas()
-            ->with(['opciones' => fn ($q) => $q->activo()->ordenado()->select(self::COLUMNAS_OPCION)])
+            ->with([
+                'opciones' => fn ($q) => $q->activo()->ordenado()->select(self::COLUMNAS_OPCION),
+                'grupos' => fn ($q) => $q->ordenado(),
+            ])
             ->first();
     }
 

@@ -18,7 +18,7 @@ class OpcionPlanService
     public function planesConOpciones(): Collection
     {
         return Servicio::ordenado()
-            ->with(['opciones' => fn ($q) => $q->ordenado()])
+            ->with(['opciones' => fn ($q) => $q->ordenado(), 'grupos' => fn ($q) => $q->ordenado()])
             ->get();
     }
 

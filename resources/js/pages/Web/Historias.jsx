@@ -11,8 +11,18 @@ import { Estrellas, PortadaHistoria, VideosEnRedes } from '@/components/web/Test
 import { BotonReproducir, VideoEnLinea } from '@/components/web/Video';
 import { cn } from '@/lib/utils';
 
-// Proporción de la foto según lo elegido en el panel (Testimonios → Tamaño de la foto)
-const ASPECTO_FOTO = { horizontal: 'aspect-video', cuadrada: 'aspect-square', vertical: 'aspect-[3/4]' };
+// Proporción de la foto según lo elegido en el panel (Testimonios → Tamaño de la foto). `original`
+// no lleva marco fijo: la foto se ve completa, con su propia proporción.
+const ASPECTO_FOTO = { horizontal: 'aspect-video', cuadrada: 'aspect-square', vertical: 'aspect-[3/4]', original: '' };
+
+// Ancho de la tarjeta (Testimonios → Tamaño de la tarjeta), en una cuadrícula de 6 columnas desde
+// tablet: pequeña = 3 por fila en pantalla grande, mediana = 2 por fila, grande = fila completa con
+// la foto al lado del texto. En el celular siempre es una por fila.
+const TARJETA = {
+    pequena: { columnas: 'md:col-span-3 lg:col-span-2', compacta: true },
+    mediana: { columnas: 'md:col-span-3' },
+    grande: { columnas: 'md:col-span-6', lateral: true },
+};
 
 /**
  * Una historia como tarjeta: la foto del conductor arriba (con la de su vehículo encima, en
@@ -26,11 +36,20 @@ function TarjetaHistoria({ testimonio, indice }) {
     const [reproduciendo, setReproduciendo] = useState(false);
     const titulo = `La historia de ${testimonio.nombre}`;
     const conVideo = Boolean(testimonio.video_archivo_url);
+    const { columnas, compacta, lateral } = TARJETA[testimonio.tamano_tarjeta] ?? TARJETA.mediana;
+    // "Original" solo aplica a una foto: con video o iniciales hace falta un marco, el horizontal de siempre
+    const original = testimonio.tamano_foto === 'original' && Boolean(testimonio.foto_url) && !reproduciendo;
+    const aspecto = original ? ASPECTO_FOTO.original : (ASPECTO_FOTO[testimonio.tamano_foto] || ASPECTO_FOTO.horizontal);
 
     return (
-        <Revelar as="li" desde={indice % 2 ? 'derecha' : 'izquierda'} retraso={escalonar(indice, 110)} className="h-full">
-            <figure className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-white ring-1 ring-primary-100 transition duration-300 hover:ring-2 hover:ring-primary">
-                <div className={cn('relative overflow-hidden bg-primary', ASPECTO_FOTO[testimonio.tamano_foto] ?? ASPECTO_FOTO.horizontal)}>
+        <Revelar as="li" desde={indice % 2 ? 'derecha' : 'izquierda'} retraso={escalonar(indice, 110)} className={cn('h-full', columnas)}>
+            <figure
+                className={cn(
+                    'group relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-white ring-1 ring-primary-100 transition duration-300 hover:ring-2 hover:ring-primary',
+                    lateral && 'lg:flex-row',
+                )}
+            >
+                <div className={cn('relative overflow-hidden bg-primary', aspecto, lateral && 'lg:w-1/2 lg:shrink-0')}>
                     {reproduciendo ? (
                         <VideoEnLinea src={testimonio.video_archivo_url} titulo={titulo} />
                     ) : (
@@ -38,7 +57,12 @@ function TarjetaHistoria({ testimonio, indice }) {
                             <PortadaHistoria
                                 testimonio={testimonio}
                                 alt={`Foto de ${testimonio.nombre}`}
-                                className="size-full object-[50%_30%] text-7xl transition-transform duration-700 ease-out group-hover:scale-105"
+                                // Sin marco fijo la foto mide 0 hasta cargar y el navegador no la pediría: se carga de inmediato
+                                loading={original ? 'eager' : undefined}
+                                className={cn(
+                                    'text-7xl transition-transform duration-700 ease-out group-hover:scale-105',
+                                    original ? 'block h-auto w-full' : 'size-full object-[50%_30%]',
+                                )}
                             />
                             {/* Sin foto ni video: las iniciales llevan el resplandor amarillo de la marca */}
                             {!testimonio.foto_url && !conVideo && (
@@ -64,7 +88,7 @@ function TarjetaHistoria({ testimonio, indice }) {
                     )}
                 </div>
 
-                <div className="relative flex flex-1 flex-col p-6 sm:p-7">
+                <div className={cn('relative flex flex-1 flex-col', compacta ? 'p-5' : 'p-6 sm:p-7', lateral && 'lg:justify-center lg:p-10')}>
                     <div className="flex items-center justify-between gap-4">
                         <span
                             aria-hidden="true"
@@ -75,7 +99,9 @@ function TarjetaHistoria({ testimonio, indice }) {
                         <Estrellas valor={testimonio.calificacion} />
                     </div>
 
-                    <blockquote className="mt-4 text-lg leading-snug font-semibold text-pretty text-primary sm:text-xl">“{testimonio.comentario}”</blockquote>
+                    <blockquote className={cn('mt-4 leading-snug font-semibold text-pretty text-primary', compacta ? 'text-base' : 'text-lg sm:text-xl', lateral && 'lg:text-2xl')}>
+                        “{testimonio.comentario}”
+                    </blockquote>
 
                     <figcaption className="mt-6 flex flex-1 flex-wrap items-end justify-between gap-x-4 gap-y-3">
                         <div className="w-full border-t border-primary-100 pt-5 sm:flex sm:items-end sm:justify-between sm:gap-4">
@@ -133,8 +159,16 @@ function HistoriasContenido({ secciones, testimonios }) {
 
             <Section>
                 {testimonios.length > 0 ? (
-                    // Con una sola historia, la tarjeta va centrada
-                    <ul className={cn('grid gap-8', testimonios.length > 1 ? 'md:grid-cols-2' : 'mx-auto max-w-2xl')}>
+                    // Cuadrícula de 6 columnas: cada tarjeta ocupa 2, 3 o 6 según su tamaño y `dense` rellena los huecos.
+                    // Con una sola historia, la tarjeta va centrada (más ancha si es grande)
+                    <ul
+                        className={cn(
+                            'grid gap-8',
+                            testimonios.length > 1
+                                ? 'md:grid-flow-dense md:grid-cols-6'
+                                : cn('mx-auto', testimonios[0].tamano_tarjeta === 'grande' ? 'max-w-5xl' : 'max-w-2xl'),
+                        )}
+                    >
                         {testimonios.map((testimonio, i) => (
                             <TarjetaHistoria key={testimonio.id} testimonio={testimonio} indice={i} />
                         ))}

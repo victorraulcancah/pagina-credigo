@@ -34,6 +34,7 @@ const VACIO = {
     foto_vehiculo: null,
     quitar_foto_vehiculo: false,
     tamano_foto: 'horizontal',
+    tamano_tarjeta: 'mediana',
     vehiculo: '',
     calificacion: '',
     tiktok_url: '',
@@ -46,11 +47,18 @@ const VACIO = {
     activo: true,
 };
 
-// Proporción de la foto en la página Historias (la clase de aspecto está en Historias.jsx)
+// Cómo se ve la historia en la página Historias (las clases de cada opción están en Historias.jsx)
+const TAMANOS_TARJETA = [
+    { value: 'pequena', label: 'Pequeña: 3 historias por fila' },
+    { value: 'mediana', label: 'Mediana: 2 por fila (la de siempre)' },
+    { value: 'grande', label: 'Grande: ocupa toda la fila, foto al lado del texto' },
+];
+
 const TAMANOS_FOTO = [
-    { value: 'horizontal', label: 'Horizontal (16:9): la de siempre, más baja' },
+    { value: 'horizontal', label: 'Horizontal (16:9): la de siempre' },
     { value: 'cuadrada', label: 'Cuadrada (1:1): más alta, muestra más de la persona' },
-    { value: 'vertical', label: 'Vertical (3:4): la más alta, para fotos de cuerpo entero' },
+    { value: 'vertical', label: 'Vertical (3:4): la más alta, para cuerpo entero' },
+    { value: 'original', label: 'Original: la foto completa, sin recortar' },
 ];
 
 const CALIFICACIONES =[5, 4, 3, 2, 1].map((n) => ({ value: n, label: `${n} ${n === 1 ? 'estrella' : 'estrellas'}` }));
@@ -285,15 +293,15 @@ export default function TestimoniosIndex() {
                         />
                     </div>
 
-                    <FormField
-                        label="Tamaño de la foto en la web"
-                        htmlFor="tamano_foto"
-                        error={errors.tamano_foto}
-                        hint="Cómo se recorta la foto en la tarjeta de Historias. Si la cara sale cortada, prueba con Cuadrada o Vertical."
-                        className="sm:col-span-2"
-                    >
-                        <Select id="tamano_foto" value={data.tamano_foto} onChange={(e) => setData('tamano_foto', e.target.value)} options={TAMANOS_FOTO} error={errors.tamano_foto} />
-                    </FormField>
+                    <div className="grid gap-5 rounded-xl bg-gray-50 p-4 sm:col-span-2 sm:grid-cols-2 sm:p-5">
+                        <p className="text-sm font-semibold text-gray-900 sm:col-span-2">Tamaño en la página Historias</p>
+                        <FormField label="Tarjeta" htmlFor="tamano_tarjeta" error={errors.tamano_tarjeta} hint="Cuánto espacio ocupa la historia a lo ancho. En el celular siempre va una por fila.">
+                            <Select id="tamano_tarjeta" value={data.tamano_tarjeta} onChange={(e) => setData('tamano_tarjeta', e.target.value)} options={TAMANOS_TARJETA} error={errors.tamano_tarjeta} />
+                        </FormField>
+                        <FormField label="Foto" htmlFor="tamano_foto" error={errors.tamano_foto} hint="Si la cara sale cortada, prueba con Cuadrada, Vertical u Original.">
+                            <Select id="tamano_foto" value={data.tamano_foto} onChange={(e) => setData('tamano_foto', e.target.value)} options={TAMANOS_FOTO} error={errors.tamano_foto} />
+                        </FormField>
+                    </div>
 
                     <FormField label="Nombre" htmlFor="nombre" error={errors.nombre} required hint="Como quiere aparecer (ej. solo su nombre).">
                         <Input id="nombre" value={data.nombre} onChange={(e) => setData('nombre', e.target.value)} error={errors.nombre} placeholder="Edimar" />

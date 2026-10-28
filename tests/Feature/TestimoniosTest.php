@@ -231,3 +231,22 @@ it('cada historia elige el tamaño de su foto y la web lo recibe', function () {
         ->where('testimonios.1.tamano_foto', 'vertical')
         ->etc());
 });
+
+it('cada historia elige el ancho de su tarjeta y acepta la foto original', function () {
+    $this->actingAs(User::factory()->create());
+    $datos = ['nombre' => 'Edimar', 'comentario' => 'Feliz con mi carro.', 'autorizado' => true, 'activo' => true, 'orden' => 0];
+
+    // Sin elegir, queda mediana (dos por fila)
+    $this->postJson('/api/admin/testimonios', $datos)->assertCreated()->assertJsonPath('data.tamano_tarjeta', 'mediana');
+
+    $this->postJson('/api/admin/testimonios', [...$datos, 'tamano_tarjeta' => 'grande', 'tamano_foto' => 'original'])
+        ->assertCreated()
+        ->assertJsonPath('data.tamano_tarjeta', 'grande')
+        ->assertJsonPath('data.tamano_foto', 'original');
+    $this->postJson('/api/admin/testimonios', [...$datos, 'tamano_tarjeta' => 'enorme'])->assertJsonValidationErrors('tamano_tarjeta');
+
+    paginaApi('historias', fn (AssertableJson $page) => $page
+        ->where('testimonios.0.tamano_tarjeta', 'mediana')
+        ->where('testimonios.1.tamano_tarjeta', 'grande')
+        ->etc());
+});

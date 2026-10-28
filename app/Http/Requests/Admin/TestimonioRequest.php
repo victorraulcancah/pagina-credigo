@@ -38,6 +38,7 @@ class TestimonioRequest extends FormRequest
             'foto_vehiculo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
             'quitar_foto_vehiculo' => ['boolean'],
             'tamano_foto' => ['sometimes', 'required', Rule::in(Testimonio::TAMANOS_FOTO)],
+            'tamano_tarjeta' => ['sometimes', 'required', Rule::in(Testimonio::TAMANOS_TARJETA)],
             'vehiculo' => ['nullable', 'string', 'max:80'],
             'calificacion' => ['nullable', 'integer', 'between:1,5'],
             ...collect(self::REDES)->map(fn ($red) => VideoRegla::reglas($red))->all(),
@@ -67,6 +68,7 @@ class TestimonioRequest extends FormRequest
             'foto' => 'foto del conductor',
             'foto_vehiculo' => 'foto del vehículo',
             'tamano_foto' => 'tamaño de la foto',
+            'tamano_tarjeta' => 'tamaño de la tarjeta',
             'video' => 'video',
             'calificacion' => 'calificación',
         ];

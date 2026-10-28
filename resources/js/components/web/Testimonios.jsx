@@ -45,9 +45,9 @@ export function TituloConCifra({ titulo, as: Tag = 'h2', className }) {
 }
 
 /** Foto del conductor; sin foto, sus iniciales sobre el azul de marca. */
-export function FotoConductor({ testimonio, alt = '', className }) {
+export function FotoConductor({ testimonio, alt = '', className, loading = 'lazy' }) {
     return testimonio.foto_url ? (
-        <img src={testimonio.foto_url} alt={alt} loading="lazy" className={cn('object-cover', className)} />
+        <img src={testimonio.foto_url} alt={alt} loading={loading} className={cn('object-cover', className)} />
     ) : (
         <span aria-hidden="true" className={cn('flex items-center justify-center bg-primary font-bold text-accent', className)}>
             {iniciales(testimonio.nombre)}
@@ -59,7 +59,7 @@ export function FotoConductor({ testimonio, alt = '', className }) {
  * Portada de una historia: la foto del conductor; sin foto pero con video subido, el primer
  * cuadro del video (solo se descargan sus datos iniciales); sin ninguno, sus iniciales.
  */
-export function PortadaHistoria({ testimonio, alt, className }) {
+export function PortadaHistoria({ testimonio, alt, className, loading }) {
     if (!testimonio.foto_url && testimonio.video_archivo_url) {
         return (
             <video
@@ -74,7 +74,7 @@ export function PortadaHistoria({ testimonio, alt, className }) {
         );
     }
 
-    return <FotoConductor testimonio={testimonio} alt={alt} className={className} />;
+    return <FotoConductor testimonio={testimonio} alt={alt} className={className} loading={loading} />;
 }
 
 /** Íconos de TikTok, YouTube y Facebook (solo los que tienen enlace): cada uno abre su video en una ventana. */

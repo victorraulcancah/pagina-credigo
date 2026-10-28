@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Articulo;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,7 +28,20 @@ class ArticuloRequest extends FormRequest
             // Eventos, Noticias o Tendencias: la dirección del artículo va dentro de su categoría
             'categoria_blog_id' => ['required', 'integer', 'exists:categorias_blog,id'],
             'resumen' => ['nullable', 'string', 'max:300'],
-            'contenido' => ['required', 'string', 'max:50000'],
+            // Un artículo nuevo se arma con bloques; `contenido` (texto suelto) sigue valiendo para los anteriores
+            'contenido' => ['required_without:bloques', 'nullable', 'string', 'max:50000'],
+            'bloques' => ['required_without:contenido', 'nullable', 'array', 'max:60', $this->conAlgoQueMostrar(...)],
+            'bloques.*.tipo' => ['required', Rule::in(['texto', 'fotos'])],
+            'bloques.*.html' => ['nullable', 'string', 'max:50000'],
+            'bloques.*.fotos' => ['nullable', 'array', 'max:12'],
+            'bloques.*.fotos.*.src' => ['required', 'string', 'max:500', 'regex:#^(https?://|/)#'],
+            'bloques.*.fotos.*.alt' => ['nullable', 'string', 'max:200'],
+            'bloques.*.diseno' => ['nullable', Rule::in(Articulo::DISENOS)],
+            'bloques.*.columnas' => ['nullable', Rule::in([2, 3, 4])],
+            'bloques.*.tamano' => ['nullable', Rule::in(Articulo::TAMANOS)],
+            'bloques.*.alineacion' => ['nullable', Rule::in(Articulo::ALINEACIONES)],
+            'bloques.*.proporcion' => ['nullable', Rule::in(Articulo::PROPORCIONES)],
+            'bloques.*.animacion' => ['nullable', Rule::in(Articulo::ANIMACIONES)],
             'portada' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
             'quitar_portada' => ['boolean'],
             'video_url' => VideoRegla::reglas(),
@@ -35,6 +50,18 @@ class ArticuloRequest extends FormRequest
             'destacado' => ['boolean'],
             'publicado_at' => ['nullable', 'date'],
         ];
+    }
+
+    /** Al menos un bloque con texto o con fotos (los bloques de texto vacíos no cuentan). */
+    private function conAlgoQueMostrar(string $atributo, mixed $bloques, Closure $fallar): void
+    {
+        $hay = collect($bloques)->contains(fn ($bloque) => ($bloque['tipo'] ?? null) === 'fotos'
+            ? ! empty($bloque['fotos'])
+            : trim(strip_tags((string) ($bloque['html'] ?? ''))) !== '');
+
+        if (! $hay) {
+            $fallar('Agrega texto o fotos al artículo.');
+        }
     }
 
     public function messages(): array

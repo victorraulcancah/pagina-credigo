@@ -224,3 +224,79 @@ describe('contenido escrito con el editor (HTML)', function () {
         Storage::disk('public')->assertMissing($ruta);
     });
 });
+
+describe('artículo armado con bloques', function () {
+    beforeEach(function () {
+        $this->actingAs(User::factory()->create());
+        $this->noticias = CategoriaBlog::where('slug', 'noticias')->value('id');
+    });
+
+    it('guarda bloques de texto y de fotos con sus valores por defecto y limpia el HTML', function () {
+        $respuesta = $this->postJson('/api/admin/articulos', [
+            'titulo' => 'Con bloques',
+            'categoria_blog_id' => $this->noticias,
+            'bloques' => [
+                ['tipo' => 'texto', 'html' => '<p style="text-align:center">Hola <strong>mundo</strong></p><script>alert(1)</script>'],
+                ['tipo' => 'texto', 'html' => '<p></p>'],
+                ['tipo' => 'fotos', 'fotos' => [['src' => '/storage/blog/contenido/a.jpg', 'alt' => 'Una <b>foto</b>']]],
+                ['tipo' => 'fotos', 'diseno' => 'carrusel', 'tamano' => 'completo', 'animacion' => 'ninguna', 'fotos' => [
+                    ['src' => '/storage/blog/contenido/b.jpg', 'alt' => ''], ['src' => 'https://ejemplo.com/c.jpg', 'alt' => 'Pie'],
+                ]],
+            ],
+        ])->assertCreated();
+
+        $bloques = $respuesta->json('data.bloques');
+
+        expect($bloques)->toHaveCount(3)
+            ->and($bloques[0]['html'])->toContain('text-align:center')->not->toContain('script')
+            ->and($bloques[1])->toMatchArray(['tipo' => 'fotos', 'diseno' => 'unica', 'tamano' => 'grande', 'alineacion' => 'centro', 'proporcion' => 'original', 'animacion' => 'zoom'])
+            ->and($bloques[1]['fotos'][0]['alt'])->toBe('Una foto')
+            ->and($bloques[2])->toMatchArray(['diseno' => 'carrusel', 'tamano' => 'completo', 'animacion' => 'ninguna'])
+            // `contenido` queda con el texto (tiempo de lectura y respaldo)
+            ->and($respuesta->json('data.contenido'))->toContain('mundo')->not->toContain('<img');
+    });
+
+    it('rechaza opciones inválidas, fotos con enlaces peligrosos y artículos vacíos', function () {
+        $base = ['titulo' => 'X', 'categoria_blog_id' => $this->noticias];
+
+        $this->postJson('/api/admin/articulos', [...$base, 'bloques' => [['tipo' => 'fotos', 'diseno' => 'raro', 'fotos' => [['src' => '/a.jpg']]]]])
+            ->assertJsonValidationErrors('bloques.0.diseno');
+        $this->postJson('/api/admin/articulos', [...$base, 'bloques' => [['tipo' => 'fotos', 'fotos' => [['src' => 'javascript:alert(1)']]]]])
+            ->assertJsonValidationErrors('bloques.0.fotos.0.src');
+        $this->postJson('/api/admin/articulos', [...$base, 'bloques' => [['tipo' => 'texto', 'html' => '<p> </p>']]])
+            ->assertJsonValidationErrors('bloques');
+        $this->postJson('/api/admin/articulos', $base)->assertJsonValidationErrors(['bloques', 'contenido']);
+    });
+
+    it('la página del artículo entrega sus bloques y un texto suelto nuevo reemplaza a los bloques', function () {
+        $articulo = articulo(['bloques' => [['tipo' => 'texto', 'html' => '<p>Bloque</p>']], 'contenido' => '<p>Bloque</p>']);
+
+        $this->getJson("/api/paginas/blog/noticias/{$articulo->slug}")->assertOk()->assertJsonPath('data.articulo.bloques.0.html', '<p>Bloque</p>');
+
+        $this->putJson("/api/admin/articulos/{$articulo->id}", [
+            'titulo' => $articulo->titulo, 'categoria_blog_id' => $this->noticias, 'contenido' => 'Texto suelto',
+        ])->assertOk()->assertJsonPath('data.bloques', null);
+    });
+
+    it('borra del disco las fotos que se quitan de los bloques y las de un artículo eliminado', function () {
+        Storage::fake('public');
+        $subir = fn () => $this->post('/api/admin/articulos/imagenes', ['imagen' => UploadedFile::fake()->image('f.jpg')])->json('data.url');
+        [$a, $b] = [$subir(), $subir()];
+        $ruta = fn (string $url) => 'blog/contenido/'.basename($url);
+
+        $id = $this->postJson('/api/admin/articulos', [
+            'titulo' => 'Con fotos', 'categoria_blog_id' => $this->noticias,
+            'bloques' => [['tipo' => 'fotos', 'fotos' => [['src' => $a], ['src' => $b]]]],
+        ])->json('data.id');
+
+        $this->putJson("/api/admin/articulos/{$id}", [
+            'titulo' => 'Con fotos', 'categoria_blog_id' => $this->noticias,
+            'bloques' => [['tipo' => 'fotos', 'fotos' => [['src' => $a]]]],
+        ])->assertOk();
+        Storage::disk('public')->assertExists($ruta($a));
+        Storage::disk('public')->assertMissing($ruta($b));
+
+        $this->deleteJson("/api/admin/articulos/{$id}")->assertOk();
+        Storage::disk('public')->assertMissing($ruta($a));
+    });
+});

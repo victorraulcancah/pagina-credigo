@@ -3,7 +3,7 @@ import { useState } from 'react';
 import AccionesFila from '@/components/admin/AccionesFila';
 import Cargando from '@/components/admin/Cargando';
 import EmptyState from '@/components/admin/EmptyState';
-import EditorRico from '@/components/admin/EditorRico';
+import ConstructorArticulo from '@/components/admin/ConstructorArticulo';
 import ImageUpload from '@/components/admin/ImageUpload';
 import PageHeader from '@/components/admin/PageHeader';
 import VideoInput from '@/components/admin/VideoInput';
@@ -18,6 +18,7 @@ import Textarea from '@/components/ui/Textarea';
 import { fechaArticulo, urlArticulo } from '@/components/web/Blog';
 import { useConsulta } from '@/hooks/useConsulta';
 import { useCrudModal } from '@/hooks/useCrudModal';
+import { bloqueDeTexto, contenidoABloques } from '@/lib/contenidoArticulo';
 import { cn } from '@/lib/utils';
 
 const MAX_RESUMEN = 300;
@@ -27,7 +28,7 @@ const VACIO = {
     slug: '',
     categoria_blog_id: '',
     resumen: '',
-    contenido: '',
+    bloques: [bloqueDeTexto()],
     portada: null,
     quitar_portada: false,
     video_url: '',
@@ -60,9 +61,11 @@ export default function BlogIndex() {
         url: '/admin/articulos',
         recargar: lista.recargar,
         vacio: VACIO,
-        aFormulario: (a) => ({
+        aFormulario: ({ contenido, ...a }) => ({
             ...VACIO,
             ...a,
+            // Los artículos anteriores (texto suelto) se abren ya separados en bloques de texto y de fotos
+            bloques: a.bloques?.length ? a.bloques : contenidoABloques(contenido),
             slug: a.slug ?? '',
             categoria_blog_id: a.categoria_blog_id ?? '',
             resumen: a.resumen ?? '',
@@ -199,12 +202,12 @@ export default function BlogIndex() {
                     <FormField
                         label="Contenido"
                         htmlFor="contenido"
-                        error={errors.contenido}
+                        error={errors.bloques || errors.contenido}
                         required
-                        hint='Escribe como en un documento: selecciona el texto y usa la barra de arriba para cambiar su tamaño, color o alineación. "Fotos" sube hasta 6 a la vez; varias juntas forman una galería.'
+                        hint="El artículo se arma con bloques en orden: de Texto (con colores, tamaños y alineación) y de Fotos (cada uno con su tamaño, diseño y animación). Súbelos o bájalos con las flechas."
                         className="sm:col-span-2"
                     >
-                        <EditorRico value={data.contenido} onChange={(valor) => setData('contenido', valor)} error={errors.contenido} />
+                        <ConstructorArticulo bloques={data.bloques} onChange={(bloques) => setData('bloques', bloques)} />
                     </FormField>
 
                     <FormField label="Categoría" htmlFor="categoria_blog_id" error={errors.categoria_blog_id} required>

@@ -189,7 +189,7 @@ function BarraImagen({ editor, pie }) {
     );
 }
 
-function Barra({ editor }) {
+function Barra({ editor, conFotos }) {
     const archivo = useRef(null);
     const [subiendo, setSubiendo] = useState(false);
 
@@ -349,8 +349,10 @@ function Barra({ editor }) {
                 <Desplegable etiqueta="Enlace" icono={Link2} activo={estado.enlace}>
                     {(cerrar) => <PanelEnlace editor={editor} cerrar={cerrar} />}
                 </Desplegable>
-                <Separador />
-                <button
+                {conFotos && (
+                    <>
+                        <Separador />
+                        <button
                     type="button"
                     title={`Subir fotos (hasta ${MAX_FOTOS_A_LA_VEZ} a la vez; varias juntas forman una galería)`}
                     onClick={() => archivo.current?.click()}
@@ -359,9 +361,11 @@ function Barra({ editor }) {
                 >
                     <ImagePlus className="size-4" aria-hidden="true" /> {subiendo ? 'Subiendo...' : 'Fotos'}
                 </button>
-                <input ref={archivo} type="file" multiple accept="image/png,image/jpeg,image/webp" className="hidden" onChange={subirImagenes} />
+                        <input ref={archivo} type="file" multiple accept="image/png,image/jpeg,image/webp" className="hidden" onChange={subirImagenes} />
+                    </>
+                )}
             </div>
-            {estado.imagen && <BarraImagen editor={editor} pie={estado.pie} />}
+            {conFotos && estado.imagen && <BarraImagen editor={editor} pie={estado.pie} />}
         </>
     );
 }
@@ -371,7 +375,7 @@ function Barra({ editor }) {
  * enlaces y fotos (varias juntas = galería). Guarda HTML, que el servidor limpia antes de guardarlo.
  * Un artículo anterior (texto simple) se convierte a HTML al abrirlo.
  */
-export default function EditorRico({ value, onChange, error }) {
+export default function EditorRico({ value, onChange, error, conFotos = true }) {
     const ultimo = useRef(value); // lo último que emitió el editor: así no se vuelve a cargar lo que él mismo escribió
 
     const editor = useEditor({
@@ -389,7 +393,7 @@ export default function EditorRico({ value, onChange, error }) {
             TextAlign.configure({ types: ['heading', 'paragraph'] }),
             Image.configure({ allowBase64: false }),
             Galeria,
-            Placeholder.configure({ placeholder: 'Escribe el artículo aquí. Usa la barra de arriba para dar formato y subir fotos.' }),
+            Placeholder.configure({ placeholder: conFotos ? 'Escribe el artículo aquí. Usa la barra de arriba para dar formato y subir fotos.' : 'Escribe aquí el texto de este bloque. Usa la barra de arriba para dar formato.' }),
         ],
         content: esHtml(value) ? value : textoAHtml(value),
         editorProps: {
@@ -413,8 +417,8 @@ export default function EditorRico({ value, onChange, error }) {
     if (!editor) return null;
 
     return (
-        <div className={cn('editor-rico overflow-hidden rounded-xl border bg-white', error ? 'border-red-500' : 'border-primary-200 focus-within:border-primary')}>
-            <Barra editor={editor} />
+        <div data-compacto={conFotos ? undefined : ''} className={cn('editor-rico overflow-hidden rounded-xl border bg-white', error ? 'border-red-500' : 'border-primary-200 focus-within:border-primary')}>
+            <Barra editor={editor} conFotos={conFotos} />
             <EditorContent editor={editor} />
         </div>
     );

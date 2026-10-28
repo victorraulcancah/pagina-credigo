@@ -242,6 +242,10 @@
     outline: none;
 }
 
+.editor-rico[data-compacto] .ProseMirror {
+    min-height: 9rem;
+}
+
 .editor-rico .ProseMirror > * + * {
     margin-top: 1rem;
 }

@@ -31,6 +31,7 @@ class ArticuloResource extends JsonResource
             'slug' => $this->slug,
             'resumen' => $this->resumen,
             'contenido' => $this->when($this->conContenido || $panel, $this->contenido),
+            'bloques' => $this->when($this->conContenido || $panel, $this->bloques),
             'portada_url' => $this->portada_url,
             'video_url' => $this->video_url,
             'autor' => $this->autor,

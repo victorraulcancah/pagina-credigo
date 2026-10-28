@@ -20,8 +20,19 @@ class Articulo extends Model
 
     protected $table = 'articulos';
 
+    // Opciones de los bloques de fotos del artículo (la primera de cada lista es la de por defecto)
+    public const DISENOS = ['galeria', 'unica', 'carrusel'];
+
+    public const TAMANOS = ['grande', 'mediana', 'pequena', 'completo'];
+
+    public const ALINEACIONES = ['centro', 'izquierda', 'derecha'];
+
+    public const PROPORCIONES = ['horizontal', 'original', 'cuadrada', 'vertical'];
+
+    public const ANIMACIONES = ['zoom', 'abajo', 'izquierda', 'derecha', 'ninguna'];
+
     protected $fillable = [
-        'categoria_blog_id', 'titulo', 'slug', 'resumen', 'contenido', 'portada',
+        'categoria_blog_id', 'titulo', 'slug', 'resumen', 'contenido', 'bloques', 'portada',
         'video_url', 'autor', 'publicado', 'destacado', 'publicado_at',
     ];
 
@@ -30,6 +41,7 @@ class Articulo extends Model
     protected function casts(): array
     {
         return [
+            'bloques' => 'array',
             'publicado' => 'boolean',
             'destacado' => 'boolean',
             'publicado_at' => 'datetime',

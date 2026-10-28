@@ -144,6 +144,7 @@ function ArticuloContenido({ secciones, articulo, relacionados }) {
                     <ContenidoArticulo
                         animar
                         contenido={articulo.contenido}
+                        bloques={articulo.bloques}
                         className="gap-6 text-lg leading-relaxed text-primary-800 sm:text-xl"
                         primerParrafo="first-letter:float-left first-letter:mr-3 first-letter:text-7xl first-letter:leading-[0.8] first-letter:font-bold first-letter:text-primary"
                     />

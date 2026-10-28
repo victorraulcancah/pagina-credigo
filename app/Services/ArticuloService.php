@@ -63,9 +63,16 @@ class ArticuloService
 
     public function actualizar(Articulo $articulo, array $datos): Articulo
     {
+        $anteriores = $this->imagenesDelArticulo($articulo);
         $articulo->update($this->conPortada($this->contenidoLimpio($datos), $articulo));
+        $articulo->refresh();
 
-        return $articulo->refresh()->load('categoria:id,nombre,slug');
+        // Las fotos que ya no están en ningún bloque se borran del disco
+        foreach (array_diff($anteriores, $this->imagenesDelArticulo($articulo)) as $ruta) {
+            $this->imagenes->eliminar($ruta);
+        }
+
+        return $articulo->load('categoria:id,nombre,slug');
     }
 
     /** Borra el artículo con su portada y las imágenes que se subieron para su contenido. */
@@ -73,7 +80,7 @@ class ArticuloService
     {
         $this->imagenes->eliminar($articulo->portada);
 
-        foreach ($this->imagenesDelContenido($articulo->contenido) as $ruta) {
+        foreach ($this->imagenesDelArticulo($articulo) as $ruta) {
             $this->imagenes->eliminar($ruta);
         }
 
@@ -86,22 +93,67 @@ class ArticuloService
         return $this->imagenes->url($this->imagenes->guardar($archivo, self::CARPETA.'/contenido'));
     }
 
-    /** Rutas en el disco de las imágenes subidas que usa el contenido (texto simple o HTML). */
-    private function imagenesDelContenido(?string $contenido): array
+    /** Rutas en el disco de las imágenes subidas que usa el artículo (en su texto o en sus bloques). */
+    private function imagenesDelArticulo(Articulo $articulo): array
     {
-        preg_match_all('#/storage/('.self::CARPETA.'/contenido/[^)\s"\'<>]+)#', (string) $contenido, $coincidencias);
+        $texto = $articulo->contenido.' '.json_encode($articulo->bloques ?? [], JSON_UNESCAPED_SLASHES);
+        preg_match_all('#/storage/('.self::CARPETA.'/contenido/[^)\s"\'<>]+)#', $texto, $coincidencias);
 
-        return array_unique($coincidencias[1]);
+        return array_values(array_unique($coincidencias[1]));
     }
 
-    /** El HTML del editor se limpia al guardar: solo queda el formato permitido (config/purify.php → articulo). */
+    /**
+     * El HTML del editor se limpia al guardar: solo queda el formato permitido (config/purify.php → articulo).
+     * Con bloques, cada uno se normaliza y `contenido` pasa a ser el texto de los bloques de texto.
+     */
     private function contenidoLimpio(array $datos): array
     {
-        if (isset($datos['contenido']) && Articulo::esHtml($datos['contenido'])) {
-            $datos['contenido'] = Purify::config('articulo')->clean($datos['contenido']);
+        if (isset($datos['bloques']) && is_array($datos['bloques'])) {
+            $bloques = $this->bloquesLimpios($datos['bloques']);
+            $datos['bloques'] = $bloques ?: null;
+            $datos['contenido'] = collect($bloques)->where('tipo', 'texto')->pluck('html')->implode('');
+        } elseif (array_key_exists('contenido', $datos)) {
+            // Texto suelto (artículos anteriores o la API): reemplaza a los bloques que hubiera
+            $datos['bloques'] = null;
+            if (Articulo::esHtml($datos['contenido'])) {
+                $datos['contenido'] = Purify::config('articulo')->clean($datos['contenido']);
+            }
         }
 
         return $datos;
+    }
+
+    /** Solo lo permitido de cada bloque, con sus valores por defecto; los bloques de texto vacíos se descartan. */
+    private function bloquesLimpios(array $bloques): array
+    {
+        return collect($bloques)->map(function (array $bloque) {
+            if (($bloque['tipo'] ?? null) === 'fotos') {
+                $fotos = collect($bloque['fotos'] ?? [])
+                    ->map(fn ($foto) => ['src' => (string) $foto['src'], 'alt' => trim(strip_tags((string) ($foto['alt'] ?? '')))])
+                    ->values()->all();
+
+                if (! $fotos) {
+                    return null;
+                }
+
+                $varias = count($fotos) > 1;
+
+                return [
+                    'tipo' => 'fotos',
+                    'fotos' => $fotos,
+                    'diseno' => $bloque['diseno'] ?? ($varias ? 'galeria' : 'unica'),
+                    'columnas' => (int) ($bloque['columnas'] ?? min(count($fotos), 3)),
+                    'tamano' => $bloque['tamano'] ?? Articulo::TAMANOS[0],
+                    'alineacion' => $bloque['alineacion'] ?? Articulo::ALINEACIONES[0],
+                    'proporcion' => $bloque['proporcion'] ?? ($varias ? 'horizontal' : 'original'),
+                    'animacion' => $bloque['animacion'] ?? Articulo::ANIMACIONES[0],
+                ];
+            }
+
+            $html = Purify::config('articulo')->clean((string) ($bloque['html'] ?? ''));
+
+            return trim(strip_tags($html)) === '' ? null : ['tipo' => 'texto', 'html' => $html];
+        })->filter()->values()->all();
     }
 
     private function conPortada(array $datos, ?Articulo $articulo = null): array

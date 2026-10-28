@@ -41,4 +41,52 @@ export function textoAHtml(texto = '') {
         .join('');
 }
 
+/** Un bloque de fotos con las opciones por defecto (las mismas que pone el servidor). */
+export const bloqueDeFotos = (fotos) => ({
+    tipo: 'fotos',
+    fotos,
+    diseno: fotos.length > 1 ? 'galeria' : 'unica',
+    columnas: fotos.length === 4 ? 2 : Math.min(Math.max(fotos.length, 2), 3),
+    tamano: 'grande',
+    alineacion: 'centro',
+    proporcion: fotos.length > 1 ? 'horizontal' : 'original',
+    animacion: 'zoom',
+});
+
+export const bloqueDeTexto = (html = '') => ({ tipo: 'texto', html });
+
+/**
+ * Convierte el contenido de un artículo anterior (texto simple o HTML con fotos dentro) en bloques en orden:
+ * el texto seguido forma un bloque de texto y cada foto suelta o galería, un bloque de fotos.
+ */
+export function contenidoABloques(contenido = '') {
+    const html = esHtml(contenido) ? contenido : textoAHtml(contenido);
+    const documento = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html');
+    const bloques = [];
+    let texto = '';
+    const volcarTexto = () => {
+        if (texto) bloques.push(bloqueDeTexto(texto));
+        texto = '';
+    };
+    const foto = (img) => ({ src: img.getAttribute('src'), alt: pieDe(img.getAttribute('alt') ?? '') });
+
+    for (const nodo of documento.body.children) {
+        const solaFoto = nodo.tagName === 'IMG' ? nodo : nodo.tagName === 'P' && nodo.children.length === 1 && nodo.firstElementChild.tagName === 'IMG' && !nodo.textContent.trim() ? nodo.firstElementChild : null;
+
+        if (solaFoto) {
+            volcarTexto();
+            bloques.push(bloqueDeFotos([foto(solaFoto)]));
+        } else if (nodo.tagName === 'DIV' && nodo.classList.contains('galeria')) {
+            volcarTexto();
+            const fotos = [...nodo.querySelectorAll('img')].map(foto);
+            if (fotos.length) bloques.push(bloqueDeFotos(fotos));
+        } else {
+            texto += nodo.outerHTML;
+        }
+    }
+    volcarTexto();
+
+    return bloques.length ? bloques : [bloqueDeTexto()];
+}
+
 export { IMAGEN };

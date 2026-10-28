@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
+import BloqueFotos from '@/components/web/BloqueFotos';
 import TextoFormateado from '@/components/web/TextoFormateado';
 import { esHtml, pieDe } from '@/lib/contenidoArticulo';
 import { cn } from '@/lib/utils';
@@ -37,11 +38,12 @@ function Pie({ texto }) {
  * acercamiento y las galerías una foto tras otra. Los artículos anteriores (texto simple) se muestran igual que siempre.
  * `primerParrafo`: clases extra del primer párrafo (ej. letra capital).
  */
-export default function ContenidoArticulo({ contenido = '', className, primerParrafo, animar = false }) {
+export default function ContenidoArticulo({ contenido = '', bloques: bloquesArticulo, className, primerParrafo, animar = false }) {
     const html = esHtml(contenido);
-    const bloques = useMemo(() => (html ? leerBloques(contenido) : []), [html, contenido]);
+    const hayBloques = Boolean(bloquesArticulo?.length);
+    const bloques = useMemo(() => (hayBloques ? bloquesArticulo.map((b) => (b.tipo === 'texto' ? { tipo: 'texto', html: b.html, parrafo: b.html.trimStart().startsWith('<p') } : b)) : html ? leerBloques(contenido) : []), [hayBloques, bloquesArticulo, html, contenido]);
 
-    if (!html) return <TextoFormateado texto={contenido} animar={animar} className={className} primerParrafo={primerParrafo} />;
+    if (!hayBloques && !html) return <TextoFormateado texto={contenido} animar={animar} className={className} primerParrafo={primerParrafo} />;
 
     // El primer bloque de texto, si es un párrafo, lleva la letra capital
     const indicePrimerParrafo = bloques.findIndex((bloque) => bloque.tipo === 'texto');
@@ -59,6 +61,8 @@ export default function ContenidoArticulo({ contenido = '', className, primerPar
                         </Animado>
                     );
                 }
+
+                if (bloque.tipo === 'fotos') return <BloqueFotos key={i} bloque={bloque} animar={animar} />;
 
                 if (bloque.tipo === 'galeria') {
                     return (

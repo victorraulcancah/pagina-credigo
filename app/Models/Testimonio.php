@@ -13,10 +13,15 @@ class Testimonio extends Model
 {
     use Ordenable;
 
+    /** Proporciones de la foto en la página Historias; la primera es la de siempre. */
+    public const TAMANOS_FOTO = ['horizontal', 'cuadrada', 'vertical'];
+
     protected $table = 'testimonios';
 
+    protected $attributes = ['tamano_foto' => 'horizontal'];
+
     protected $fillable = [
-        'nombre', 'ciudad', 'comentario', 'foto', 'foto_vehiculo', 'vehiculo',
+        'nombre', 'ciudad', 'comentario', 'foto', 'foto_vehiculo', 'tamano_foto', 'vehiculo',
         'calificacion', 'tiktok_url', 'youtube_url', 'facebook_url', 'video', 'autorizado', 'orden', 'activo',
     ];
 

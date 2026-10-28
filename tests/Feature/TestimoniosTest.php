@@ -215,3 +215,19 @@ it('rechaza videos de otro formato o demasiado pesados', function () {
     $this->post('/api/admin/testimonios', [...$datos, 'video' => UploadedFile::fake()->create('grande.mp4', 103000, 'video/mp4')], ['Accept' => 'application/json'])
         ->assertJsonValidationErrors(['video' => '100 MB']);
 });
+
+it('cada historia elige el tamaño de su foto y la web lo recibe', function () {
+    $this->actingAs(User::factory()->create());
+    $datos = ['nombre' => 'Edimar', 'comentario' => 'Feliz con mi carro.', 'autorizado' => true, 'activo' => true, 'orden' => 0];
+
+    // Sin elegir, queda la proporción de siempre
+    $this->postJson('/api/admin/testimonios', $datos)->assertCreated()->assertJsonPath('data.tamano_foto', 'horizontal');
+
+    $this->postJson('/api/admin/testimonios', [...$datos, 'tamano_foto' => 'vertical'])->assertCreated()->assertJsonPath('data.tamano_foto', 'vertical');
+    $this->postJson('/api/admin/testimonios', [...$datos, 'tamano_foto' => 'gigante'])->assertJsonValidationErrors('tamano_foto');
+
+    paginaApi('historias', fn (AssertableJson $page) => $page
+        ->where('testimonios.0.tamano_foto', 'horizontal')
+        ->where('testimonios.1.tamano_foto', 'vertical')
+        ->etc());
+});

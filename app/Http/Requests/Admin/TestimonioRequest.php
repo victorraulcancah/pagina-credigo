@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Testimonio;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -36,6 +37,7 @@ class TestimonioRequest extends FormRequest
             'quitar_foto' => ['boolean'],
             'foto_vehiculo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
             'quitar_foto_vehiculo' => ['boolean'],
+            'tamano_foto' => ['sometimes', 'required', Rule::in(Testimonio::TAMANOS_FOTO)],
             'vehiculo' => ['nullable', 'string', 'max:80'],
             'calificacion' => ['nullable', 'integer', 'between:1,5'],
             ...collect(self::REDES)->map(fn ($red) => VideoRegla::reglas($red))->all(),
@@ -64,6 +66,7 @@ class TestimonioRequest extends FormRequest
         return [
             'foto' => 'foto del conductor',
             'foto_vehiculo' => 'foto del vehículo',
+            'tamano_foto' => 'tamaño de la foto',
             'video' => 'video',
             'calificacion' => 'calificación',
         ];

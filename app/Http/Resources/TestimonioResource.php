@@ -20,6 +20,7 @@ class TestimonioResource extends JsonResource
             'comentario' => $this->comentario,
             'foto_url' => $this->foto_url,
             'foto_vehiculo_url' => $this->foto_vehiculo_url,
+            'tamano_foto' => $this->tamano_foto,
             'vehiculo' => $this->vehiculo,
             'calificacion' => $this->calificacion,
             'tiktok_url' => $this->tiktok_url,

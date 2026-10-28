@@ -33,6 +33,7 @@ const VACIO = {
     quitar_foto: false,
     foto_vehiculo: null,
     quitar_foto_vehiculo: false,
+    tamano_foto: 'horizontal',
     vehiculo: '',
     calificacion: '',
     tiktok_url: '',
@@ -45,7 +46,14 @@ const VACIO = {
     activo: true,
 };
 
-const CALIFICACIONES = [5, 4, 3, 2, 1].map((n) => ({ value: n, label: `${n} ${n === 1 ? 'estrella' : 'estrellas'}` }));
+// Proporción de la foto en la página Historias (la clase de aspecto está en Historias.jsx)
+const TAMANOS_FOTO = [
+    { value: 'horizontal', label: 'Horizontal (16:9): la de siempre, más baja' },
+    { value: 'cuadrada', label: 'Cuadrada (1:1): más alta, muestra más de la persona' },
+    { value: 'vertical', label: 'Vertical (3:4): la más alta, para fotos de cuerpo entero' },
+];
+
+const CALIFICACIONES =[5, 4, 3, 2, 1].map((n) => ({ value: n, label: `${n} ${n === 1 ? 'estrella' : 'estrellas'}` }));
 
 // Qué enlace sirve en cada red (el de Compartir del celular sirve en TikTok y YouTube)
 const AYUDA_RED = {
@@ -276,6 +284,16 @@ export default function TestimoniosIndex() {
                             aspect="aspect-[4/3]"
                         />
                     </div>
+
+                    <FormField
+                        label="Tamaño de la foto en la web"
+                        htmlFor="tamano_foto"
+                        error={errors.tamano_foto}
+                        hint="Cómo se recorta la foto en la tarjeta de Historias. Si la cara sale cortada, prueba con Cuadrada o Vertical."
+                        className="sm:col-span-2"
+                    >
+                        <Select id="tamano_foto" value={data.tamano_foto} onChange={(e) => setData('tamano_foto', e.target.value)} options={TAMANOS_FOTO} error={errors.tamano_foto} />
+                    </FormField>
 
                     <FormField label="Nombre" htmlFor="nombre" error={errors.nombre} required hint="Como quiere aparecer (ej. solo su nombre).">
                         <Input id="nombre" value={data.nombre} onChange={(e) => setData('nombre', e.target.value)} error={errors.nombre} placeholder="Edimar" />

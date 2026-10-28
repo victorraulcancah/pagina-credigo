@@ -11,6 +11,9 @@ import { Estrellas, PortadaHistoria, VideosEnRedes } from '@/components/web/Test
 import { BotonReproducir, VideoEnLinea } from '@/components/web/Video';
 import { cn } from '@/lib/utils';
 
+// Proporción de la foto según lo elegido en el panel (Testimonios → Tamaño de la foto)
+const ASPECTO_FOTO = { horizontal: 'aspect-video', cuadrada: 'aspect-square', vertical: 'aspect-[3/4]' };
+
 /**
  * Una historia como tarjeta: la foto del conductor arriba (con la de su vehículo encima, en
  * una esquina), su comentario y al pie su nombre, vehículo y los íconos de sus videos en
@@ -27,7 +30,7 @@ function TarjetaHistoria({ testimonio, indice }) {
     return (
         <Revelar as="li" desde={indice % 2 ? 'derecha' : 'izquierda'} retraso={escalonar(indice, 110)} className="h-full">
             <figure className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-white ring-1 ring-primary-100 transition duration-300 hover:ring-2 hover:ring-primary">
-                <div className="relative aspect-video overflow-hidden bg-primary">
+                <div className={cn('relative overflow-hidden bg-primary', ASPECTO_FOTO[testimonio.tamano_foto] ?? ASPECTO_FOTO.horizontal)}>
                     {reproduciendo ? (
                         <VideoEnLinea src={testimonio.video_archivo_url} titulo={titulo} />
                     ) : (

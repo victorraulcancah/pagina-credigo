@@ -44,6 +44,11 @@ return [
         'logo_empresa' => null, // logo de la empresa (Arequipa GO), va junto al de CrediGo
         'favicon' => null,
 
+        // Títulos de las columnas de precios en la página de cada plan
+        'precios_etiqueta_inicial' => 'Inscripción',
+        'precios_etiqueta_cuota' => 'Cuota',
+        'precios_etiqueta_cuotas' => 'Cuotas',
+
         // Avisos internos: correos que reciben las solicitudes y reclamaciones (separados por coma)
         'notificaciones_email' => '',
 

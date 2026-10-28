@@ -75,6 +75,22 @@ describe('con sesión iniciada', function () {
             ->where('sitio.color_acento', '#ffcc00'));
     });
 
+    it('permite cambiar los títulos de los precios y los comparte con el sitio', function () {
+        $this->get('/')->assertInertia(fn (Assert $page) => $page
+            ->where('sitio.precios_etiqueta_inicial', 'Inscripción')
+            ->where('sitio.precios_etiqueta_cuota', 'Cuota')
+            ->where('sitio.precios_etiqueta_cuotas', 'Cuotas'));
+
+        $this->put('/api/admin/configuracion', ['precios_etiqueta_inicial' => 'Matrícula'])->assertSuccessful();
+
+        $this->get('/')->assertInertia(fn (Assert $page) => $page->where('sitio.precios_etiqueta_inicial', 'Matrícula'));
+    });
+
+    it('no deja vacío el título de un precio', function () {
+        $this->put('/api/admin/configuracion', ['precios_etiqueta_cuota' => ''])
+            ->assertJsonValidationErrors('precios_etiqueta_cuota');
+    });
+
     it('rechaza colores que no son hexadecimales', function () {
         $this->put('/api/admin/configuracion', ['color_primario' => 'red;}body{'])
             ->assertJsonValidationErrors('color_primario');

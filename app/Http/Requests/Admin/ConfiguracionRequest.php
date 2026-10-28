@@ -54,6 +54,10 @@ class ConfiguracionRequest extends FormRequest
             'redes_tiktok' => ['sometimes', 'nullable', 'url', 'max:255'],
             'redes_youtube' => ['sometimes', 'nullable', 'url', 'max:255'],
 
+            'precios_etiqueta_inicial' => ['sometimes', 'required', 'string', 'max:30'],
+            'precios_etiqueta_cuota' => ['sometimes', 'required', 'string', 'max:30'],
+            'precios_etiqueta_cuotas' => ['sometimes', 'required', 'string', 'max:30'],
+
             'color_primario' => ['sometimes', 'required', self::COLOR_HEX],
             'color_acento' => ['sometimes', 'required', self::COLOR_HEX],
             'logo' => ['sometimes', 'nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
@@ -111,6 +115,9 @@ class ConfiguracionRequest extends FormRequest
             'redes_instagram' => 'Instagram',
             'redes_tiktok' => 'TikTok',
             'redes_youtube' => 'YouTube',
+            'precios_etiqueta_inicial' => 'título de la inscripción',
+            'precios_etiqueta_cuota' => 'título de la cuota',
+            'precios_etiqueta_cuotas' => 'título de las cuotas',
             'color_primario' => 'color principal',
             'color_acento' => 'color de acento',
             'notificaciones_email' => 'correos de avisos',

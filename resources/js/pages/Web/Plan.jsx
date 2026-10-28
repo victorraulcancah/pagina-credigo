@@ -86,14 +86,24 @@ function Encabezado({ servicio, menor, whatsapp }) {
     );
 }
 
-/** Una opción del cotizador como fila: nombre a la izquierda, montos en columnas. */
-function FilaOpcion({ opcion }) {
+/** Columnas de montos de una opción. Los títulos se editan en el panel (Empresa y contacto); si falta alguno, se usa el de siempre. */
+function datosOpcion(opcion, sitio) {
     const frecuencia = FRECUENCIAS[opcion.frecuencia] ?? FRECUENCIAS.semanal;
-    const datos = [
-        ['Inicial', formatoMoneda(opcion.inicial, monedaInicial(opcion))],
-        ['Cuota', formatoMoneda(opcion.cuota, opcion.moneda), frecuencia.periodo],
-        ['Cuotas', opcion.numero_cuotas ? `${opcion.numero_cuotas}` : null, frecuencia.plural],
+
+    return [
+        { clave: 'inicial', etiqueta: sitio.precios_etiqueta_inicial || 'Inscripción', valor: formatoMoneda(opcion.inicial, monedaInicial(opcion)) },
+        { clave: 'cuota', etiqueta: sitio.precios_etiqueta_cuota || 'Cuota', valor: formatoMoneda(opcion.cuota, opcion.moneda), detalle: frecuencia.periodo },
+        { clave: 'cuotas', etiqueta: sitio.precios_etiqueta_cuotas || 'Cuotas', valor: opcion.numero_cuotas ? `${opcion.numero_cuotas}` : null, detalle: frecuencia.plural },
     ];
+}
+
+// Ancho y columnas de la tabla según cuántas se muestran (clases completas para que Tailwind las detecte)
+const ANCHO_COLUMNAS = { 1: 'grid-cols-1 sm:w-[7.5rem]', 2: 'grid-cols-2 sm:w-[15rem]', 3: 'grid-cols-3 sm:w-[22rem]' };
+
+/** Una opción del cotizador como fila: nombre a la izquierda, montos en columnas (solo las `columnas` del plan). */
+function FilaOpcion({ opcion, columnas }) {
+    const sitio = useSitio();
+    const datos = datosOpcion(opcion, sitio).filter(({ clave }) => columnas.includes(clave));
 
     return (
         <li className="grid gap-4 py-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-8">
@@ -101,9 +111,9 @@ function FilaOpcion({ opcion }) {
                 <p className="font-bold">{opcion.nombre}</p>
                 {opcion.nota && <p className="mt-0.5 text-sm text-primary-700/80">{opcion.nota}</p>}
             </div>
-            <dl className="grid grid-cols-3 gap-4 sm:w-[22rem] sm:text-right">
-                {datos.map(([etiqueta, valor, detalle]) => (
-                    <div key={etiqueta}>
+            <dl className={cn('grid gap-4 sm:text-right', ANCHO_COLUMNAS[datos.length])}>
+                {datos.map(({ clave, etiqueta, valor, detalle }) => (
+                    <div key={clave}>
                         <dt className="text-xs font-semibold tracking-wide text-primary-500 uppercase">{etiqueta}</dt>
                         <dd className="mt-0.5 text-lg font-bold tabular-nums">{valor ?? '—'}</dd>
                         {valor && detalle && <dd className="text-xs text-primary-500">{detalle}</dd>}
@@ -116,9 +126,16 @@ function FilaOpcion({ opcion }) {
 
 /** Qué incluye el plan y sus opciones con montos (del panel → Cotizador). */
 function IncluyeYOpciones({ servicio, whatsapp }) {
+    const sitio = useSitio();
     const caracteristicas = servicio.caracteristicas ?? [];
     const opciones = servicio.opciones;
     if (!caracteristicas.length && !opciones.length) return null;
+
+    // Una columna solo se muestra si alguna opción del plan tiene ese dato (ej. "Descuentos por productividad" solo trae la cuota)
+    const columnas = ['inicial', 'cuota', 'cuotas'].filter((clave) =>
+        opciones.some((opcion) => datosOpcion(opcion, sitio).find((dato) => dato.clave === clave).valor),
+    );
+    if (!columnas.length) columnas.push('cuota');
 
     return (
         <Section>
@@ -145,7 +162,7 @@ function IncluyeYOpciones({ servicio, whatsapp }) {
                         <>
                             <ul className="mt-8 divide-y divide-primary-100 border-y border-primary-100">
                                 {opciones.map((opcion) => (
-                                    <FilaOpcion key={opcion.id} opcion={opcion} />
+                                    <FilaOpcion key={opcion.id} opcion={opcion} columnas={columnas} />
                                 ))}
                             </ul>
                             <p className="mt-4 text-sm text-primary-500">Montos referenciales. Las condiciones finales se definen en el contrato, luego de la evaluación.</p>

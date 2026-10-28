@@ -14,6 +14,7 @@ const CAMPOS = [
     'contacto_telefono', 'contacto_whatsapp', 'contacto_whatsapp_mensaje', 'contacto_email',
     'contacto_direccion', 'contacto_ciudad', 'contacto_horario', 'contacto_mapa_url',
     'redes_facebook', 'redes_instagram', 'redes_tiktok', 'redes_youtube',
+    'precios_etiqueta_inicial', 'precios_etiqueta_cuota', 'precios_etiqueta_cuotas',
     'notificaciones_email',
 ];
 
@@ -117,6 +118,23 @@ function EmpresaFormulario({ ajustes }) {
                             className="sm:col-span-2"
                         >
                             <Textarea {...campo('contacto_mapa_url', { rows: 2 })} />
+                        </FormField>
+                    </div>
+                </Panel>
+
+                <Panel
+                    title="Títulos de los precios"
+                    description="Cómo se llaman las columnas de la lista de opciones en la página de cada plan. El monto de cada opción se edita en Cotizador."
+                >
+                    <div className="grid gap-5 sm:grid-cols-3">
+                        <FormField label="Primer pago" htmlFor="precios_etiqueta_inicial" error={errors.precios_etiqueta_inicial} hint="Ej. Inscripción o Inicial." required>
+                            <Input {...campo('precios_etiqueta_inicial', { maxLength: 30 })} />
+                        </FormField>
+                        <FormField label="Monto de cada pago" htmlFor="precios_etiqueta_cuota" error={errors.precios_etiqueta_cuota} hint="Ej. Cuota." required>
+                            <Input {...campo('precios_etiqueta_cuota', { maxLength: 30 })} />
+                        </FormField>
+                        <FormField label="Cantidad de pagos" htmlFor="precios_etiqueta_cuotas" error={errors.precios_etiqueta_cuotas} hint="Ej. Cuotas." required>
+                            <Input {...campo('precios_etiqueta_cuotas', { maxLength: 30 })} />
                         </FormField>
                     </div>
                 </Panel>

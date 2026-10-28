@@ -337,7 +337,7 @@ function Barra({ editor }) {
                     <AlignJustify className="size-4" aria-hidden="true" />
                 </button>
                 <Separador />
-                <button type="button" aria-label="Lista con vinetas" title="Lista con vinetas" onClick={() => editor.chain().focus().toggleBulletList().run()} className={boton(estado.vinetas)}>
+                <button type="button" aria-label="Lista con viñetas" title="Lista con viñetas" onClick={() => editor.chain().focus().toggleBulletList().run()} className={boton(estado.vinetas)}>
                     <List className="size-4" aria-hidden="true" />
                 </button>
                 <button type="button" aria-label="Lista numerada" title="Lista numerada" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={boton(estado.numerada)}>

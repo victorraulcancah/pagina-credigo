@@ -21,7 +21,8 @@ class SeccionController extends BaseApiController
 
     public function show(Seccion $seccion): JsonResponse
     {
-        return $this->successResponse(new SeccionResource($seccion), 'Sección');
+        // En las secciones de niveles, los del ERP (nombre, imagen, números) para que en el panel solo se escriba el texto
+        return $this->successResponse([...(new SeccionResource($seccion))->resolve(), 'niveles_erp' => $this->secciones->nivelesParaPanel($seccion)], 'Sección');
     }
 
     public function update(SeccionRequest $request, Seccion $seccion): JsonResponse

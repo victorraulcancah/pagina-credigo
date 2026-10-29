@@ -10,6 +10,7 @@ class CatalogosErp
         private ComerciosErp $comercios,
         private CuponesErp $cupones,
         private PlanesErp $planes,
+        private NivelesErp $niveles,
     ) {}
 
     /** @return array<string, CatalogoErp> */
@@ -20,6 +21,7 @@ class CatalogosErp
             'comercios' => $this->comercios,
             'cupones' => $this->cupones,
             'planes' => $this->planes,
+            'niveles' => $this->niveles,
         ];
     }
 

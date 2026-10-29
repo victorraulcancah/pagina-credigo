@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\BaseApiController;
 use App\Services\Erp\CatalogosErp;
 use Illuminate\Http\JsonResponse;
 
-/** Datos que la web lee del ERP (talleres, comercios, cupones y precios de planes). */
+/** Datos que la web lee del ERP (talleres, comercios, cupones, precios de planes y niveles). */
 class ErpController extends BaseApiController
 {
     public function __construct(private CatalogosErp $catalogos) {}

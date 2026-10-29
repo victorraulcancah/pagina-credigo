@@ -6,6 +6,7 @@ import Icono from '@/components/ui/Icono';
 import Revelar from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import CtaSection from '@/components/web/CtaSection';
+import DatosNivel from '@/components/web/DatosNivel';
 import FaqSection from '@/components/web/FaqSection';
 import HeroBanner from '@/components/web/HeroBanner';
 import ListaPlanes from '@/components/web/ListaPlanes';
@@ -35,8 +36,11 @@ function Planes({ encabezado, servicios }) {
     );
 }
 
-// Escala de la marca para los niveles: azul claro, azul medio, y amarillo solo para el más alto
-const MEDALLAS = ['bg-primary-100 text-primary', 'bg-primary-200 text-primary', 'bg-accent text-primary'];
+// Escala de la marca para los niveles: de azul claro a azul medio, y amarillo solo para el más alto
+const ESCALA_MEDALLAS = ['bg-primary-100 text-primary', 'bg-primary-200 text-primary', 'bg-primary-300 text-primary'];
+
+// Columnas según cuántos niveles hay (los trae el ERP: hoy son 4, pero pueden ser más o menos)
+const COLUMNAS_NIVELES = { 1: '', 2: 'md:grid-cols-2', 3: 'md:grid-cols-3', 4: 'md:grid-cols-2 lg:grid-cols-4' };
 
 /** Niveles como una sola barra de progreso dividida en tramos. */
 function Niveles({ seccion }) {
@@ -55,15 +59,17 @@ function Niveles({ seccion }) {
             </div>
 
             <Revelar desde="zoom" className="mt-12 overflow-hidden rounded-2xl ring-1 ring-primary-100">
-                <div className="grid md:grid-cols-3">
+                {/* gap-px sobre fondo claro dibuja las líneas entre niveles, vengan los que vengan */}
+                <div className={cn('grid gap-px bg-primary-100', COLUMNAS_NIVELES[niveles.length] ?? 'md:grid-cols-2 lg:grid-cols-3')}>
                     {niveles.map((nivel, i) => {
                         const ultimo = i === niveles.length - 1;
                         return (
-                            <div key={i} className={cn('flex flex-col p-6 sm:p-8', ultimo ? 'bg-primary text-white' : 'bg-white', i > 0 && 'border-t border-primary-100 md:border-t-0 md:border-l')}>
-                                <span className={cn('mb-5 flex size-12 items-center justify-center rounded-full', MEDALLAS[i] ?? 'bg-accent text-primary')}>
-                                    <Icono nombre={nivel.icono} fallback="Medal" className="size-6" />
+                            <div key={i} className={cn('flex flex-col p-6 sm:p-8', ultimo ? 'bg-primary text-white' : 'bg-white')}>
+                                <span className={cn('mb-5 flex size-12 items-center justify-center rounded-full', ultimo ? 'bg-accent text-primary' : ESCALA_MEDALLAS[Math.min(i, ESCALA_MEDALLAS.length - 1)])}>
+                                    {nivel.imagen_url ? <img src={nivel.imagen_url} alt="" loading="lazy" className="size-full rounded-full object-cover" /> : <Icono nombre={nivel.icono} fallback="Medal" className="size-6" />}
                                 </span>
                                 <h3 className="text-2xl font-bold">{nivel.titulo}</h3>
+                                <DatosNivel nivel={nivel} claro={ultimo} className="mt-2" />
                                 {nivel.descripcion && <p className={cn('mt-2 text-sm sm:text-base', ultimo ? 'text-white/75' : 'text-primary-700/80')}>{nivel.descripcion}</p>}
                                 {/* Tramo de la barra: se llena hasta este nivel */}
                                 <span aria-hidden="true" className="mt-auto flex gap-1 pt-6">

@@ -17,7 +17,7 @@ class SeccionService
     /** Orden de las páginas en el panel */
     private const ORDEN_PAGINAS = ['inicio', 'nosotros', 'servicios', 'requisitos', 'pagos', 'talleres', 'beneficios', 'historias', 'blog', 'cotizador', 'contacto', 'general', 'legal'];
 
-    public function __construct(private ImagenService $imagenes) {}
+    public function __construct(private ImagenService $imagenes, private NivelesService $niveles) {}
 
     /**
      * Secciones activas de las páginas indicadas, ya transformadas e indexadas por
@@ -29,8 +29,23 @@ class SeccionService
             ->activo()
             ->ordenado()
             ->get()
-            ->mapWithKeys(fn (Seccion $seccion) => ["{$seccion->pagina}.{$seccion->clave}" => (new SeccionResource($seccion))->resolve()])
+            ->mapWithKeys(function (Seccion $seccion) {
+                $datos = (new SeccionResource($seccion))->resolve();
+
+                // Los niveles (Bronce, Plata, Oro...) se leen del ERP; el panel solo pone sus textos
+                if ($this->niveles->esDeNiveles($seccion)) {
+                    $datos['items'] = $this->niveles->combinar($datos['items']);
+                }
+
+                return ["{$seccion->pagina}.{$seccion->clave}" => $datos];
+            })
             ->all();
+    }
+
+    /** Niveles del ERP para rellenar sus textos en el panel; null si la sección no es de niveles o el ERP no tiene datos. */
+    public function nivelesParaPanel(Seccion $seccion): ?array
+    {
+        return $this->niveles->esDeNiveles($seccion) ? ($this->niveles->delErp() ?: null) : null;
     }
 
     /** Lista del panel, agrupable por página. */

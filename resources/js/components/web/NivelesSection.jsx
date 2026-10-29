@@ -1,4 +1,5 @@
 import Icono from '@/components/ui/Icono';
+import DatosNivel from '@/components/web/DatosNivel';
 import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import SectionHeading from '@/components/ui/SectionHeading';
@@ -38,12 +39,13 @@ export default function NivelesSection({ seccion, background = 'white' }) {
                             )}
                         >
                             <span className={cn('mb-5 flex size-14 items-center justify-center rounded-full shadow-inner', medalla.fondo, medalla.texto)}>
-                                <Icono nombre={nivel.icono} fallback="Medal" className="size-7" />
+                                {nivel.imagen_url ? <img src={nivel.imagen_url} alt="" loading="lazy" className="size-full rounded-full object-cover" /> : <Icono nombre={nivel.icono} fallback="Medal" className="size-7" />}
                             </span>
                             <p className={cn('text-xs font-bold tracking-wider uppercase', esUltimo ? 'text-accent' : 'text-primary-400')}>
                                 Nivel {i + 1}
                             </p>
                             <h3 className="mt-1 text-2xl font-extrabold">{nivel.titulo}</h3>
+                            <DatosNivel nivel={nivel} claro={esUltimo} className="mt-2" />
                             {nivel.descripcion && (
                                 <p className={cn('mt-3 text-sm sm:text-base', esUltimo ? 'text-primary-100' : 'text-primary-700/80')}>
                                     {nivel.descripcion}

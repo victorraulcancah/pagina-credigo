@@ -29,3 +29,12 @@ const COLUMNAS_LG = {
 export function columnasLg(cantidad) {
     return COLUMNAS_LG[Math.min(Math.max(cantidad, 1), 4)];
 }
+
+/** "Súper Estrella" → "super-estrella" (igual que el código de los niveles del ERP). */
+export const slug = (texto = '') =>
+    texto
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');

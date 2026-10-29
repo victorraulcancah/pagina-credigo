@@ -66,7 +66,7 @@ function Niveles({ seccion }) {
                         return (
                             <div key={i} className={cn('flex flex-col p-6 sm:p-8', ultimo ? 'bg-primary text-white' : 'bg-white')}>
                                 <span className={cn('mb-5 flex size-12 items-center justify-center rounded-full', ultimo ? 'bg-accent text-primary' : ESCALA_MEDALLAS[Math.min(i, ESCALA_MEDALLAS.length - 1)])}>
-                                    {nivel.imagen_url ? <img src={nivel.imagen_url} alt="" loading="lazy" className="size-full rounded-full object-cover" /> : <Icono nombre={nivel.icono} fallback="Medal" className="size-6" />}
+                                    {nivel.imagen_url ? <img src={nivel.imagen_url} alt="" loading="lazy" className="size-full rounded-full object-contain" /> : <Icono nombre={nivel.icono} fallback="Medal" className="size-6" />}
                                 </span>
                                 <h3 className="text-2xl font-bold">{nivel.titulo}</h3>
                                 <DatosNivel nivel={nivel} claro={ultimo} className="mt-2" />

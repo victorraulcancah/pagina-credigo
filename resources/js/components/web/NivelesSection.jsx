@@ -39,7 +39,7 @@ export default function NivelesSection({ seccion, background = 'white' }) {
                             )}
                         >
                             <span className={cn('mb-5 flex size-14 items-center justify-center rounded-full shadow-inner', medalla.fondo, medalla.texto)}>
-                                {nivel.imagen_url ? <img src={nivel.imagen_url} alt="" loading="lazy" className="size-full rounded-full object-cover" /> : <Icono nombre={nivel.icono} fallback="Medal" className="size-7" />}
+                                {nivel.imagen_url ? <img src={nivel.imagen_url} alt="" loading="lazy" className="size-full rounded-full object-contain" /> : <Icono nombre={nivel.icono} fallback="Medal" className="size-7" />}
                             </span>
                             <p className={cn('text-xs font-bold tracking-wider uppercase', esUltimo ? 'text-accent' : 'text-primary-400')}>
                                 Nivel {i + 1}

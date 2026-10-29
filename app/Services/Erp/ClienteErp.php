@@ -43,6 +43,12 @@ class ClienteErp
         return null;
     }
 
+    /** URL de un archivo que viene con el propio ERP (su carpeta public), como las imágenes que trae el sistema. */
+    public function recurso(string $ruta): string
+    {
+        return config('services.erp.url').'/'.ltrim($ruta, '/');
+    }
+
     /** URL pública de un archivo guardado en el ERP (logos, imágenes). */
     public function archivo(?string $ruta): ?string
     {

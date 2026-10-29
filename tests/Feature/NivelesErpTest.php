@@ -48,9 +48,10 @@ it('los niveles del inicio salen del ERP, en orden, con sus números y la descri
         ->and($niveles[0]['descripcion'])->toBeNull()
         ->and($niveles[1]['descripcion'])->toContain('programa de fidelización')
         ->and($niveles[1]['icono'])->toBe('Medal')
-        // La imagen la guarda el ERP: se arma su dirección pública
+        // La imagen subida al ERP manda (se arma su dirección pública); sin ella, la que trae el propio ERP para ese nivel
         ->and($niveles[0]['imagen_url'])->toBe('https://erp.test/storage/niveles/pollito.png')
-        ->and($niveles[1]['imagen_url'])->toBeNull();
+        ->and($niveles[1]['imagen_url'])->toBe('https://erp.test/images/icons/nivel-bronce.svg')
+        ->and($niveles[3]['imagen_url'])->toBe('https://erp.test/images/icons/nivel-oro.svg');
 });
 
 it('la página de beneficios también usa los niveles del ERP', function () {

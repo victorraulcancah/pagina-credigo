@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Admin\PreguntaFrecuenteController;
 use App\Http\Controllers\Api\Admin\ReclamacionController as AdminReclamacionController;
 use App\Http\Controllers\Api\Admin\ReservaController as AdminReservaController;
 use App\Http\Controllers\Api\Admin\SeccionController;
+use App\Http\Controllers\Api\Admin\SedeController;
 use App\Http\Controllers\Api\Admin\ServicioController;
 use App\Http\Controllers\Api\Admin\SolicitudController as AdminSolicitudController;
 use App\Http\Controllers\Api\Admin\TestimonioController as AdminTestimonioController;
@@ -57,6 +58,7 @@ Route::name('api.')->group(function () {
         Route::get('/secciones', [SitioController::class, 'secciones'])->name('secciones');
         Route::get('/banners', [SitioController::class, 'banners'])->name('banners');
         Route::get('/preguntas', [SitioController::class, 'preguntas'])->name('preguntas');
+        Route::get('/sedes', [SitioController::class, 'sedes'])->name('sedes');
 
         Route::get('/planes', [PlanController::class, 'index'])->name('planes.index');
         Route::get('/planes/{slug}', [PlanController::class, 'show'])->name('planes.show');
@@ -100,6 +102,7 @@ Route::name('api.')->group(function () {
         Route::apiResource('servicios', ServicioController::class);
         Route::apiResource('documentos', AdminDocumentoController::class);
         Route::apiResource('preguntas', PreguntaFrecuenteController::class)->parameters(['preguntas' => 'pregunta']);
+        Route::apiResource('sedes', SedeController::class)->parameters(['sedes' => 'sede']);
 
         Route::apiResource('secciones', SeccionController::class)
             ->only(['index', 'show', 'update'])

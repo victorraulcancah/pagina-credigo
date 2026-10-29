@@ -8,6 +8,7 @@ import Revelar, { escalonar } from '@/components/ui/Revelar';
 import Section from '@/components/ui/Section';
 import ContactoForm from '@/components/web/ContactoForm';
 import FaqSection from '@/components/web/FaqSection';
+import { useCompartido } from '@/hooks/useCompartido';
 import { useSitio } from '@/hooks/useSitio';
 
 function DatoContacto({ icon: Icon, titulo, href, externo = false, children }) {
@@ -43,6 +44,16 @@ function ContactoContenido({ secciones, tiposConsulta, preguntas }) {
     const hero = secciones['contacto.hero'];
     const formulario = secciones['contacto.formulario'];
     const whatsapp = sitio.whatsappUrl();
+    const sedes = useCompartido('/sedes') ?? [];
+
+    // Una tarjeta por oficina (con enlace al mapa si lo tiene); sin sedes, la dirección de Empresa y contacto
+    const oficinas = sedes.map((sede) => (
+        <DatoContacto key={`sede-${sede.id}`} icon={MapPin} titulo={`Oficina · ${sede.ciudad}`} href={sede.mapa_url || undefined} externo>
+            {sede.direccion}
+            {sede.nombre && <span className="block text-sm font-normal text-primary-600">{sede.nombre}</span>}
+            {sede.horario && <span className="block text-sm font-normal text-primary-600">{sede.horario}</span>}
+        </DatoContacto>
+    ));
 
     // Solo los datos configurados en el panel
     const datos = [
@@ -61,12 +72,16 @@ function ContactoContenido({ secciones, tiposConsulta, preguntas }) {
                 {sitio.contacto_email}
             </DatoContacto>
         ),
-        (sitio.contacto_direccion || sitio.contacto_ciudad) && (
-            <DatoContacto key="direccion" icon={MapPin} titulo="Dirección">
-                {[sitio.contacto_direccion, sitio.contacto_ciudad].filter(Boolean).join(', ')}
-            </DatoContacto>
-        ),
-        sitio.contacto_horario && (
+        ...(oficinas.length
+            ? oficinas
+            : [
+                  (sitio.contacto_direccion || sitio.contacto_ciudad) && (
+                      <DatoContacto key="direccion" icon={MapPin} titulo="Dirección">
+                          {[sitio.contacto_direccion, sitio.contacto_ciudad].filter(Boolean).join(', ')}
+                      </DatoContacto>
+                  ),
+              ]),
+        sitio.contacto_horario && !sedes.some((sede) => sede.horario) && (
             <DatoContacto key="horario" icon={Clock} titulo="Horario">
                 {sitio.contacto_horario}
             </DatoContacto>

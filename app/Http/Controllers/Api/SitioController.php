@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\ListarSeccionesRequest;
 use App\Http\Resources\BannerResource;
 use App\Http\Resources\PreguntaFrecuenteResource;
+use App\Http\Resources\SedeResource;
 use App\Services\BannerService;
 use App\Services\ConfiguracionService;
 use App\Services\PreguntaFrecuenteService;
 use App\Services\SeccionService;
+use App\Services\SedeService;
 use App\Services\ServicioService;
 use Illuminate\Http\JsonResponse;
 
@@ -36,6 +38,12 @@ class SitioController extends BaseApiController
     public function banners(BannerService $banners): JsonResponse
     {
         return $this->successResponse(BannerResource::collection($banners->activos()), 'Banners');
+    }
+
+    /** Oficinas de la empresa ("Nuestras oficinas" del pie y de Soporte). */
+    public function sedes(SedeService $sedes): JsonResponse
+    {
+        return $this->successResponse(SedeResource::collection($sedes->activas()), 'Sedes');
     }
 
     public function preguntas(PreguntaFrecuenteService $preguntas): JsonResponse

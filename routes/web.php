@@ -81,6 +81,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::inertia('/servicios', 'Admin/Servicios/Index')->name('servicios.index');
     Route::inertia('/cotizador', 'Admin/Cotizador/Index')->name('cotizador.index');
     Route::inertia('/preguntas', 'Admin/Preguntas/Index')->name('preguntas.index');
+    Route::inertia('/sedes', 'Admin/Sedes/Index')->name('sedes.index');
     Route::inertia('/documentos', 'Admin/Documentos/Index')->name('documentos.index');
     Route::inertia('/mensajes', 'Admin/Mensajes/Index')->name('mensajes.index');
     Route::inertia('/reclamaciones', 'Admin/Reclamaciones/Index')->name('reclamaciones.index');

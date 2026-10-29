@@ -4,6 +4,7 @@ import { FaWhatsapp } from 'react-icons/fa6';
 import Logo from '@/components/layout/Logo';
 import Container from '@/components/ui/Container';
 import { navLinks } from '@/data/navegacion';
+import { useCompartido } from '@/hooks/useCompartido';
 import { useSitio } from '@/hooks/useSitio';
 
 // El logo de Magus se pinta en su cian usando el SVG como máscara (el archivo viene en otro color)
@@ -75,9 +76,45 @@ function DatoContacto({ icon: Icon, href, children }) {
     );
 }
 
+/** "Nuestras oficinas": cada sede con su ciudad, dirección y, si las tiene, teléfono, horario y enlace al mapa. */
+function Oficinas({ sedes }) {
+    return (
+        <li>
+            <p className="text-xs font-bold tracking-wider text-white/60 uppercase">Nuestras oficinas</p>
+            <ul className="mt-3 space-y-4">
+                {sedes.map((sede) => (
+                    <li key={sede.id} className="flex items-start gap-3">
+                        <MapPin className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden="true" />
+                        <div className="min-w-0 break-words">
+                            <p className="font-semibold text-white">
+                                {sede.ciudad}
+                                {sede.nombre && <span className="font-normal text-primary-300"> · {sede.nombre}</span>}
+                            </p>
+                            <p>{sede.direccion}</p>
+                            {sede.telefono && (
+                                <a href={`tel:${sede.telefono.replace(/\s/g, '')}`} className="block transition hover:text-accent">
+                                    {sede.telefono}
+                                </a>
+                            )}
+                            {sede.horario && <p className="text-primary-300">{sede.horario}</p>}
+                            {sede.mapa_url && (
+                                <a href={sede.mapa_url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 font-semibold text-accent hover:underline">
+                                    Ver mapa <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                                </a>
+                            )}
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        </li>
+    );
+}
+
 export default function Footer() {
     const sitio = useSitio();
     const whatsapp = sitio.whatsappUrl();
+    // Con sedes cargadas en el panel se listan todas; sin ellas sigue la dirección de Empresa y contacto
+    const sedes = useCompartido('/sedes') ?? [];
 
     return (
         <footer className="bg-primary-950 text-primary-200 print:hidden">
@@ -124,14 +161,19 @@ export default function Footer() {
                                 {sitio.contacto_email}
                             </DatoContacto>
                         )}
-                        {(sitio.contacto_direccion || sitio.contacto_ciudad) && (
-                            <DatoContacto icon={MapPin}>
-                                {sitio.contacto_direccion}
-                                {sitio.contacto_direccion && sitio.contacto_ciudad && <br />}
-                                {sitio.contacto_ciudad}
-                            </DatoContacto>
+                        {sedes.length > 0 ? (
+                            <Oficinas sedes={sedes} />
+                        ) : (
+                            (sitio.contacto_direccion || sitio.contacto_ciudad) && (
+                                <DatoContacto icon={MapPin}>
+                                    {sitio.contacto_direccion}
+                                    {sitio.contacto_direccion && sitio.contacto_ciudad && <br />}
+                                    {sitio.contacto_ciudad}
+                                </DatoContacto>
+                            )
                         )}
-                        {sitio.contacto_horario && <DatoContacto icon={Clock}>{sitio.contacto_horario}</DatoContacto>}
+                        {/* El horario general solo si ninguna sede trae el suyo */}
+                        {sitio.contacto_horario && !sedes.some((sede) => sede.horario) && <DatoContacto icon={Clock}>{sitio.contacto_horario}</DatoContacto>}
                     </ul>
 
                     {/* Acceso visible al Libro de Reclamaciones (obligatorio para Indecopi) */}

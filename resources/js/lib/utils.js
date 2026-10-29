@@ -34,7 +34,7 @@ export function columnasLg(cantidad) {
 export const slug = (texto = '') =>
     texto
         .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
+        .replace(/\p{M}/gu, '')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');

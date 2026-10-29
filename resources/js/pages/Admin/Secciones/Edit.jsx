@@ -5,6 +5,7 @@ import ColorInput from '@/components/admin/ColorInput';
 import DestinoEnlace from '@/components/admin/DestinoEnlace';
 import ImageUpload from '@/components/admin/ImageUpload';
 import ItemsRepeater from '@/components/admin/ItemsRepeater';
+import NivelesErpEditor from '@/components/admin/NivelesErpEditor';
 import PageHeader from '@/components/admin/PageHeader';
 import PantallaApi from '@/components/admin/PantallaApi';
 import VideoInput from '@/components/admin/VideoInput';
@@ -210,14 +211,18 @@ function SeccionFormulario({ seccion }) {
                     )}
 
                     {usa('items') && (
-                        <Panel title={lista.titulo} description={lista.descripcion}>
-                            <ItemsRepeater
-                                items={data.items}
-                                onChange={(items) => setData('items', items)}
-                                errors={errors}
-                                conIcono={lista.conIcono}
-                                etiquetas={lista.etiquetas}
-                            />
+                        <Panel title={lista.titulo} description={seccion.niveles_erp?.length ? 'Vienen del ERP: aquí solo escribes la descripción de cada nivel.' : lista.descripcion}>
+                            {seccion.niveles_erp?.length ? (
+                                <NivelesErpEditor niveles={seccion.niveles_erp} items={data.items} onChange={(items) => setData('items', items)} />
+                            ) : (
+                                <ItemsRepeater
+                                    items={data.items}
+                                    onChange={(items) => setData('items', items)}
+                                    errors={errors}
+                                    conIcono={lista.conIcono}
+                                    etiquetas={lista.etiquetas}
+                                />
+                            )}
                         </Panel>
                     )}
                 </div>
